@@ -1,0 +1,530 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		002FAEA3C95D60B152C32A52 /* OnboardingStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB467A0A82942285D6C1016 /* OnboardingStartView.swift */; };
+		0A9EF115B65E152C15586369 /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407F558E5B2349773FE9806 /* PrivacySettingsView.swift */; };
+		0FA09588B602DDDB5C6A9956 /* MineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B3BFF0C456566C5FD3C1C6 /* MineView.swift */; };
+		1226FAD4D9D078719D3CB817 /* MemorialSentenceEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */; };
+		162884CC621EA2A8E9C0F7FF /* MailboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1020B1B660C233418782944 /* MailboxView.swift */; };
+		1F953BE202ED0B123ABF3AED /* MailboxLockedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793C643D0522E264F127E573 /* MailboxLockedView.swift */; };
+		237503EEAB4CA1CA32FD985F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8830EE2A3C903C1A16AE7670 /* AppState.swift */; };
+		4272315CFC0783C8732416AF /* SharePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB94814E21284C70E752BAE2 /* SharePanelView.swift */; };
+		43080225A217466CC254B91F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 516B0249E76335F20828B276 /* MainTabView.swift */; };
+		44243CDADEF646AD402136D6 /* HugsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FBDB325D733AE8E09C8DF2 /* HugsView.swift */; };
+		4466670647B150DDBBEEA1F3 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C6461E77A8135CE9C344F /* HomeView.swift */; };
+		5137174C420982AA770504D8 /* CreateSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */; };
+		5643DE6B080E87407C9F82A6 /* PetProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0D50567A918025751525DC /* PetProfileView.swift */; };
+		59091E848DE621C8ACAC8AFB /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD71578A5A4A3C1176F500D8 /* LoginView.swift */; };
+		627E73C0956B550C457A44BE /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4E6B181B4B945D33D6A95C /* AppColors.swift */; };
+		6630F92912A9F72F998175BB /* StoryEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */; };
+		6B412D6905266A68D5C60AF4 /* MemorialApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD62992F1C9DD82FBC6187F /* MemorialApp.swift */; };
+		6C8CE782EB987A2D6576C5C5 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26167546E792AA3A0A734513 /* Models.swift */; };
+		7E66E715757137B43349A6D3 /* TierSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017D65EE9976E5085D1863A3 /* TierSelectView.swift */; };
+		8F7F6014ACD7577531F7DE5B /* EntitlementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DA614CCC0D6060777285F4 /* EntitlementView.swift */; };
+		D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */; };
+		D3F87DD0C0761B37CB50F0A8 /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */; };
+		EF1E1B725956A118E21538F3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40540C59A31F39495D189F7 /* RootView.swift */; };
+		F7998E3E4B140A831D629C74 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64245C6BF899F9C1142F86E0 /* AlbumView.swift */; };
+		F87BC66E8BD41D36F7EC9071 /* PetInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856E4EB784D031CDEA78CBBD /* PetInfoView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		017D65EE9976E5085D1863A3 /* TierSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierSelectView.swift; sourceTree = "<group>"; };
+		1EB467A0A82942285D6C1016 /* OnboardingStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStartView.swift; sourceTree = "<group>"; };
+		26167546E792AA3A0A734513 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		2DC6FBB2725D9E5EB290B2B7 /* MemorialApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MemorialApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPhotoView.swift; sourceTree = "<group>"; };
+		46FBDB325D733AE8E09C8DF2 /* HugsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HugsView.swift; sourceTree = "<group>"; };
+		4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryEditView.swift; sourceTree = "<group>"; };
+		4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
+		516B0249E76335F20828B276 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		5B4E6B181B4B945D33D6A95C /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		64245C6BF899F9C1142F86E0 /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
+		73DA614CCC0D6060777285F4 /* EntitlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementView.swift; sourceTree = "<group>"; };
+		793C643D0522E264F127E573 /* MailboxLockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxLockedView.swift; sourceTree = "<group>"; };
+		856E4EB784D031CDEA78CBBD /* PetInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetInfoView.swift; sourceTree = "<group>"; };
+		8830EE2A3C903C1A16AE7670 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		9407F558E5B2349773FE9806 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
+		9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorialSentenceEditView.swift; sourceTree = "<group>"; };
+		AD71578A5A4A3C1176F500D8 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		B95DC4895BFBD7DFF3205270 /* MemorialApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MemorialApp.entitlements; sourceTree = "<group>"; };
+		C1020B1B660C233418782944 /* MailboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxView.swift; sourceTree = "<group>"; };
+		C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateSuccessView.swift; sourceTree = "<group>"; };
+		C40540C59A31F39495D189F7 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		CDD62992F1C9DD82FBC6187F /* MemorialApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorialApp.swift; sourceTree = "<group>"; };
+		D7FD3DFD4A69C6AACDAAB5CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		DB94814E21284C70E752BAE2 /* SharePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePanelView.swift; sourceTree = "<group>"; };
+		E31C6461E77A8135CE9C344F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		F9B3BFF0C456566C5FD3C1C6 /* MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineView.swift; sourceTree = "<group>"; };
+		FE0D50567A918025751525DC /* PetProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetProfileView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0C64186A5F01183EA7413240 /* Memory */ = {
+			isa = PBXGroup;
+			children = (
+				9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */,
+				4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */,
+				4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */,
+			);
+			path = Memory;
+			sourceTree = "<group>";
+		};
+		13A49DD2D5FCF42BADCCDB09 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				E31C6461E77A8135CE9C344F /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		18D0EA78E20534DA0C17AB56 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */,
+				AD71578A5A4A3C1176F500D8 /* LoginView.swift */,
+				3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */,
+				1EB467A0A82942285D6C1016 /* OnboardingStartView.swift */,
+				856E4EB784D031CDEA78CBBD /* PetInfoView.swift */,
+				017D65EE9976E5085D1863A3 /* TierSelectView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		232B6830D28EFE4A335F85A8 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				26167546E792AA3A0A734513 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2F4E09FD3C1FAC7CEB634F48 = {
+			isa = PBXGroup;
+			children = (
+				EFBBD2DA9412086472483C85 /* Sources */,
+				A34DD71D61702358C7104BA9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4C347BBBF7E78D7C82DE968B /* Services */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		5B589ECE093426D12F2751B0 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				C15CEB1545DCF69B3C28EB96 /* Album */,
+				C88C5F17FA852FA066A2F069 /* Entitlement */,
+				13A49DD2D5FCF42BADCCDB09 /* Home */,
+				BADC7FA09ECA3792A78CB109 /* Hugs */,
+				8CAB494CFA6A61154E8A5E33 /* Mailbox */,
+				0C64186A5F01183EA7413240 /* Memory */,
+				8330A4D2D09EF0E6611852B8 /* Mine */,
+				18D0EA78E20534DA0C17AB56 /* Onboarding */,
+				E3031FA140E231DE74ACCC8D /* Share */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		8330A4D2D09EF0E6611852B8 /* Mine */ = {
+			isa = PBXGroup;
+			children = (
+				F9B3BFF0C456566C5FD3C1C6 /* MineView.swift */,
+				FE0D50567A918025751525DC /* PetProfileView.swift */,
+				9407F558E5B2349773FE9806 /* PrivacySettingsView.swift */,
+			);
+			path = Mine;
+			sourceTree = "<group>";
+		};
+		8CAB494CFA6A61154E8A5E33 /* Mailbox */ = {
+			isa = PBXGroup;
+			children = (
+				793C643D0522E264F127E573 /* MailboxLockedView.swift */,
+				C1020B1B660C233418782944 /* MailboxView.swift */,
+			);
+			path = Mailbox;
+			sourceTree = "<group>";
+		};
+		A34DD71D61702358C7104BA9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2DC6FBB2725D9E5EB290B2B7 /* MemorialApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A958C665615B0683D097973F /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				AD4E2C296BF65D46616AB093 /* Components */,
+				232B6830D28EFE4A335F85A8 /* Models */,
+				C9B826275B723C3793202952 /* Network */,
+				4C347BBBF7E78D7C82DE968B /* Services */,
+				FDA0C000F4436DF47B85885F /* Utils */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		AD4E2C296BF65D46616AB093 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		BADC7FA09ECA3792A78CB109 /* Hugs */ = {
+			isa = PBXGroup;
+			children = (
+				46FBDB325D733AE8E09C8DF2 /* HugsView.swift */,
+			);
+			path = Hugs;
+			sourceTree = "<group>";
+		};
+		C15CEB1545DCF69B3C28EB96 /* Album */ = {
+			isa = PBXGroup;
+			children = (
+				64245C6BF899F9C1142F86E0 /* AlbumView.swift */,
+			);
+			path = Album;
+			sourceTree = "<group>";
+		};
+		C88C5F17FA852FA066A2F069 /* Entitlement */ = {
+			isa = PBXGroup;
+			children = (
+				73DA614CCC0D6060777285F4 /* EntitlementView.swift */,
+			);
+			path = Entitlement;
+			sourceTree = "<group>";
+		};
+		C9B826275B723C3793202952 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		D81FC06AD8C5C57B98F1CEAE /* App */ = {
+			isa = PBXGroup;
+			children = (
+				8830EE2A3C903C1A16AE7670 /* AppState.swift */,
+				D7FD3DFD4A69C6AACDAAB5CE /* Info.plist */,
+				516B0249E76335F20828B276 /* MainTabView.swift */,
+				B95DC4895BFBD7DFF3205270 /* MemorialApp.entitlements */,
+				CDD62992F1C9DD82FBC6187F /* MemorialApp.swift */,
+				C40540C59A31F39495D189F7 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E3031FA140E231DE74ACCC8D /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				DB94814E21284C70E752BAE2 /* SharePanelView.swift */,
+			);
+			path = Share;
+			sourceTree = "<group>";
+		};
+		EFBBD2DA9412086472483C85 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				D81FC06AD8C5C57B98F1CEAE /* App */,
+				A958C665615B0683D097973F /* Common */,
+				5B589ECE093426D12F2751B0 /* Features */,
+			);
+			name = Sources;
+			path = MemorialApp/Sources;
+			sourceTree = "<group>";
+		};
+		FDA0C000F4436DF47B85885F /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				5B4E6B181B4B945D33D6A95C /* AppColors.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C2CE6035980329CD05EBFBDC /* MemorialApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B6C1923EC2D411CE3D152A5 /* Build configuration list for PBXNativeTarget "MemorialApp" */;
+			buildPhases = (
+				FEB4AC8FB3CB6ACB5EEAE074 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MemorialApp;
+			packageProductDependencies = (
+			);
+			productName = MemorialApp;
+			productReference = 2DC6FBB2725D9E5EB290B2B7 /* MemorialApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD71655BC0E50A1CFFABA9AC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					C2CE6035980329CD05EBFBDC = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 6B04C9F500D0E79B2695C625 /* Build configuration list for PBXProject "MemorialApp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 2F4E09FD3C1FAC7CEB634F48;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A34DD71D61702358C7104BA9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C2CE6035980329CD05EBFBDC /* MemorialApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FEB4AC8FB3CB6ACB5EEAE074 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F7998E3E4B140A831D629C74 /* AlbumView.swift in Sources */,
+				627E73C0956B550C457A44BE /* AppColors.swift in Sources */,
+				237503EEAB4CA1CA32FD985F /* AppState.swift in Sources */,
+				5137174C420982AA770504D8 /* CreateSuccessView.swift in Sources */,
+				8F7F6014ACD7577531F7DE5B /* EntitlementView.swift in Sources */,
+				4466670647B150DDBBEEA1F3 /* HomeView.swift in Sources */,
+				44243CDADEF646AD402136D6 /* HugsView.swift in Sources */,
+				59091E848DE621C8ACAC8AFB /* LoginView.swift in Sources */,
+				1F953BE202ED0B123ABF3AED /* MailboxLockedView.swift in Sources */,
+				162884CC621EA2A8E9C0F7FF /* MailboxView.swift in Sources */,
+				D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */,
+				43080225A217466CC254B91F /* MainTabView.swift in Sources */,
+				6B412D6905266A68D5C60AF4 /* MemorialApp.swift in Sources */,
+				1226FAD4D9D078719D3CB817 /* MemorialSentenceEditView.swift in Sources */,
+				D3F87DD0C0761B37CB50F0A8 /* MemoryView.swift in Sources */,
+				0FA09588B602DDDB5C6A9956 /* MineView.swift in Sources */,
+				6C8CE782EB987A2D6576C5C5 /* Models.swift in Sources */,
+				002FAEA3C95D60B152C32A52 /* OnboardingStartView.swift in Sources */,
+				F87BC66E8BD41D36F7EC9071 /* PetInfoView.swift in Sources */,
+				5643DE6B080E87407C9F82A6 /* PetProfileView.swift in Sources */,
+				0A9EF115B65E152C15586369 /* PrivacySettingsView.swift in Sources */,
+				EF1E1B725956A118E21538F3 /* RootView.swift in Sources */,
+				4272315CFC0783C8732416AF /* SharePanelView.swift in Sources */,
+				6630F92912A9F72F998175BB /* StoryEditView.swift in Sources */,
+				7E66E715757137B43349A6D3 /* TierSelectView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		464CC122B1FCE6AA16BB9D16 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		833039D35CA460210B6723A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MemorialApp/Sources/App/MemorialApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = MemorialApp/Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.musayang.memorial;
+				PRODUCT_NAME = MemorialApp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D54B75FED30F212D1692394A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		DBACE6C5C8ED20C9A5E7CE94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MemorialApp/Sources/App/MemorialApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = MemorialApp/Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.musayang.memorial;
+				PRODUCT_NAME = MemorialApp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6B04C9F500D0E79B2695C625 /* Build configuration list for PBXProject "MemorialApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				464CC122B1FCE6AA16BB9D16 /* Debug */,
+				D54B75FED30F212D1692394A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6B6C1923EC2D411CE3D152A5 /* Build configuration list for PBXNativeTarget "MemorialApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DBACE6C5C8ED20C9A5E7CE94 /* Debug */,
+				833039D35CA460210B6723A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BD71655BC0E50A1CFFABA9AC /* Project object */;
+}

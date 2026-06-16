@@ -1,0 +1,67 @@
+import SwiftUI
+
+struct PetProfileView: View {
+    @EnvironmentObject var appState: AppState
+    @State private var name = ""
+    @State private var petType: Pet.PetType = .cat
+    @State private var isSaving = false
+
+    var body: some View {
+        ZStack {
+            AppColors.paper.ignoresSafeArea()
+            Form {
+                Section("基础信息") {
+                    TextField("名字", text: $name)
+                    Picker("类型", selection: $petType) {
+                        ForEach(Pet.PetType.allCases, id: \.self) { type in
+                            Text(type.displayName).tag(type)
+                        }
+                    }
+                }
+                .listRowBackground(AppColors.white)
+
+                Section("日期（选填）") {
+                    DatePrecisionRow(label: "来到身边")
+                    DatePrecisionRow(label: "生日")
+                    DatePrecisionRow(label: "离开日期")
+                }
+                .listRowBackground(AppColors.white)
+            }
+            .scrollContentBackground(.hidden)
+            .background(AppColors.paper)
+        }
+        .navigationTitle("宠物资料")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("保存") {
+                    appState.currentPet?.name = name
+                    appState.currentPet?.type = petType
+                    // TODO: PATCH /api/v1/pets/{pet_id}
+                }
+                .foregroundColor(AppColors.greenDeep)
+                .fontWeight(.medium)
+            }
+        }
+        .onAppear {
+            name = appState.currentPet?.name ?? ""
+            petType = appState.currentPet?.type ?? .cat
+        }
+    }
+}
+
+struct DatePrecisionRow: View {
+    let label: String
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(AppFonts.body(15))
+                .foregroundColor(AppColors.ink)
+            Spacer()
+            Text("未填写")
+                .font(AppFonts.body(14))
+                .foregroundColor(AppColors.muted)
+        }
+    }
+}
