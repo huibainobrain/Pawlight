@@ -1,0 +1,14 @@
+node_modules/
+.DS_Store
+*.xcuserdatad
+*.xcuserstate
+DerivedData/
+.build/
+*.o
+*.d
+.env
+.env.local
+.env.*.local
+.next/
+dist/
+build/
