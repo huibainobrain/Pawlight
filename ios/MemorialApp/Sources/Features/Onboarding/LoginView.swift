@@ -51,6 +51,14 @@ struct LoginView: View {
                         .font(AppFonts.body(12))
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
+
+                    #if DEBUG
+                    Button("跳过登录（仅开发测试）") {
+                        appState.loadMockData()
+                    }
+                    .font(AppFonts.body(12))
+                    .foregroundColor(AppColors.muted.opacity(0.5))
+                    #endif
                 }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 56)
