@@ -1,0 +1,2722 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星屿纪念 V1 HTML 原型</title>
+  <style>
+    :root {
+      --paper: #f7f1e8;
+      --paper-soft: #fbf7f0;
+      --ink: #2e2b27;
+      --muted: #736d64;
+      --line: rgba(69, 59, 45, .14);
+      --green: #7e9366;
+      --green-deep: #526744;
+      --blue: #6487a0;
+      --blue-deep: #263449;
+      --gold: #bd8f4d;
+      --rose: #bf7d72;
+      --white: #fffdfa;
+      --shadow: 0 22px 60px rgba(50, 42, 30, .16);
+      --radius: 8px;
+      --tab-h: 74px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(247, 241, 232, .92), rgba(232, 238, 228, .86)),
+        radial-gradient(circle at 15% 18%, rgba(255, 248, 219, .6), transparent 28%),
+        linear-gradient(90deg, #edf2ec, #f7f1e8 52%, #e6eef2);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .workspace {
+      min-height: 100%;
+      display: grid;
+      grid-template-columns: minmax(390px, 430px) minmax(300px, 360px);
+      gap: 28px;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      border-radius: 34px;
+      padding: 12px;
+      background: #1d211f;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 26px;
+      background: var(--paper);
+      position: relative;
+    }
+
+    .statusbar {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      color: rgba(44, 39, 34, .8);
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(255, 253, 250, .78);
+      border-bottom: 1px solid rgba(255, 255, 255, .4);
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .signal,
+    .battery {
+      display: inline-block;
+      height: 8px;
+      border: 1px solid rgba(44, 39, 34, .65);
+    }
+
+    .signal {
+      width: 14px;
+      border-top-left-radius: 7px;
+      border-top-right-radius: 7px;
+      border-bottom: 0;
+    }
+
+    .battery {
+      width: 20px;
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 2px;
+      width: 2px;
+      height: 4px;
+      border-radius: 1px;
+      background: rgba(44, 39, 34, .65);
+    }
+
+    #app {
+      height: calc(100% - 38px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page {
+      height: 100%;
+      overflow-y: auto;
+      background:
+        linear-gradient(180deg, rgba(255, 253, 250, .9), rgba(247, 241, 232, .96) 46%, rgba(235, 241, 229, .72)),
+        var(--paper);
+      scrollbar-width: none;
+    }
+
+    .page::-webkit-scrollbar {
+      display: none;
+    }
+
+    .page.with-tabs {
+      padding-bottom: var(--tab-h);
+    }
+
+    .page.h5 {
+      background:
+        linear-gradient(180deg, #f8f4ed 0%, #edf3ec 62%, #f7f1e8 100%);
+    }
+
+    .content {
+      padding: 18px 18px 24px;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 38px 1fr 38px;
+      align-items: center;
+      gap: 8px;
+      min-height: 52px;
+      padding: 10px 14px 4px;
+      background: linear-gradient(180deg, rgba(255, 253, 250, .96), rgba(255, 253, 250, .72));
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-title {
+      text-align: center;
+      font-weight: 750;
+      font-size: 16px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .7);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 800;
+      color: rgba(46, 43, 39, .82);
+    }
+
+    .soft-tag {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(126, 147, 102, .14);
+      color: var(--green-deep);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 30px;
+      line-height: 1.18;
+      letter-spacing: 0;
+      margin-top: 12px;
+    }
+
+    h2 {
+      font-size: 21px;
+      line-height: 1.28;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 16px;
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .hero-copy {
+      margin: 18px 0 20px;
+    }
+
+    .hero-copy .muted {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .planet-window {
+      position: relative;
+      min-height: 300px;
+      border-radius: 8px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(34, 44, 68, .94), rgba(48, 73, 83, .86) 56%, rgba(119, 142, 110, .78)),
+        linear-gradient(135deg, #273144, #7c9aa5);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28);
+      isolation: isolate;
+    }
+
+    .planet-window::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(110deg, rgba(255, 238, 191, .2), transparent 34%),
+        linear-gradient(180deg, transparent 62%, rgba(226, 230, 196, .28)),
+        repeating-radial-gradient(circle at 16% 18%, rgba(255, 255, 255, .45) 0 1px, transparent 1px 38px);
+      opacity: .9;
+      z-index: -1;
+    }
+
+    .planet-window::after {
+      content: "";
+      position: absolute;
+      left: -8%;
+      right: -8%;
+      bottom: -32px;
+      height: 120px;
+      background:
+        linear-gradient(180deg, rgba(235, 241, 217, .22), rgba(130, 157, 109, .9)),
+        repeating-linear-gradient(100deg, rgba(255, 255, 255, .15) 0 2px, transparent 2px 18px);
+      border-top-left-radius: 50% 70%;
+      border-top-right-radius: 50% 70%;
+    }
+
+    .pet-photo {
+      width: 178px;
+      height: 178px;
+      margin: 34px auto 16px;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      background:
+        linear-gradient(145deg, rgba(255, 251, 238, .7), rgba(132, 157, 165, .28)),
+        linear-gradient(180deg, #e7d5bd, #b4c5b2);
+      border: 4px solid rgba(255, 253, 250, .68);
+      box-shadow: 0 18px 34px rgba(20, 30, 42, .26);
+      filter: hue-rotate(var(--photo-hue, 0deg));
+    }
+
+    .pet-photo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, .45), transparent 36%),
+        radial-gradient(circle at 50% 42%, rgba(74, 64, 55, .34) 0 24%, transparent 25%),
+        radial-gradient(circle at 44% 50%, rgba(74, 64, 55, .55) 0 3px, transparent 4px),
+        radial-gradient(circle at 57% 50%, rgba(74, 64, 55, .55) 0 3px, transparent 4px),
+        radial-gradient(circle at 51% 58%, rgba(74, 64, 55, .36) 0 4px, transparent 5px),
+        linear-gradient(180deg, transparent 62%, rgba(102, 132, 91, .42));
+    }
+
+    .pet-photo::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(255, 253, 250, .78);
+      color: rgba(46, 43, 39, .72);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      display: none;
+    }
+
+    .pet-photo.upload-placeholder::after {
+      content: "主照片占位";
+      display: block;
+    }
+
+    .pet-photo.sm {
+      width: 68px;
+      height: 68px;
+      margin: 0;
+      border-width: 2px;
+    }
+
+    .pet-photo.sm::after {
+      display: none;
+    }
+
+    .planet-caption {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0 20px 18px;
+      color: #fffdfa;
+      text-shadow: 0 1px 12px rgba(0, 0, 0, .22);
+    }
+
+    .planet-caption .name {
+      font-size: 24px;
+      font-weight: 850;
+      margin-bottom: 6px;
+    }
+
+    .planet-caption .line {
+      font-size: 13px;
+      line-height: 1.55;
+      opacity: .9;
+    }
+
+    .cover-window {
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 350px;
+    }
+
+    .cover-window .pet-photo {
+      width: 210px;
+      height: 210px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: rgba(255, 253, 250, .78);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 10px 28px rgba(74, 61, 45, .07);
+    }
+
+    .card + .card,
+    .section + .section {
+      margin-top: 12px;
+    }
+
+    .section {
+      margin-top: 16px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .section-title h3 {
+      margin-bottom: 0;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .primary,
+    .secondary,
+    .ghost,
+    .danger,
+    .quiet {
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 0 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-weight: 750;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .primary {
+      color: #fffdfa;
+      background: linear-gradient(135deg, var(--green-deep), var(--blue));
+      box-shadow: 0 10px 24px rgba(82, 103, 68, .22);
+    }
+
+    .secondary {
+      color: var(--green-deep);
+      background: rgba(126, 147, 102, .14);
+      border: 1px solid rgba(126, 147, 102, .24);
+    }
+
+    .ghost {
+      color: var(--ink);
+      background: rgba(255, 253, 250, .72);
+      border: 1px solid var(--line);
+    }
+
+    .quiet {
+      min-height: 34px;
+      color: var(--muted);
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+
+    .danger {
+      color: #8b413d;
+      background: rgba(191, 125, 114, .13);
+      border: 1px solid rgba(191, 125, 114, .22);
+    }
+
+    .wide {
+      width: 100%;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .field {
+      margin-top: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid rgba(69, 59, 45, .18);
+      background: rgba(255, 253, 250, .84);
+      border-radius: 8px;
+      padding: 12px 12px;
+      outline: none;
+      color: var(--ink);
+      resize: vertical;
+    }
+
+    .field textarea {
+      min-height: 170px;
+      line-height: 1.65;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .choice {
+      min-height: 52px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 250, .75);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 750;
+      color: var(--ink);
+    }
+
+    .choice.active {
+      border-color: rgba(126, 147, 102, .48);
+      background: rgba(126, 147, 102, .15);
+      color: var(--green-deep);
+    }
+
+    .progress {
+      display: flex;
+      gap: 5px;
+      margin: 8px 0 18px;
+    }
+
+    .progress span {
+      flex: 1;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(69, 59, 45, .12);
+    }
+
+    .progress span.on {
+      background: var(--green);
+    }
+
+    .upload-box {
+      height: 280px;
+      border-radius: 8px;
+      border: 1px dashed rgba(82, 103, 68, .42);
+      background:
+        linear-gradient(180deg, rgba(255, 253, 250, .78), rgba(231, 237, 222, .76));
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 26px;
+      color: var(--muted);
+    }
+
+    .upload-box.done {
+      border-style: solid;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .upload-box.done .pet-photo {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      border: 0;
+      border-radius: 8px;
+    }
+
+    .plan-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .plan {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 250, .82);
+      border-radius: 8px;
+      padding: 14px;
+      position: relative;
+    }
+
+    .plan.featured {
+      border-color: rgba(189, 143, 77, .5);
+      background:
+        linear-gradient(135deg, rgba(255, 248, 224, .86), rgba(255, 253, 250, .84));
+    }
+
+    .plan.disabled {
+      opacity: .62;
+    }
+
+    .plan-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .price {
+      color: var(--gold);
+      font-weight: 850;
+      font-size: 18px;
+    }
+
+    .price del {
+      color: rgba(115, 109, 100, .7);
+      font-size: 12px;
+      margin-left: 4px;
+      font-weight: 600;
+    }
+
+    .checks {
+      display: grid;
+      gap: 6px;
+      margin: 10px 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .checks li::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      background: var(--green);
+      margin-right: 7px;
+      transform: translateY(-1px);
+    }
+
+    .bottom-tabs {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--tab-h);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 8px 14px 12px;
+      gap: 8px;
+      background: rgba(255, 253, 250, .92);
+      border-top: 1px solid rgba(69, 59, 45, .12);
+      backdrop-filter: blur(16px);
+      z-index: 10;
+    }
+
+    .tab {
+      border-radius: 8px;
+      color: var(--muted);
+      background: transparent;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .tab span {
+      width: 22px;
+      height: 18px;
+      border-radius: 7px;
+      border: 1.5px solid currentColor;
+      display: block;
+      position: relative;
+    }
+
+    .tab[data-tab="home"] span::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      right: 5px;
+      bottom: 3px;
+      height: 5px;
+      border-radius: 4px;
+      background: currentColor;
+    }
+
+    .tab[data-tab="memory"] span::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      left: 6px;
+      top: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .tab[data-tab="mine"] span::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      right: 5px;
+      bottom: 2px;
+      height: 6px;
+      border-radius: 6px 6px 3px 3px;
+      background: currentColor;
+    }
+
+    .tab.active {
+      color: var(--green-deep);
+      background: rgba(126, 147, 102, .12);
+    }
+
+    .notice-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .notice {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 253, 250, .74);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .notice strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .action-tile {
+      min-height: 72px;
+      padding: 10px 6px;
+      border-radius: 8px;
+      background: rgba(255, 253, 250, .82);
+      border: 1px solid var(--line);
+      text-align: center;
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .action-tile span {
+      display: block;
+      width: 22px;
+      height: 22px;
+      margin: 0 auto 7px;
+      border-radius: 7px;
+      border: 1.6px solid var(--green);
+      position: relative;
+    }
+
+    .action-tile span::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+
+    .thumb {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background:
+        linear-gradient(145deg, rgba(255, 253, 250, .24), transparent 44%),
+        linear-gradient(180deg, var(--tile-a), var(--tile-b));
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 253, 250, .65);
+    }
+
+    .thumb::before {
+      content: "";
+      position: absolute;
+      width: 42%;
+      height: 42%;
+      border-radius: 50%;
+      left: 28%;
+      top: 24%;
+      background: rgba(68, 58, 49, .26);
+      box-shadow: 0 22px 0 -11px rgba(68, 58, 49, .18);
+    }
+
+    .thumb.main::after {
+      content: "主照片";
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      padding: 3px 6px;
+      border-radius: 999px;
+      background: rgba(255, 253, 250, .8);
+      color: var(--green-deep);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .hug-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .hug-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(69, 59, 45, .1);
+    }
+
+    .hug-item:last-child {
+      border-bottom: 0;
+    }
+
+    .hug-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(191, 125, 114, .16);
+      border: 1px solid rgba(191, 125, 114, .26);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .hug-mark::before,
+    .hug-mark::after {
+      content: "";
+      position: absolute;
+      width: 11px;
+      height: 18px;
+      top: 8px;
+      border-radius: 12px 12px 4px 4px;
+      background: var(--rose);
+    }
+
+    .hug-mark::before {
+      left: 8px;
+      transform: rotate(-24deg);
+    }
+
+    .hug-mark::after {
+      right: 8px;
+      transform: rotate(24deg);
+    }
+
+    .list-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 54px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(69, 59, 45, .1);
+    }
+
+    .list-row:last-child {
+      border-bottom: 0;
+    }
+
+    .row-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(126, 147, 102, .11);
+      position: relative;
+    }
+
+    .row-icon::after {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .chevron {
+      color: rgba(46, 43, 39, .35);
+      font-size: 20px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 26px 14px;
+      border: 1px dashed rgba(82, 103, 68, .32);
+      border-radius: 8px;
+      background: rgba(255, 253, 250, .54);
+    }
+
+    .mini-divider {
+      height: 1px;
+      background: rgba(69, 59, 45, .11);
+      margin: 12px 0;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(69, 59, 45, .1);
+    }
+
+    .switch {
+      width: 48px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(69, 59, 45, .18);
+      padding: 3px;
+      flex: 0 0 auto;
+    }
+
+    .switch.on {
+      background: rgba(126, 147, 102, .52);
+    }
+
+    .switch span {
+      display: block;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fffdfa;
+      box-shadow: 0 2px 8px rgba(40, 32, 22, .18);
+      transition: transform .18s ease;
+    }
+
+    .switch.on span {
+      transform: translateX(20px);
+    }
+
+    .h5-bar {
+      margin: 10px 14px 0;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255, 253, 250, .74);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .h5 .content {
+      padding-top: 12px;
+    }
+
+    .h5 .planet-window {
+      min-height: 340px;
+      background:
+        linear-gradient(180deg, rgba(39, 49, 68, .92), rgba(83, 114, 114, .85) 58%, rgba(149, 165, 124, .8)),
+        #dfe8e4;
+    }
+
+    .modal-shade {
+      position: absolute;
+      inset: 0;
+      background: rgba(33, 31, 28, .34);
+      z-index: 30;
+      display: flex;
+      align-items: flex-end;
+      padding: 14px;
+    }
+
+    .modal {
+      width: 100%;
+      background: var(--paper-soft);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .75);
+      box-shadow: 0 18px 50px rgba(33, 31, 28, .22);
+      max-height: 78%;
+      overflow-y: auto;
+    }
+
+    .toast {
+      position: absolute;
+      z-index: 40;
+      top: 52px;
+      left: 24px;
+      right: 24px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      text-align: center;
+      background: rgba(46, 43, 39, .9);
+      color: #fffdfa;
+      font-size: 13px;
+      box-shadow: 0 10px 28px rgba(46, 43, 39, .22);
+    }
+
+    .debug-panel {
+      align-self: stretch;
+      max-height: 844px;
+      overflow-y: auto;
+      background: rgba(255, 253, 250, .78);
+      border: 1px solid rgba(69, 59, 45, .14);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 12px 40px rgba(50, 42, 30, .1);
+    }
+
+    .debug-panel h2 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .debug-group {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(69, 59, 45, .12);
+    }
+
+    .debug-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .debug-group select {
+      width: 100%;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fffdfa;
+      color: var(--ink);
+      padding: 0 10px;
+    }
+
+    .debug-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .debug-buttons button {
+      min-height: 36px;
+      border-radius: 8px;
+      background: rgba(126, 147, 102, .12);
+      border: 1px solid rgba(126, 147, 102, .18);
+      color: var(--green-deep);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .debug-state {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      background: rgba(255, 253, 250, .66);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    @media (max-width: 860px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+
+      .phone {
+        margin: 0 auto;
+      }
+
+      .debug-panel {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="workspace">
+    <div class="phone" aria-label="iPhone 移动端原型">
+      <div class="screen">
+        <div class="statusbar">
+          <span>9:41</span>
+          <span class="status-icons"><span class="signal"></span><span>5G</span><span class="battery"></span></span>
+        </div>
+        <main id="app"></main>
+      </div>
+    </div>
+    <aside id="debug" class="debug-panel" aria-label="开发走查面板"></aside>
+  </div>
+
+  <script>
+    // ===== Mock Data Model for Future Development =====
+    //
+    // User:
+    // - userId
+    // - loginStatus
+    // - nickname
+    //
+    // Entitlement:
+    // - entitlementType: free / paid
+    // - purchaseStatus
+    // - purchaseTime
+    //
+    // Pet:
+    // - petId
+    // - ownerUserId
+    // - name
+    // - type
+    // - mainPhoto
+    // - memorialSentence
+    // - dates
+    //
+    // Story:
+    // - storyId
+    // - petId
+    // - content
+    //
+    // Photo:
+    // - photoId
+    // - petId
+    // - type: main / album
+    // - url
+    // - uploadStatus
+    //
+    // Letter:
+    // - letterId
+    // - petId
+    // - title
+    // - content
+    // - createdAt
+    //
+    // Hug:
+    // - hugId
+    // - petId
+    // - shareId
+    // - visitorFingerprint
+    // - createdAt
+    //
+    // Share:
+    // - shareId
+    // - petId
+    // - visibility
+    // - hugEnabled
+    var state = {
+      route: "home",
+      modal: null,
+      toast: "",
+      ownerStage: "unboarded",
+      visibility: "link",
+      hugEnabled: true,
+      contentLevel: "fresh",
+      hugMoment: "none",
+      photoState: "free-open",
+      albumPhotoCount: 0,
+      mainPhotoVersion: 0,
+      uploadDone: false,
+      visitorHug: "none",
+      draftPetName: "棉花",
+      selectedPetType: "猫猫",
+      storyContent: "",
+      photos: [],
+      letters: [],
+      hugs: [],
+      share: {
+        shareId: "share_mock_001",
+        petId: "pet_mock_001",
+        visibility: "link",
+        hugEnabled: true,
+        shareUrl: "share.xingyu.example/棉花"
+      }
+    };
+
+    var navStack = [];
+
+    var pet = {
+      name: "棉花",
+      type: "猫猫",
+      sentence: "愿你在有风和阳光的地方，继续慢慢散步。",
+      dates: "陪伴 2016 - 2025",
+      defaultStory: "棉花喜欢趴在窗边晒太阳。每次听见钥匙声，都会慢慢走到门口，像是在确认家人都平安回来。后来我们才知道，原来那些安静的日子，一直都被TA认真陪着。"
+    };
+
+    var app = document.getElementById("app");
+    var debug = document.getElementById("debug");
+
+    function isCreated() {
+      return state.ownerStage === "free" || state.ownerStage === "paid";
+    }
+
+    function isPaid() {
+      return state.ownerStage === "paid";
+    }
+
+    function isRich() {
+      return state.contentLevel === "rich";
+    }
+
+    function hasStory() {
+      return state.storyContent.trim().length > 0;
+    }
+
+    function defaultStoryText() {
+      return pet.defaultStory.replaceAll("棉花", pet.name);
+    }
+
+    function hugCount() {
+      return state.hugs.length;
+    }
+
+    function photoLimit() {
+      return isPaid() ? 50 : 9;
+    }
+
+    function photoCount() {
+      if (!isCreated()) return 0;
+      return Math.min(state.photos.length, photoLimit());
+    }
+
+    function syncAlbumPhotoCount() {
+      state.albumPhotoCount = state.photos.length;
+    }
+
+    function makePhoto(index = state.photos.length + 1) {
+      return {
+        photoId: `photo_mock_${Date.now()}_${index}`,
+        petId: "pet_mock_001",
+        type: "album",
+        createdAt: "刚刚",
+        isMain: false
+      };
+    }
+
+    function setMockPhotoCount(count) {
+      const target = Math.max(0, Math.min(count, photoLimit()));
+      state.photos = Array.from({ length: target }, (_, i) => ({
+        photoId: `photo_mock_${i + 1}`,
+        petId: "pet_mock_001",
+        type: "album",
+        createdAt: i === 0 ? "主照片之后" : "回忆照片",
+        isMain: false
+      }));
+      syncAlbumPhotoCount();
+      if (!isPaid() && state.photos.length >= 9) state.photoState = "free-full";
+      if (!isPaid() && state.photos.length < 9 && state.photoState === "free-full") state.photoState = "free-open";
+    }
+
+    function syncShareState() {
+      state.share.petId = "pet_mock_001";
+      state.share.visibility = state.visibility;
+      state.share.hugEnabled = state.hugEnabled;
+      state.share.shareUrl = `share.xingyu.example/${encodeURIComponent(pet.name)}`;
+    }
+
+    function addMockHug(time = "刚刚") {
+      const hug = {
+        hugId: `hug_mock_${Date.now()}_${state.hugs.length + 1}`,
+        petName: pet.name,
+        time,
+        visitorName: "匿名访客",
+        source: "H5分享页",
+        petId: "pet_mock_001",
+        shareId: state.share.shareId,
+        visitorFingerprint: "visitor_mock"
+      };
+      state.hugs.unshift(hug);
+      state.hugMoment = "new";
+      return hug;
+    }
+
+    function setHugMoment(value) {
+      state.hugMoment = value;
+      if (value === "new" && state.hugs.length === 0) addMockHug("刚刚");
+      if (value === "none") state.hugs = [];
+      render();
+    }
+
+    function setContentLevel(value) {
+      state.contentLevel = value;
+      if (value === "rich") {
+        if (!hasStory()) state.storyContent = defaultStoryText();
+        if (state.photos.length < 6) setMockPhotoCount(isPaid() ? 18 : 6);
+      } else {
+        state.storyContent = "";
+        state.photos = [];
+        syncAlbumPhotoCount();
+      }
+      render();
+    }
+
+    function go(route, options = {}) {
+      if (!options.replace && state.route !== route) navStack.push(state.route);
+      state.route = route;
+      state.modal = null;
+      state.toast = "";
+      render();
+    }
+
+    function back(fallback = "home") {
+      state.route = navStack.pop() || fallback;
+      state.modal = null;
+      render();
+    }
+
+    function openModal(name) {
+      state.modal = name;
+      render();
+    }
+
+    function closeModal() {
+      state.modal = null;
+      render();
+    }
+
+    function showToast(message) {
+      state.toast = message;
+      render();
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => {
+        state.toast = "";
+        render();
+      }, 1800);
+    }
+
+    function setOwnerStage(value) {
+      state.ownerStage = value;
+      if (value === "unboarded") {
+        state.route = "home";
+        state.uploadDone = false;
+        state.photoState = "free-open";
+        state.photos = [];
+        syncAlbumPhotoCount();
+        state.visitorHug = "none";
+        state.hugs = [];
+        state.visibility = "link";
+        state.hugEnabled = true;
+      }
+      if (value === "paid") {
+        state.photoState = "paid";
+      }
+      if (value === "free" && state.photoState === "paid") state.photoState = "free-open";
+      render();
+    }
+
+    function setPhotoState(value) {
+      state.photoState = value;
+      if (value === "paid") {
+        state.ownerStage = "paid";
+      }
+      if (value === "free-full") {
+        state.ownerStage = "free";
+        setMockPhotoCount(9);
+      }
+      if (value === "free-open") {
+        if (state.ownerStage === "paid") state.ownerStage = "free";
+        if (state.photos.length > 8) setMockPhotoCount(6);
+      }
+      render();
+    }
+
+    function startCreate() {
+      go("onboardingStart");
+    }
+
+    function creationStep(current, title) {
+      return `
+        <div class="small" style="font-weight:800;color:var(--green-deep);margin-bottom:8px;">${current}/3 ${title}</div>
+        <div class="progress">${[1, 2, 3].map(i => `<span class="${i <= current ? "on" : ""}"></span>`).join("")}</div>
+      `;
+    }
+
+    function petTypeOptions() {
+      return ["猫猫", "狗狗", "其他小动物"].map(type => `<button class="choice ${state.selectedPetType === type ? "active" : ""}" onclick="state.selectedPetType='${type}'; pet.type='${type}'; render()">${type}</button>`).join("");
+    }
+
+    function petPhoto(className = "", inlineStyle = "") {
+      const hue = (state.mainPhotoVersion % 6) * 10;
+      const cls = className ? ` ${className}` : "";
+      const style = `${inlineStyle ? inlineStyle + ";" : ""}--photo-hue:${hue}deg`;
+      return `<div class="pet-photo${cls}" style="${style}"></div>`;
+    }
+
+    function submitPetInfo() {
+      const input = document.getElementById("petNameInput");
+      const nextName = input ? input.value.trim() : "";
+      if (!nextName) {
+        showToast("请先写下TA的名字");
+        return;
+      }
+      pet.name = nextName;
+      pet.type = state.selectedPetType;
+      state.draftPetName = nextName;
+      syncShareState();
+      go("mainPhoto");
+    }
+
+    function simulateUpload(status) {
+      if (status === "video") {
+        showToast("V1暂时只支持图片上传，视频回忆会在后续版本考虑。");
+        return;
+      }
+      if (status === "fail") {
+        showToast("这张照片暂时没能保存，请重新试一次");
+        return;
+      }
+      state.uploadDone = true;
+      state.mainPhotoVersion += 1;
+      showToast("照片已作为TA的主照片");
+    }
+
+    function chooseFreeTier() {
+      state.ownerStage = "free";
+      state.photoState = "free-open";
+      state.visibility = "link";
+      state.hugEnabled = true;
+      state.contentLevel = "fresh";
+      state.hugMoment = "none";
+      state.visitorHug = "none";
+      state.photos = [];
+      syncAlbumPhotoCount();
+      state.storyContent = "";
+      state.letters = [];
+      state.hugs = [];
+      syncShareState();
+      go("createSuccess");
+    }
+
+    function paySuccess() {
+      const wasCreated = isCreated();
+      state.ownerStage = "paid";
+      state.photoState = "paid";
+      state.visibility = "link";
+      state.hugEnabled = true;
+      state.modal = null;
+      if (!wasCreated) {
+        state.contentLevel = "fresh";
+        state.hugMoment = "none";
+        state.visitorHug = "none";
+        state.photos = [];
+        syncAlbumPhotoCount();
+        state.storyContent = "";
+        state.letters = [];
+        state.hugs = [];
+        syncShareState();
+        go("createSuccess");
+      } else {
+        syncShareState();
+        render();
+        showToast("完整纪念空间已开启");
+      }
+    }
+
+    function payFail() {
+      state.modal = null;
+      go("paymentFail");
+    }
+
+    function upgradeNow() {
+      state.ownerStage = "paid";
+      state.photoState = "paid";
+      syncShareState();
+      showToast("完整纪念空间已开启");
+    }
+
+    function saveStory() {
+      const input = document.getElementById("storyInput");
+      const nextStory = input ? input.value.trim() : "";
+      if (!nextStory) {
+        state.storyContent = "";
+        go("memory");
+        showToast("可以从一件小事开始，之后再慢慢写");
+        return;
+      }
+      state.storyContent = nextStory;
+      state.contentLevel = "rich";
+      go("memory");
+      showToast("TA的故事已保存");
+    }
+
+    function storyText() {
+      return state.storyContent;
+    }
+
+    function saveLetter() {
+      const titleInput = document.getElementById("letterTitleInput");
+      const contentInput = document.getElementById("letterContentInput");
+      const title = titleInput ? titleInput.value.trim() : "";
+      const content = contentInput ? contentInput.value.trim() : "";
+      if (!content) {
+        showToast("可以先写下一点想说的话");
+        return;
+      }
+      state.letters.unshift({
+        letterId: `letter_mock_${Date.now()}_${state.letters.length + 1}`,
+        petId: "pet_mock_001",
+        title: title || "写给TA的话",
+        content,
+        createdAt: "刚刚保存",
+        visibility: "private"
+      });
+      go("mailbox");
+      showToast("这封信已留在这里");
+    }
+
+    function saveSentence() {
+      const input = document.getElementById("sentenceInput");
+      const nextSentence = input ? input.value.trim() : "";
+      if (!nextSentence) {
+        showToast("可以先写下一句想留给TA的话");
+        return;
+      }
+      pet.sentence = nextSentence;
+      state.modal = null;
+      render();
+      showToast("纪念语已保存");
+    }
+
+    function savePetProfile() {
+      const nameInput = document.getElementById("profilePetName");
+      const typeInput = document.getElementById("profilePetType");
+      const nextName = nameInput ? nameInput.value.trim() : "";
+      if (!nextName) {
+        showToast("请先写下TA的名字");
+        return;
+      }
+      pet.name = nextName;
+      pet.type = typeInput ? typeInput.value : pet.type;
+      state.draftPetName = pet.name;
+      state.selectedPetType = pet.type;
+      syncShareState();
+      showToast("资料已保存");
+    }
+
+    function canAddAlbumPhoto() {
+      return isCreated() && photoCount() < photoLimit();
+    }
+
+    function simulateAlbumUpload(status) {
+      if (status === "fail") {
+        showToast("这张照片暂时没能保存，请重新试一次");
+        return;
+      }
+      if (!canAddAlbumPhoto()) {
+        openModal("photoLimit");
+        return;
+      }
+      state.photos.push(makePhoto());
+      syncAlbumPhotoCount();
+      if (!isPaid() && state.photos.length >= 9) state.photoState = "free-full";
+      if (state.photos.length > 0) state.contentLevel = "rich";
+      state.modal = null;
+      render();
+      showToast("照片已加入相册");
+    }
+
+    function addPhoto() {
+      if (!canAddAlbumPhoto()) {
+        openModal("photoLimit");
+        return;
+      }
+      openModal("photoUpload");
+    }
+
+    function hugPet() {
+      if (state.visitorHug === "hugged") {
+        go("h5Repeat");
+        return;
+      }
+      state.visitorHug = "hugged";
+      addMockHug("刚刚");
+      go("h5Success");
+    }
+
+    function changePrivateAndShare() {
+      state.visibility = "link";
+      syncShareState();
+      openModal("share");
+    }
+
+    function setVisibility(value) {
+      state.visibility = value;
+      syncShareState();
+      render();
+    }
+
+    function setHugEnabled(value) {
+      state.hugEnabled = value;
+      syncShareState();
+      render();
+    }
+
+    function ensureCreatedForWalkthrough(paid = false) {
+      if (!isCreated()) state.ownerStage = paid ? "paid" : "free";
+      if (paid) state.ownerStage = "paid";
+      state.photoState = state.ownerStage === "paid" ? "paid" : (state.photoState === "paid" ? "free-open" : state.photoState);
+      state.uploadDone = true;
+      syncAlbumPhotoCount();
+    }
+
+    function walkthroughReset() {
+      state.ownerStage = "unboarded";
+      state.route = "home";
+      state.uploadDone = false;
+      state.photos = [];
+      syncAlbumPhotoCount();
+      state.photoState = "free-open";
+      state.modal = null;
+      state.visitorHug = "none";
+      state.hugMoment = "none";
+      state.hugs = [];
+      state.visibility = "link";
+      state.hugEnabled = true;
+      state.storyContent = "";
+      state.letters = [];
+      syncShareState();
+      render();
+    }
+
+    function walkthroughFullExample() {
+      state.ownerStage = "free";
+      state.contentLevel = "rich";
+      state.storyContent = state.storyContent || defaultStoryText();
+      if (state.photos.length < 6) setMockPhotoCount(6);
+      state.photoState = "free-open";
+      state.visibility = "link";
+      state.hugEnabled = true;
+      syncShareState();
+      state.route = "home";
+      render();
+    }
+
+    function walkthroughFreePhotoFull() {
+      state.ownerStage = "free";
+      state.photoState = "free-full";
+      setMockPhotoCount(9);
+      state.route = "album";
+      render();
+    }
+
+    function walkthroughPaidMailbox() {
+      state.ownerStage = "paid";
+      state.photoState = "paid";
+      state.route = "mailbox";
+      render();
+    }
+
+    function walkthroughH5Success() {
+      ensureCreatedForWalkthrough(false);
+      state.visibility = "link";
+      state.hugEnabled = true;
+      state.visitorHug = "hugged";
+      addMockHug("刚刚");
+      syncShareState();
+      go("h5Success");
+    }
+
+    function walkthroughH5Repeat() {
+      ensureCreatedForWalkthrough(false);
+      state.visibility = "link";
+      state.hugEnabled = true;
+      state.visitorHug = "hugged";
+      syncShareState();
+      go("h5Repeat");
+    }
+
+    function walkthroughH5Inaccessible() {
+      ensureCreatedForWalkthrough(false);
+      state.visibility = "private";
+      syncShareState();
+      go("h5");
+    }
+
+    function tabs(active) {
+      return `
+        <nav class="bottom-tabs" aria-label="底部导航">
+          <button class="tab ${active === "home" ? "active" : ""}" data-tab="home" onclick="go('home')"><span></span>首页</button>
+          <button class="tab ${active === "memory" ? "active" : ""}" data-tab="memory" onclick="go('${isCreated() ? "memory" : "memoryGuide"}')"><span></span>回忆</button>
+          <button class="tab ${active === "mine" ? "active" : ""}" data-tab="mine" onclick="go('mine')"><span></span>我的</button>
+        </nav>
+      `;
+    }
+
+    function nav(title, right = "") {
+      return `
+        <div class="nav">
+          <button class="icon-btn" onclick="back()" aria-label="返回">‹</button>
+          <div class="nav-title">${title}</div>
+          <div>${right}</div>
+        </div>
+      `;
+    }
+
+    function shell(content, options = {}) {
+      const tabMarkup = options.tab ? tabs(options.tab) : "";
+      const h5Class = options.h5 ? " h5" : "";
+      const tabClass = options.tab ? " with-tabs" : "";
+      return `
+        <section class="page${h5Class}${tabClass}">
+          ${options.nav ? nav(options.nav, options.right || "") : ""}
+          ${options.h5Bar ? `<div class="h5-bar">${state.share.shareUrl}</div>` : ""}
+          <div class="content">${content}</div>
+        </section>
+        ${tabMarkup}
+        ${state.toast ? `<div class="toast">${state.toast}</div>` : ""}
+        ${modal()}
+      `;
+    }
+
+    function createdHome() {
+      const extraCards = [];
+      const latestHug = state.hugs[0];
+      if (state.hugMoment === "new" && latestHug) {
+        extraCards.push(`
+          <div class="notice">
+            <div><strong>${latestHug.visitorName}刚刚抱抱了${latestHug.petName}</strong><p class="small">这份心意已经留在TA的星球里。</p></div>
+            <button class="secondary" onclick="go('hugs')">查看抱抱</button>
+          </div>
+        `);
+      }
+      if (!isRich()) {
+        extraCards.push(`
+          <div class="notice">
+            <div><strong>还有一些回忆，可以慢慢留下</strong><p class="small">关于TA的故事，可以慢慢留下。</p></div>
+            <button class="secondary" onclick="go('memory')">继续</button>
+          </div>
+        `);
+      }
+      if (!isPaid()) {
+        extraCards.push(`
+          <div class="notice">
+            <div><strong>当前是免费纪念空间</strong><p class="small">想保存更多照片、写信给TA时，可以再了解完整纪念空间。</p></div>
+            <button class="ghost" onclick="go('entitlement')">了解</button>
+          </div>
+        `);
+      }
+
+      return shell(`
+        <div class="logo-row">
+          <div class="brand">星屿纪念</div>
+          <div class="soft-tag">${isPaid() ? "完整纪念空间" : "免费纪念空间"}</div>
+        </div>
+        <p class="muted">今天也来看看TA。</p>
+        <div class="section planet-window">
+          ${petPhoto()}
+          <div class="planet-caption">
+            <div class="name">${pet.name}</div>
+            <div class="line">${pet.sentence}</div>
+          </div>
+        </div>
+        <div class="button-row">
+          <button class="primary wide" onclick="go('memory')">进入TA的回忆</button>
+          <button class="secondary" onclick="addPhoto()">放一张照片</button>
+          <button class="secondary" onclick="${isPaid() ? "go('mailbox')" : "go('mailboxLocked')"}">写给TA的话</button>
+        </div>
+        <div class="notice-list">${extraCards.join("")}</div>
+      `, { tab: "home" });
+    }
+
+    function unboardedHome() {
+      return shell(`
+        <div class="logo-row">
+          <div class="brand">星屿纪念</div>
+          <div class="soft-tag">内测体验</div>
+        </div>
+        <div class="planet-window">
+          ${petPhoto()}
+          <div class="planet-caption">
+            <div class="name">为TA留下一颗小小的星球</div>
+            <div class="line">先留下名字和照片，其他回忆之后慢慢补充。</div>
+          </div>
+        </div>
+        <div class="hero-copy">
+          <h1>回来看看TA，把想念慢慢放在这里。</h1>
+          <p class="muted">这里不是任务系统，也不是社交广场。它只是一个安静的位置，留给你和那只小动物。</p>
+        </div>
+        <button class="primary wide" onclick="startCreate()">为TA创建星球</button>
+      `, { tab: "home" });
+    }
+
+    function onboardingStart() {
+      return shell(`
+        <div class="planet-window">
+          ${petPhoto()}
+          <div class="planet-caption">
+            <div class="name">为TA留下一颗小小的星球</div>
+            <div class="line">先留下名字和照片，故事和更多瞬间可以以后慢慢补充。</div>
+          </div>
+        </div>
+        <div class="button-row">
+          <button class="primary wide" onclick="go('login')">开始创建</button>
+          <button class="ghost wide" onclick="go('home')">稍后再说</button>
+        </div>
+      `, { nav: "入驻起始页" });
+    }
+
+    function loginPage() {
+      return shell(`
+        <h2>先绑定账号</h2>
+        <p class="muted">帮你保存TA的星球，也方便之后查看权益和抱抱记录。</p>
+        <div class="section card">
+          <h3>使用 Apple 登录</h3>
+          <p class="muted">用你的 Apple 账号保存TA的星球和纪念内容。</p>
+          <button class="primary wide section" onclick="go('petInfo')">使用 Apple 登录并继续</button>
+        </div>
+        <div class="section card">
+          <h3>其他账号绑定</h3>
+          <p class="small">用于后续账号找回和权益绑定。</p>
+          <button class="secondary wide section" onclick="go('petInfo')">绑定账号并继续</button>
+        </div>
+        <p class="small section">继续表示你已阅读并同意《用户协议》和《隐私政策》。</p>
+      `, { nav: "账号绑定" });
+    }
+
+    function petInfoPage() {
+      return shell(`
+        ${creationStep(1, "基础信息")}
+        <h2>TA叫什么名字？</h2>
+        <p class="muted">关于TA的故事，可以慢慢留下。</p>
+        <div class="field">
+          <label>宠物名字</label>
+          <input id="petNameInput" value="${state.draftPetName || pet.name}" oninput="state.draftPetName=this.value">
+        </div>
+        <div class="field">
+          <label>宠物类型</label>
+          <div class="choice-grid">
+            ${petTypeOptions()}
+          </div>
+        </div>
+        <button class="primary wide section" onclick="submitPetInfo()">下一步</button>
+      `, { nav: "基础信息" });
+    }
+
+    function mainPhotoPage() {
+      return shell(`
+        ${creationStep(2, "主照片")}
+        <h2>放一张最想看到TA的照片</h2>
+        <p class="muted">这张照片会成为TA星球里的第一张照片。</p>
+        <div class="section upload-box ${state.uploadDone ? "done" : ""}">
+          ${state.uploadDone ? petPhoto() : `<div>${petPhoto("upload-placeholder")}<p class="muted">点击下方按钮选择一张TA的照片</p></div>`}
+        </div>
+        <div class="button-row">
+          <button class="secondary" onclick="simulateUpload('success')">${state.uploadDone ? "重新选择" : "选择照片"}</button>
+        </div>
+        <button class="primary wide section" onclick="${state.uploadDone ? "go('tierSelect')" : "showToast('请先放一张TA的主照片')"}">下一步</button>
+        <div class="section card">
+          <h3>开发测试状态</h3>
+          <p class="small">以下入口仅用于原型走查，正式产品中不会展示。</p>
+          <div class="button-row">
+            <button class="ghost" onclick="simulateUpload('fail')">模拟上传失败</button>
+            <button class="ghost" onclick="simulateUpload('video')">模拟视频格式</button>
+          </div>
+        </div>
+      `, { nav: "主照片" });
+    }
+
+    function entitlementSelectPage() {
+      return shell(`
+        ${creationStep(3, "选择权益")}
+        <h2>选择TA的纪念空间</h2>
+        <p class="muted">免费档可以完整跑通创建、分享和抱抱。完整纪念空间会保存更多照片，并开启天堂信箱。</p>
+        <div class="section plan-list">
+          <div class="plan">
+            <div class="plan-head"><h3>免费纪念空间</h3><span class="soft-tag">可创建</span></div>
+            <ul class="checks">
+              <li>创建1只宠物，展示主照片和基础星球观察窗</li>
+              <li>纪念语、TA的故事、最多9张照片</li>
+              <li>H5分享、访客抱抱、完整抱抱记录</li>
+            </ul>
+            <button class="secondary wide" onclick="chooseFreeTier()">选择免费档</button>
+          </div>
+          <div class="plan featured">
+            <div class="plan-head"><h3>完整纪念空间</h3><div class="price">¥29.9 <del>¥59.9</del></div></div>
+            <ul class="checks">
+              <li>包含免费档全部能力</li>
+              <li>最多50张照片，开启天堂信箱</li>
+              <li>更完整的纪念空间呈现和更安心的保存感</li>
+            </ul>
+            <button class="primary wide" onclick="openModal('pay')">¥29.9 开启完整纪念空间</button>
+          </div>
+          <div class="plan disabled">
+            <div class="plan-head"><h3>未来纪念形态</h3><span class="soft-tag">暂未开放</span></div>
+            <p class="small">多宠星球、视频回忆、纪念日提醒和更高级的纪念视觉会在后续版本考虑。</p>
+          </div>
+        </div>
+      `, { nav: "权益选择" });
+    }
+
+    function paymentFailPage() {
+      return shell(`
+        <div class="empty-state">
+          <h2>支付未完成</h2>
+          <p class="muted">前面写下的名字、类型和主照片都会保留。你可以重新支付，也可以先用免费档创建。</p>
+        </div>
+        <div class="button-row">
+          <button class="primary wide" onclick="openModal('pay')">重新支付</button>
+          <button class="secondary wide" onclick="chooseFreeTier()">先用免费档创建</button>
+          <button class="ghost wide" onclick="go('tierSelect')">返回权益选择</button>
+        </div>
+      `, { nav: "支付状态" });
+    }
+
+    function createSuccessPage() {
+      return shell(`
+        <div class="planet-window">
+          ${petPhoto()}
+          <div class="planet-caption">
+            <div class="name">TA已经有自己的星球了</div>
+            <div class="line">可以先去看看TA，也可以慢慢补充更多回忆。</div>
+          </div>
+        </div>
+        <div class="section card">
+          <h3>${isPaid() ? "完整纪念空间已开启" : "当前为免费纪念空间"}</h3>
+          <p class="muted">${isPaid() ? "你可以保存更多照片，也可以在之后写信给TA。" : "之后可以在“我的-权益”中升级，保存更多照片，开启天堂信箱。"}</p>
+        </div>
+        <div class="button-row">
+          <button class="primary wide" onclick="go('home')">去看看TA</button>
+          <button class="secondary wide" onclick="go('memory')">继续补充回忆</button>
+        </div>
+        <p class="small section">补充一点回忆后，可以分享给也记得TA的人。</p>
+      `, { nav: "入驻成功" });
+    }
+
+    function memoryGuidePage() {
+      return shell(`
+        <div class="empty-state">
+          <h2>还没有可以回来的星球</h2>
+          <p class="muted">先为TA留下名字和一张照片，回忆页就会成为TA的纪念主页。</p>
+          <button class="primary wide section" onclick="startCreate()">创建星球</button>
+        </div>
+      `, { tab: "memory" });
+    }
+
+    function memoryPage() {
+      if (!isCreated()) return memoryGuidePage();
+      return shell(`
+        <div class="cover-window planet-window">
+          ${petPhoto()}
+          <div class="planet-caption">
+            <div class="name">${pet.name}</div>
+            <div class="line">${pet.sentence || "写下一句想留给TA的话"}</div>
+            ${isRich() ? `<div class="line">${pet.dates}</div>` : ""}
+          </div>
+        </div>
+        <div class="button-row">
+          <button class="ghost" onclick="openModal('sentenceEdit')">编辑纪念语</button>
+        </div>
+        <div class="quick-actions">
+          <button class="action-tile" onclick="${isPaid() ? "go('mailbox')" : "go('mailboxLocked')"}"><span></span>写给TA的话</button>
+          <button class="action-tile" onclick="addPhoto()"><span></span>添加一张照片</button>
+          <button class="action-tile" onclick="openModal('share')"><span></span>分享给也记得TA的人</button>
+        </div>
+        <section class="section card">
+          <div class="section-title"><h3>TA的故事</h3><button class="quiet" onclick="go('storyEdit')">编辑</button></div>
+          ${hasStory() ? `<p class="muted">${storyText()}</p>` : `<div class="empty-state"><p class="muted">还没有写下TA的故事。可以从第一次见到TA，或者最想念TA的一件小事开始。</p><button class="secondary section" onclick="go('storyEdit')">写下TA的故事</button></div>`}
+        </section>
+        <section class="section card">
+          <div class="section-title"><h3>照片回忆</h3><button class="quiet" onclick="go('album')">查看全部</button></div>
+          <p class="small">已保存 ${photoCount()} / ${photoLimit()} 张</p>
+          ${photoCount() > 0 ? `<div class="photo-grid section">${photoThumbs(Math.min(photoCount(), 6))}</div>` : `<div class="empty-state section"><p class="muted">慢慢把和${pet.name}有关的瞬间放在这里。</p><button class="secondary section" onclick="addPhoto()">添加一张照片</button></div>`}
+          ${!isPaid() && photoCount() >= 9 ? `<p class="small section">免费档最多可保存9张照片。升级后可保存最多50张照片。</p>` : ""}
+        </section>
+        <section class="section card">
+          <div class="section-title"><h3>天堂信箱</h3><button class="quiet" onclick="${isPaid() ? "go('mailbox')" : "go('mailboxLocked')"}">${isPaid() ? "进入" : "了解"}</button></div>
+          <p class="muted">${isPaid() ? `想${pet.name}的时候，可以把话先留在这里。` : "开启完整纪念空间后，可以把想对TA说的话慢慢写在这里。"}</p>
+          ${!isPaid() ? `<button class="secondary section" onclick="go('entitlement')">了解完整纪念空间</button>` : ""}
+        </section>
+        <section class="section card">
+          <div class="section-title"><h3>抱抱记录</h3><button class="quiet" onclick="go('hugs')">查看全部</button></div>
+          ${hugRecordSnippet()}
+        </section>
+      `, { tab: "memory" });
+    }
+
+    function photoThumbs(count) {
+      const colors = [
+        ["#d9c5aa", "#93aa92"],
+        ["#d7e0dc", "#7c9db0"],
+        ["#edd8c1", "#b78a78"],
+        ["#d2d8bd", "#7d9566"],
+        ["#e6dfcf", "#9fb8aa"],
+        ["#cfd7e2", "#7d8aa2"],
+        ["#ead3c8", "#a98972"],
+        ["#d8e2d7", "#749378"],
+        ["#e8e4d5", "#b5a26f"]
+      ];
+      return Array.from({ length: count }, (_, i) => {
+        const c = colors[i % colors.length];
+        return `<div class="thumb ${i === 0 ? "main" : ""}" style="--tile-a:${c[0]};--tile-b:${c[1]}"></div>`;
+      }).join("");
+    }
+
+    function hugRecordSnippet() {
+      if (hugCount() === 0) {
+        return `<div class="empty-state"><p class="muted">还没有收到抱抱。当你把TA的纪念页分享给也记得TA的人，他们可以轻轻抱抱TA。</p><button class="secondary section" onclick="openModal('share')">去分享</button></div>`;
+      }
+      return `
+        <p class="small">${pet.name}一共收到了 ${hugCount()} 个抱抱</p>
+        <div class="hug-list section">
+          ${state.hugs.slice(0, 2).map(hug => hugItem(hug.time, `${hug.visitorName}轻轻抱抱了${hug.petName}`)).join("")}
+        </div>
+      `;
+    }
+
+    function hugItem(time, text) {
+      return `<div class="hug-item"><div class="hug-mark"></div><div><strong>${text}</strong><p class="small">${time}</p></div></div>`;
+    }
+
+    function storyEditPage() {
+      return shell(`
+        <h2>写下TA的故事</h2>
+        <p class="muted">不用一次写完，可以从一件小事开始。</p>
+        <div class="field">
+          <textarea id="storyInput">${hasStory() ? storyText() : ""}</textarea>
+        </div>
+        <button class="primary wide section" onclick="saveStory()">保存</button>
+      `, { nav: "TA的故事" });
+    }
+
+    function albumPage() {
+      return shell(`
+        <div class="section-title">
+          <div><h2>照片回忆</h2><p class="small">已保存 ${photoCount()} / ${photoLimit()} 张</p></div>
+          <button class="secondary" onclick="addPhoto()">添加</button>
+        </div>
+        ${!isPaid() && photoCount() >= 9 ? `<div class="card"><h3>免费照片已满</h3><p class="muted">免费档最多可保存9张照片。升级后可保存最多50张照片。</p><button class="primary section" onclick="go('entitlement')">了解完整纪念空间</button></div>` : ""}
+        ${photoCount() > 0 ? `<div class="photo-grid section">${photoThumbs(photoCount())}</div>` : `<div class="empty-state section"><p class="muted">还没有添加相册照片。主照片会继续作为TA星球的视觉中心。</p><button class="secondary section" onclick="addPhoto()">添加一张照片</button></div>`}
+      `, { nav: "相册" });
+    }
+
+    function mailboxLockedPage() {
+      return shell(`
+        <div class="card">
+          <h2>天堂信箱</h2>
+          <p class="muted">开启完整纪念空间后，可以把想对TA说的话慢慢写在这里。</p>
+          <div class="mini-divider"></div>
+          <p class="small">天堂信箱属于完整纪念空间。开启后可以写信并查看信件列表。</p>
+          <button class="primary wide section" onclick="go('entitlement')">了解完整纪念空间</button>
+        </div>
+      `, { nav: "天堂信箱" });
+    }
+
+    function mailboxPage() {
+      if (!isPaid()) return mailboxLockedPage();
+      return shell(`
+        <div class="section-title">
+          <div><h2>天堂信箱</h2><p class="small">想TA的时候，可以把话先留在这里。</p></div>
+          <button class="secondary" onclick="go('letterEdit')">写信</button>
+        </div>
+        ${state.letters.length ? `
+          ${state.letters.map(letter => `
+            <div class="card">
+              <h3>${letter.title}</h3>
+              <p class="muted">${letter.content}</p>
+              <p class="small section">${letter.createdAt}</p>
+            </div>
+          `).join("")}
+        ` : `
+          <div class="empty-state section">
+            <h3>还没有写给TA的信</h3>
+            <p class="muted">第一封信，不用写很长。</p>
+            <button class="primary section" onclick="go('letterEdit')">写第一封信</button>
+          </div>
+        `}
+      `, { nav: "天堂信箱" });
+    }
+
+    function letterEditPage() {
+      return shell(`
+        <h2>写给TA的一封信</h2>
+        <p class="muted">不用写得完整，想到什么就写什么。</p>
+        <div class="field">
+          <label>标题，可不填</label>
+          <input id="letterTitleInput" value="今天想对${pet.name}说……">
+        </div>
+        <div class="field">
+          <label>正文</label>
+          <textarea id="letterContentInput">今天又想起你了。</textarea>
+        </div>
+        <button class="primary wide section" onclick="saveLetter()">保存信件</button>
+      `, { nav: "写信" });
+    }
+
+    function hugsPage() {
+      return shell(`
+        <div class="card">
+          <h2>抱抱记录</h2>
+          <p class="muted">${pet.name}一共收到了 ${hugCount()} 个抱抱。</p>
+        </div>
+        <div class="section card">
+          ${hugCount() === 0 ? `<div class="empty-state"><p class="muted">还没有收到抱抱。分享给也记得TA的人，他们可以轻轻抱抱TA。</p><button class="secondary section" onclick="openModal('share')">去分享</button></div>` : `
+            <div class="hug-list">
+              ${state.hugs.map(hug => hugItem(hug.time, `${hug.visitorName}轻轻抱抱了${hug.petName}`)).join("")}
+            </div>
+          `}
+        </div>
+      `, { nav: "抱抱记录" });
+    }
+
+    function minePage() {
+      if (!isCreated()) {
+        return shell(`
+          <div class="card">
+            <h2>我的</h2>
+            <p class="muted">绑定账号后，可以保存TA的星球、查看权益和管理设置。</p>
+            <button class="primary wide section" onclick="startCreate()">开始创建</button>
+          </div>
+          ${supportRows()}
+        `, { tab: "mine" });
+      }
+      return shell(`
+        <div class="card">
+          <div class="list-row" style="border-bottom:0;padding:0;">
+            <span class="row-icon"></span>
+            <div><h3>我的账号</h3><p class="small">已绑定账号</p></div>
+            <span class="soft-tag">${isPaid() ? "完整纪念空间" : "免费纪念空间"}</span>
+          </div>
+        </div>
+        <div class="section card">
+          <div class="section-title"><h3>我的宠物</h3><button class="quiet" onclick="openModal('addPet')">新增宠物</button></div>
+          <div class="list-row" onclick="go('memory')">
+            ${petPhoto("sm")}
+            <div><strong>${pet.name}</strong><p class="small">${pet.type} · ${isPaid() ? "完整纪念空间" : "免费纪念空间"}</p></div>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+        <div class="section card">
+          <div class="section-title"><h3>权益</h3><button class="quiet" onclick="go('entitlement')">查看</button></div>
+          <p class="muted">${isPaid() ? "完整纪念空间已开启，可保存更多照片并使用天堂信箱。" : "当前是免费纪念空间。想保存更多照片、写信给TA时，可以再了解完整纪念空间。"}</p>
+        </div>
+        <div class="section card">
+          ${menuRow("宠物资料", "go('petProfile')")}
+          ${menuRow("权限设置", "go('privacy')")}
+        </div>
+        <div class="section card">
+          ${menuRow("购买记录 / 恢复购买", "go('purchases')")}
+        </div>
+        ${supportRows()}
+      `, { tab: "mine" });
+    }
+
+    function supportRows() {
+      return `
+        <div class="section card">
+          ${menuRow("客服与反馈", "go('support')")}
+          ${menuRow("用户协议", "go('agreement')")}
+          ${menuRow("隐私政策", "go('privacyPolicy')")}
+          ${menuRow("注销账号", "openModal('deleteAccount')")}
+        </div>
+      `;
+    }
+
+    function menuRow(title, action) {
+      return `<button class="list-row wide" onclick="${action}"><span class="row-icon"></span><span style="text-align:left;font-weight:750;">${title}</span><span class="chevron">›</span></button>`;
+    }
+
+    function entitlementPage() {
+      if (isPaid()) {
+        return shell(`
+          <h2>完整纪念空间已开启</h2>
+          <p class="muted">你已经拥有当前 V1 的完整纪念能力。</p>
+          <div class="section plan featured">
+            <div class="plan-head"><h3>已拥有权益</h3><span class="soft-tag">已开通</span></div>
+            <ul class="checks">
+              <li>最多50张照片</li>
+              <li>天堂信箱</li>
+              <li>更完整的纪念空间呈现</li>
+              <li>更长期保存感</li>
+              <li>H5分享与抱抱记录完整可用</li>
+            </ul>
+          </div>
+          <div class="button-row">
+            <button class="secondary wide" onclick="go('purchases')">查看购买记录</button>
+            <button class="ghost wide" onclick="showToast('完整纪念空间权益已恢复')">恢复购买</button>
+          </div>
+        `, { nav: "权益" });
+      }
+      return shell(`
+        <h2>权益与升级</h2>
+        <p class="muted">免费档不影响创建、分享和抱抱；完整纪念空间提供更多照片和天堂信箱。</p>
+        <div class="section plan-list">
+          <div class="plan">
+            <div class="plan-head"><h3>免费纪念空间</h3><span class="soft-tag">基础闭环</span></div>
+            <ul class="checks">
+              <li>创建1只宠物，基础星球观察窗</li>
+              <li>纪念语、TA的故事、最多9张照片</li>
+              <li>H5分享、访客抱抱、完整抱抱记录</li>
+            </ul>
+          </div>
+          <div class="plan featured">
+            <div class="plan-head"><h3>完整纪念空间</h3><div class="price">¥29.9 <del>¥59.9</del></div></div>
+            <ul class="checks">
+              <li>最多50张照片</li>
+              <li>天堂信箱</li>
+              <li>更完整的纪念空间呈现和更安心的保存感</li>
+              <li>H5分享与抱抱记录完整可用</li>
+            </ul>
+            <button class="primary wide" onclick="openModal('pay')">¥29.9 开启完整纪念空间</button>
+          </div>
+        </div>
+      `, { nav: "权益" });
+    }
+
+    function purchasesPage() {
+      return shell(`
+        <h2>购买记录</h2>
+        ${isPaid() ? `<div class="card section"><h3>完整纪念空间</h3><p class="muted">¥29.9 · 支付成功</p><p class="small section">2026.06.13</p></div>` : `<div class="empty-state section"><p class="muted">暂无购买记录。</p></div>`}
+        <button class="secondary wide section" onclick="${isPaid() ? "showToast('完整纪念空间权益已恢复')" : "showToast('暂时没有找到可恢复的购买记录')"}">恢复购买</button>
+      `, { nav: "购买记录" });
+    }
+
+    function privacyPage() {
+      const linkVisible = state.visibility === "link";
+      const hugOn = state.hugEnabled;
+      return shell(`
+        <h2>权限设置</h2>
+        <p class="muted">只有拿到你分享链接的人可以看到TA。不会出现在公开列表或星球地图中。</p>
+        <div class="section card">
+          <h3>谁可以看见TA</h3>
+          <div class="choice-grid" style="grid-template-columns:1fr 1fr;">
+            <button class="choice ${!linkVisible ? "active" : ""}" onclick="setVisibility('private')">仅自己可见</button>
+            <button class="choice ${linkVisible ? "active" : ""}" onclick="setVisibility('link')">通过链接可见</button>
+          </div>
+          <div class="mini-divider"></div>
+          <h3>允许访客抱抱TA</h3>
+          <p class="small">访客无需登录即可抱抱TA，你可以在App里看到抱抱记录。</p>
+          <div class="choice-grid" style="grid-template-columns:1fr 1fr;">
+            <button class="choice ${hugOn ? "active" : ""}" onclick="setHugEnabled(true)">开启</button>
+            <button class="choice ${!hugOn ? "active" : ""}" onclick="setHugEnabled(false)">关闭</button>
+          </div>
+          <p class="small section">仅自己可见时，访客无法访问H5页面，抱抱开关不会对外生效。</p>
+        </div>
+      `, { nav: "权限设置" });
+    }
+
+    function petProfilePage() {
+      return shell(`
+        <h2>宠物资料</h2>
+        <p class="muted">这里管理基础信息；故事、信件和抱抱记录仍在回忆页。</p>
+        <div class="section card">
+          <div class="list-row" style="border-bottom:0;padding:0;">
+            ${petPhoto("sm")}
+            <div><strong>主照片</strong><p class="small">作为首页、回忆页和H5访客页的视觉锚点</p></div>
+            <button class="secondary" onclick="simulateUpload('success')">替换</button>
+          </div>
+        </div>
+        <div class="field"><label>宠物名字</label><input id="profilePetName" value="${pet.name}"></div>
+        <div class="field"><label>宠物类型</label><select id="profilePetType">${["猫猫", "狗狗", "其他小动物"].map(type => `<option ${pet.type === type ? "selected" : ""}>${type}</option>`).join("")}</select></div>
+        <div class="field"><label>来到身边日期</label><input value="2016 年"></div>
+        <div class="field"><label>生日</label><input value="未知"></div>
+        <div class="field"><label>离开日期</label><input value="2025 年 11 月"></div>
+        <button class="primary wide section" onclick="savePetProfile()">保存</button>
+      `, { nav: "宠物资料" });
+    }
+
+    function simplePage(title, text) {
+      return shell(`
+        <div class="card">
+          <h2>${title}</h2>
+          <p class="muted">${text}</p>
+        </div>
+      `, { nav: title });
+    }
+
+    function h5DevNav(extra = "") {
+      return `
+        <section class="section card">
+          <h3>开发导航</h3>
+          <p class="small">以下入口仅用于原型走查，正式H5中不会展示。</p>
+          <div class="button-row">
+            <button class="ghost" onclick="go('home')">返回App首页</button>
+            <button class="ghost" onclick="go('hugs')">查看主人抱抱记录</button>
+            <button class="ghost" onclick="state.visibility='link'; state.hugEnabled=true; syncShareState(); render()">恢复链接可见 + 抱抱开启</button>
+            ${extra}
+          </div>
+        </section>
+      `;
+    }
+
+    function h5Page() {
+      if (state.visibility === "private") return h5InaccessiblePage();
+      const hugOff = !state.hugEnabled;
+      return shell(`
+        <div class="logo-row">
+          <div class="brand">星屿纪念</div>
+          <div class="soft-tag">${pet.type}</div>
+        </div>
+        <div class="planet-window">
+          ${petPhoto()}
+          <div class="planet-caption">
+            <div class="name">${pet.name}</div>
+            <div class="line">${pet.sentence || "一颗被主人认真留下的小星球"}</div>
+            ${isRich() ? `<div class="line">${pet.dates}</div>` : ""}
+          </div>
+        </div>
+        ${hasStory() ? `<section class="section card"><h3>TA的故事</h3><p class="muted">${storyText()}</p></section>` : ""}
+        ${photoCount() > 1 ? `<section class="section card"><div class="section-title"><h3>照片回忆</h3><span class="small">${Math.min(photoCount(), 6)} 张</span></div><div class="photo-grid">${photoThumbs(Math.min(photoCount(), 6))}</div></section>` : ""}
+        <section class="section card">
+          ${hugOff ? `<h3>主人暂时没有开放抱抱</h3><p class="muted">你仍然可以在这里看看${pet.name}。</p>` : `<h3>轻轻抱抱${pet.name}</h3><p class="muted">这份心意会被${pet.name}的主人看到。</p><button class="primary wide section" onclick="hugPet()">${state.visitorHug === "hugged" ? "你已经抱抱过TA" : "抱抱TA"}</button>`}
+        </section>
+        <button class="secondary wide section" onclick="startCreate()">也想为TA留下一颗星球</button>
+        ${h5DevNav()}
+      `, { h5: true, h5Bar: true });
+    }
+
+    function h5SuccessPage() {
+      return shell(`
+        <div class="empty-state">
+          <h2>你已经轻轻抱抱了${pet.name}</h2>
+          <p class="muted">这份心意会被${pet.name}的主人看到。</p>
+          <button class="primary wide section" onclick="go('h5')">继续看看TA</button>
+        </div>
+        <button class="secondary wide section" onclick="startCreate()">也想为TA留下一颗星球</button>
+        ${h5DevNav()}
+      `, { h5: true, h5Bar: true });
+    }
+
+    function h5RepeatPage() {
+      return shell(`
+        <div class="empty-state">
+          <h2>你已经抱抱过${pet.name}了</h2>
+          <p class="muted">谢谢你也记得${pet.name}。</p>
+          <button class="primary wide section" onclick="go('h5')">继续看看TA</button>
+        </div>
+        ${h5DevNav()}
+      `, { h5: true, h5Bar: true });
+    }
+
+    function h5InaccessiblePage() {
+      return shell(`
+        <div class="empty-state">
+          ${petPhoto("", "margin:0 auto 18px")}
+          <h2>这个星球暂时不能访问</h2>
+          <p class="muted">可能是主人把它设为了仅自己可见。</p>
+          <button class="primary wide section" onclick="showToast('已知道')">知道了</button>
+        </div>
+        <button class="secondary wide section" onclick="startCreate()">也想为TA留下一颗星球</button>
+        ${h5DevNav(`<button class="ghost" onclick="state.visibility='link'; syncShareState(); render()">改为链接可见</button>`)}
+      `, { h5: true, h5Bar: true });
+    }
+
+    function modal() {
+      if (!state.modal) return "";
+      const body = {
+        pay: `
+          <h3>开启完整纪念空间</h3>
+          <p class="muted">开启后可保存更多照片，并使用天堂信箱。正式 iOS App 中会调起 App Store 支付确认。</p>
+          <div class="button-row">
+            <button class="primary wide" onclick="paySuccess()">确认开启 ¥29.9</button>
+            <button class="ghost wide" onclick="closeModal()">暂不开启</button>
+          </div>
+          <div class="mini-divider"></div>
+          <h3>开发测试状态</h3>
+          <p class="small">以下入口仅用于原型走查，正式产品中不会展示。</p>
+          <div class="button-row">
+            <button class="secondary wide" onclick="paySuccess()">模拟支付成功</button>
+            <button class="ghost wide" onclick="payFail()">模拟支付失败 / 取消</button>
+          </div>
+        `,
+        share: shareModalBody(),
+        addPet: `
+          <h3>多宠物纪念空间即将开放</h3>
+          <p class="muted">V1阶段，每个账号暂时只能为一只小动物创建星球。我们会在之后支持为更多小动物留下空间。</p>
+          <button class="primary wide section" onclick="closeModal()">知道了</button>
+        `,
+        photoLimit: `
+          <h3>免费照片已满</h3>
+          <p class="muted">免费档最多可保存9张照片。升级后可保存最多50张照片。</p>
+          <div class="button-row">
+            <button class="primary wide" onclick="closeModal(); go('entitlement')">了解完整纪念空间</button>
+            <button class="ghost wide" onclick="closeModal()">返回</button>
+          </div>
+        `,
+        photoUpload: `
+          <h3>添加照片</h3>
+          <p class="muted">慢慢把和${pet.name}有关的瞬间放在这里。</p>
+          <div class="button-row">
+            <button class="primary wide" onclick="simulateAlbumUpload('success')">选择照片</button>
+          </div>
+          <div class="mini-divider"></div>
+          <h3>开发测试状态</h3>
+          <p class="small">以下入口仅用于原型走查，正式产品中不会展示。</p>
+          <div class="button-row">
+            <button class="secondary wide" onclick="simulateAlbumUpload('fail')">模拟相册照片上传失败</button>
+            <button class="ghost wide" onclick="showToast('V1暂时只支持图片上传，视频回忆会在后续版本考虑。')">模拟视频格式不支持</button>
+          </div>
+        `,
+        sentenceEdit: `
+          <h3>编辑纪念语</h3>
+          <p class="muted">一句想留给${pet.name}的话，可以之后再慢慢改。</p>
+          <div class="field">
+            <label>纪念语</label>
+            <textarea id="sentenceInput" style="min-height:110px;">${pet.sentence}</textarea>
+          </div>
+          <div class="button-row">
+            <button class="primary wide" onclick="saveSentence()">保存</button>
+            <button class="ghost wide" onclick="closeModal()">取消</button>
+          </div>
+        `,
+        deleteAccount: `
+          <h3>注销账号</h3>
+          <p class="muted">注销后，账号和TA的纪念内容将不可继续访问。</p>
+          <div class="button-row">
+            <button class="danger wide" onclick="showToast('已提交注销确认')">确认注销</button>
+            <button class="ghost wide" onclick="closeModal()">取消</button>
+          </div>
+        `
+      }[state.modal];
+      return `<div class="modal-shade" onclick="if(event.target.className==='modal-shade') closeModal()"><div class="modal">${body}</div></div>`;
+    }
+
+    function shareModalBody() {
+      if (state.visibility === "private") {
+        return `
+          <h3>分享TA的星球</h3>
+          <p class="muted">当前设置为仅自己可见，分享前需要改为通过链接可见。</p>
+          <div class="button-row">
+            <button class="primary wide" onclick="changePrivateAndShare()">改为通过链接可见并分享</button>
+            <button class="ghost wide" onclick="closeModal()">取消</button>
+          </div>
+        `;
+      }
+      return `
+        <h3>分享TA的星球</h3>
+        <div class="card section">
+          <div class="list-row" style="border-bottom:0;padding:0;">
+            ${petPhoto("sm")}
+            <div><strong>${pet.name}</strong><p class="small">${pet.type} · ${pet.sentence || "一颗被认真留下的小星球"}</p></div>
+            <span class="soft-tag">${state.hugEnabled ? "可抱抱" : "抱抱关闭"}</span>
+          </div>
+        </div>
+        <p class="small section">当前为通过链接可见。不会出现在公开列表或星球地图中。</p>
+        <h3 class="section">产品分享动作</h3>
+        <div class="button-row">
+          <button class="primary wide" onclick="showToast('分享链接已复制')">复制链接</button>
+          <button class="secondary wide" onclick="showToast('已打开系统分享面板')">分享给好友</button>
+          <button class="secondary wide" onclick="showToast('分享图已保存')">保存分享图</button>
+        </div>
+        <div class="mini-divider"></div>
+        <h3>开发预览动作</h3>
+        <p class="small">以下入口仅用于原型走查，正式产品中不会展示。点击后会切换当前原型状态，可在H5开发导航中恢复。</p>
+        <div class="button-row">
+          <button class="ghost wide" onclick="closeModal(); state.visibility='link'; state.hugEnabled=true; syncShareState(); go('h5')">查看H5访客页</button>
+          <button class="ghost wide" onclick="closeModal(); state.visibility='private'; syncShareState(); go('h5')">查看H5不可访问状态</button>
+          <button class="ghost wide" onclick="closeModal(); state.visibility='link'; state.hugEnabled=false; syncShareState(); go('h5')">查看抱抱关闭状态</button>
+        </div>
+      `;
+    }
+
+    function render() {
+      const routes = {
+        home: () => isCreated() ? createdHome() : unboardedHome(),
+        onboardingStart,
+        login: loginPage,
+        petInfo: petInfoPage,
+        mainPhoto: mainPhotoPage,
+        tierSelect: entitlementSelectPage,
+        paymentFail: paymentFailPage,
+        createSuccess: createSuccessPage,
+        memoryGuide: memoryGuidePage,
+        memory: memoryPage,
+        storyEdit: storyEditPage,
+        album: albumPage,
+        mailboxLocked: mailboxLockedPage,
+        mailbox: mailboxPage,
+        letterEdit: letterEditPage,
+        hugs: hugsPage,
+        mine: minePage,
+        entitlement: entitlementPage,
+        purchases: purchasesPage,
+        privacy: privacyPage,
+        petProfile: petProfilePage,
+        support: () => simplePage("客服与反馈", "这里保留客服入口、问题反馈和联系方式。"),
+        agreement: () => simplePage("用户协议", "这里保留法务入口，正式文本将在上线前补充。"),
+        privacyPolicy: () => simplePage("隐私政策", "这里保留隐私政策入口，正式文本将在上线前补充。"),
+        h5: h5Page,
+        h5Success: h5SuccessPage,
+        h5Repeat: h5RepeatPage
+      };
+      app.innerHTML = (routes[state.route] || routes.home)();
+      renderDebug();
+    }
+
+    function renderDebug() {
+      debug.innerHTML = `
+        <h2>开发走查面板</h2>
+        <p class="muted">用于切换PRD中的关键业务状态，辅助开发理解页面流转。右侧面板不属于正式产品界面。</p>
+        <div class="debug-group">
+          <label>用户 / 权益状态</label>
+          <select onchange="setOwnerStage(this.value)">
+            <option value="unboarded" ${state.ownerStage === "unboarded" ? "selected" : ""}>未入驻</option>
+            <option value="free" ${state.ownerStage === "free" ? "selected" : ""}>免费档已创建</option>
+            <option value="paid" ${state.ownerStage === "paid" ? "selected" : ""}>付费档已创建</option>
+          </select>
+        </div>
+        <div class="debug-group">
+          <label>H5可见范围</label>
+          <select onchange="setVisibility(this.value)">
+            <option value="private" ${state.visibility === "private" ? "selected" : ""}>仅自己可见</option>
+            <option value="link" ${state.visibility === "link" ? "selected" : ""}>通过链接可见</option>
+          </select>
+        </div>
+        <div class="debug-group">
+          <label>访客抱抱开关</label>
+          <select onchange="setHugEnabled(this.value==='true')">
+            <option value="true" ${state.hugEnabled ? "selected" : ""}>抱抱开启</option>
+            <option value="false" ${!state.hugEnabled ? "selected" : ""}>抱抱关闭</option>
+          </select>
+        </div>
+        <div class="debug-group">
+          <label>内容丰富度</label>
+          <select onchange="setContentLevel(this.value)">
+            <option value="fresh" ${state.contentLevel === "fresh" ? "selected" : ""}>刚创建内容较空</option>
+            <option value="rich" ${state.contentLevel === "rich" ? "selected" : ""}>已补充故事和照片</option>
+          </select>
+        </div>
+        <div class="debug-group">
+          <label>抱抱状态</label>
+          <select onchange="setHugMoment(this.value)">
+            <option value="new" ${state.hugMoment === "new" ? "selected" : ""}>有新抱抱</option>
+            <option value="none" ${state.hugMoment === "none" ? "selected" : ""}>无抱抱</option>
+          </select>
+        </div>
+        <div class="debug-group">
+          <label>照片额度状态</label>
+          <select onchange="setPhotoState(this.value)">
+            <option value="free-open" ${state.photoState === "free-open" ? "selected" : ""}>免费档照片未满</option>
+            <option value="free-full" ${state.photoState === "free-full" ? "selected" : ""}>免费档照片已满</option>
+            <option value="paid" ${state.photoState === "paid" ? "selected" : ""}>付费档</option>
+          </select>
+        </div>
+        <div class="debug-group">
+          <label>快速跳转</label>
+          <div class="debug-buttons">
+            <button onclick="go('home')">App首页</button>
+            <button onclick="go('memory')">回忆页</button>
+            <button onclick="go('mine')">我的</button>
+            <button onclick="go('h5')">H5访客页</button>
+            <button onclick="go('privacy')">权限设置</button>
+            <button onclick="openModal('share')">分享面板</button>
+            <button onclick="walkthroughReset()">重置未入驻</button>
+            <button onclick="walkthroughFullExample()">设为完整示例</button>
+          </div>
+        </div>
+        <div class="debug-group">
+          <label>开发测试能力</label>
+          <div class="debug-buttons">
+            <button onclick="simulateUpload('success')">主照片上传成功</button>
+            <button onclick="simulateUpload('fail')">主照片上传失败</button>
+            <button onclick="simulateUpload('video')">视频格式不支持</button>
+            <button onclick="ensureCreatedForWalkthrough(false); simulateAlbumUpload('success')">相册上传成功</button>
+            <button onclick="ensureCreatedForWalkthrough(false); simulateAlbumUpload('fail')">相册上传失败</button>
+            <button onclick="paySuccess()">支付成功</button>
+            <button onclick="payFail()">支付失败/取消</button>
+            <button onclick="walkthroughH5Success()">H5抱抱成功</button>
+            <button onclick="walkthroughH5Repeat()">H5已抱抱</button>
+            <button onclick="walkthroughH5Inaccessible()">H5不可访问</button>
+            <button onclick="walkthroughFreePhotoFull()">免费照片已满</button>
+            <button onclick="walkthroughPaidMailbox()">付费信箱可用</button>
+          </div>
+        </div>
+        <div class="debug-group">
+          <div class="debug-state">
+            当前路由：${state.route}<br>
+            权益：${state.ownerStage}<br>
+            可见范围：${state.visibility}<br>
+            抱抱开关：${state.hugEnabled ? "开启" : "关闭"}<br>
+            主图版本：${state.mainPhotoVersion}<br>
+            照片对象：${state.photos.length} / ${photoLimit()}<br>
+            相册计数：${state.albumPhotoCount}<br>
+            故事字数：${state.storyContent.length}<br>
+            信件数：${state.letters.length}<br>
+            抱抱对象：${state.hugs.length}<br>
+            shareId：${state.share.shareId}
+          </div>
+        </div>
+        <div class="debug-group">
+          <label>页面路由说明</label>
+          <div class="debug-state">
+            home：首页，按创建状态展示未入驻或星球观察窗<br>
+            onboardingStart：入驻起始页<br>
+            login：账号绑定页<br>
+            petInfo：宠物基础信息页<br>
+            mainPhoto：上传主照片页<br>
+            tierSelect：权益选择页<br>
+            createSuccess：入驻成功页<br>
+            memory：宠物纪念主页<br>
+            storyEdit：TA的故事编辑页<br>
+            album：相册页<br>
+            mailboxLocked：天堂信箱免费锁定态<br>
+            mailbox：天堂信箱付费列表页<br>
+            letterEdit：写信页<br>
+            hugs：抱抱记录页<br>
+            mine：我的首页<br>
+            entitlement：权益与升级页<br>
+            purchases：购买记录 / 恢复购买<br>
+            privacy：权限设置页<br>
+            petProfile：宠物资料编辑页<br>
+            h5：H5访客页，按权限展示可访问或不可访问<br>
+            h5Success：H5抱抱成功页<br>
+            h5Repeat：H5已抱抱页
+          </div>
+        </div>
+        <div class="debug-group">
+          <label>分享与H5规则说明</label>
+          <div class="debug-state">
+            H5访问权限由share/pet权限共同决定。<br>
+            visibility = private：H5不可访问。<br>
+            visibility = link + hugEnabled = true：H5可访问且可抱抱。<br>
+            visibility = link + hugEnabled = false：H5可访问但不可抱抱。<br>
+            shareId和权限校验未来应由后端控制。<br>
+            “也想为TA留下一颗星球”正式H5中应打开App、下载App或进入注册/创建引导。<br>
+            “内测体验”tag为mock表达，可按正式品牌策略替换。
+          </div>
+        </div>
+        <div class="debug-group">
+          <label>关键路径验收清单</label>
+          <div class="debug-state">
+            1. 免费用户创建路径<br>
+            2. 付费用户创建路径<br>
+            3. 故事编辑后同步到回忆页和H5<br>
+            4. 纪念语编辑后同步到首页、回忆页、H5、分享面板<br>
+            5. 相册上传后照片数量变化<br>
+            6. 免费照片达到9张后触发升级提示<br>
+            7. 付费档照片额度为50张<br>
+            8. 免费用户进入天堂信箱看到锁定态<br>
+            9. 付费用户写信后出现在信箱列表<br>
+            10. 私密权限下H5不可访问<br>
+            11. 链接可见且抱抱开启时H5可抱抱<br>
+            12. 链接可见且抱抱关闭时H5不可抱抱<br>
+            13. H5抱抱后首页出现新抱抱提示<br>
+            14. H5抱抱后抱抱记录页出现最新记录<br>
+            15. 重复抱抱展示已抱抱状态<br>
+            16. 我的Tab不承载故事、信件、相册主体内容<br>
+            17. 宠物资料页只管理基础字段
+          </div>
+        </div>
+        <div class="debug-group">
+          <label>前后端接口替换点</label>
+          <div class="debug-state">
+            账号模块：登录、账号绑定、注销账号。<br>
+            宠物模块：创建宠物、更新基础资料、更新主照片、查询当前宠物。<br>
+            内容模块：保存纪念语、保存TA的故事、上传/查询相册照片、保存/查询信件。<br>
+            权益模块：查询权益、发起支付、支付结果回调、恢复购买。<br>
+            分享/H5模块：生成分享链接、查询H5公开内容、校验访问权限、校验抱抱开关。<br>
+            抱抱模块：创建抱抱记录、查询抱抱记录、访客去重。
+          </div>
+        </div>
+        <div class="debug-group">
+          <label>PRD页面映射</label>
+          <div class="debug-state">
+            LFP-02-01 入驻起始页 → onboardingStart<br>
+            LFP-02-02 登录 / 账号绑定页 → login<br>
+            LFP-02-03 宠物基础信息页 → petInfo<br>
+            LFP-02-04 上传主照片页 → mainPhoto<br>
+            LFP-02-05 权益选择页 → tierSelect<br>
+            LFP-02-06 支付失败 / 取消状态 → paymentFail<br>
+            LFP-02-07 入驻成功页 → createSuccess<br>
+            LFP-03-01 未入驻首页 → home + unboarded<br>
+            LFP-03-02 已入驻首页：星球观察窗 → home + created<br>
+            LFP-04-01 宠物纪念主页：主人视角 → memory<br>
+            LFP-04-02 TA的故事模块 / 编辑页 → storyEdit<br>
+            LFP-04-04 相册页 / 上传照片状态 → album<br>
+            LFP-04-05 天堂信箱免费锁定态 → mailboxLocked<br>
+            LFP-04-06 天堂信箱付费列表页 → mailbox<br>
+            LFP-04-07 写信页 → letterEdit<br>
+            LFP-04-09 抱抱记录页 → hugs<br>
+            LFP-05-01 H5宠物纪念页：访客视角 → h5<br>
+            LFP-05-02 H5抱抱成功 / 已抱抱状态 → h5Success / h5Repeat<br>
+            LFP-05-03 H5不可访问状态 → h5 + private<br>
+            LFP-05-04 我的首页 → mine<br>
+            LFP-05-05 我的宠物 / 新增宠物未开放 → mine + addPet modal<br>
+            LFP-05-06 权益与升级页 → entitlement<br>
+            LFP-05-07 购买记录 / 恢复购买 → purchases<br>
+            LFP-05-08 权限设置页 → privacy<br>
+            LFP-05-09 分享面板 → share modal<br>
+            LFP-05-10 宠物资料编辑页 → petProfile
+          </div>
+        </div>
+      `;
+    }
+
+    render();
+  </script>
+</body>
+</html>
