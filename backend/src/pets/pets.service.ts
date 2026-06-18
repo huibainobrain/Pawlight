@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PetType } from '@prisma/client';
-import { nanoid } from 'nanoid';
+import { randomBytes } from 'crypto';
 
 export class CreatePetDto {
   name: string;
@@ -24,7 +24,7 @@ export class PetsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, dto: CreatePetDto) {
-    const slug = nanoid(10);
+    const slug = randomBytes(6).toString('hex');
     const pet = await this.prisma.pet.create({
       data: {
         userId,

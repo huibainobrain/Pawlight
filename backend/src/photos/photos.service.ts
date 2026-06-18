@@ -1,7 +1,7 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { nanoid } from 'nanoid';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class PhotosService {
@@ -34,7 +34,7 @@ export class PhotosService {
     }
 
     const ext = file.originalname.split('.').pop() ?? 'jpg';
-    const key = `pets/${petId}/${nanoid()}.${ext}`;
+    const key = `pets/${petId}/${randomBytes(8).toString('hex')}.${ext}`;
 
     await this.s3.send(
       new PutObjectCommand({
