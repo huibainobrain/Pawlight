@@ -36,11 +36,7 @@ struct MainPhotoView: View {
                         }
                         .padding(.top, 28)
 
-                        PhotosPickerContent(
-                            selectedItem: $selectedItem,
-                            selectedImage: $selectedImage,
-                            petName: petName
-                        )
+                        photoPickerArea
 
                         if let error = uploadError {
                             Text(error)
@@ -79,29 +75,17 @@ struct MainPhotoView: View {
         }
     }
 
-    private func uploadPhoto() {
-        guard selectedImage != nil else { return }
-        isUploading = true
-        uploadError = nil
-        // TODO: upload to backend, get photo_id
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            isUploading = false
-            navigateToTier = true
-        }
-    }
-}
-
-struct PhotosPickerContent: View {
-    @Binding var selectedItem: PhotosPickerItem?
-    @Binding var selectedImage: UIImage?
-    let petName: String
-
-    var body: some View {
+    // Inlined to avoid Swift 6 @Binding isolation issue across struct boundary
+    @ViewBuilder
+    private var photoPickerArea: some View {
         PhotosPicker(selection: $selectedItem, matching: .images) {
             ZStack {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(AppColors.white)
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.line, lineWidth: 1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(AppColors.line, lineWidth: 1)
+                    )
 
                 if let image = selectedImage {
                     Image(uiImage: image)
@@ -123,12 +107,23 @@ struct PhotosPickerContent: View {
             }
         }
         .onChange(of: selectedItem) { _, item in
-            Task {
+            Task { @MainActor in
                 if let data = try? await item?.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
                     selectedImage = image
                 }
             }
+        }
+    }
+
+    private func uploadPhoto() {
+        guard selectedImage != nil else { return }
+        isUploading = true
+        uploadError = nil
+        // TODO: upload to backend, get photo_id
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isUploading = false
+            navigateToTier = true
         }
     }
 }

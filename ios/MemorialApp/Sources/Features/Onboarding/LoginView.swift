@@ -53,11 +53,28 @@ struct LoginView: View {
                         .multilineTextAlignment(.center)
 
                     #if DEBUG
-                    Button("跳过登录（仅开发测试）") {
-                        appState.loadMockData()
+                    VStack(spacing: 8) {
+                        Button("跳过登录 → 创建流程") {
+                            appState.currentUser = User(
+                                id: "usr_debug",
+                                loginStatus: .loggedIn,
+                                loginProvider: "debug",
+                                nickname: nil,
+                                avatarURL: nil,
+                                createdAt: Date()
+                            )
+                            appState.ownerStage = .loggedInNoPet
+                            navigateToPetInfo = true
+                        }
+                        .font(AppFonts.body(12))
+                        .foregroundColor(AppColors.muted.opacity(0.5))
+
+                        Button("跳过登录 → 直接进主界面") {
+                            appState.loadMockData()
+                        }
+                        .font(AppFonts.body(12))
+                        .foregroundColor(AppColors.muted.opacity(0.5))
                     }
-                    .font(AppFonts.body(12))
-                    .foregroundColor(AppColors.muted.opacity(0.5))
                     #endif
                 }
                 .padding(.horizontal, 32)
