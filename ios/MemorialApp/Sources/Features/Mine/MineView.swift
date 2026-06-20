@@ -82,6 +82,24 @@ struct MineView: View {
                     }
                     .listRowBackground(AppColors.white)
 
+                    #if DEBUG
+                    Section("开发调试") {
+                        Button {
+                            appState.resetAll()
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "arrow.counterclockwise")
+                                    .foregroundColor(AppColors.rose)
+                                    .frame(width: 20)
+                                Text("重置（回到注册流程）")
+                                    .font(AppFonts.body(15))
+                                    .foregroundColor(AppColors.rose)
+                            }
+                        }
+                    }
+                    .listRowBackground(AppColors.white)
+                    #endif
+
                     Section("支持") {
                         MineSupportRow(icon: "questionmark.circle", label: "客服与反馈")
                         MineSupportRow(icon: "doc.text", label: "用户协议")

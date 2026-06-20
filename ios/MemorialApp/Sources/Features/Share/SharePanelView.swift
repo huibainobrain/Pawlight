@@ -8,7 +8,7 @@ struct SharePanelView: View {
     @State private var showPrivacyConfirm = false
     @State private var copied = false
 
-    private var shareURL: String { "https://h5.musayang.app/s/\(appState.share?.id ?? "demo")" }
+    private var shareURL: String { appState.share?.shareURL ?? "" }
 
     var body: some View {
         NavigationStack {
@@ -47,7 +47,7 @@ struct SharePanelView: View {
                                 .cornerRadius(10)
                         }
 
-                        ShareLink(item: URL(string: shareURL)!) {
+                        ShareLink(item: URL(string: shareURL) ?? URL(string: "https://pet-memory-psi.vercel.app")!) {
                             Label("分享给好友", systemImage: "paperplane")
                                 .font(AppFonts.body(15, weight: .medium))
                                 .foregroundColor(AppColors.greenDeep)

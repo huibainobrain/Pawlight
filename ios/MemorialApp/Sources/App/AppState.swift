@@ -96,13 +96,21 @@ class AppState: ObservableObject {
     // MARK: - API → Domain Conversion
 
     private func applyPet(_ api: ApiPet) {
+        let mainApiPhoto = api.photos?.first(where: { $0.id == api.mainPhotoId })
+            ?? api.photos?.first
+        let mainDomainPhoto: Photo? = mainApiPhoto.map { p in
+            Photo(id: p.id, petId: p.petId, userId: api.userId, type: .main,
+                  url: p.r2Url, thumbnailURL: p.r2Url, uploadStatus: .success,
+                  isMain: true, sortOrder: p.sortOrder, createdAt: p.createdAt)
+        }
+
         currentPet = Pet(
             id: api.id,
             ownerUserId: api.userId,
             name: api.name,
             type: api.type.toDomain,
             mainPhotoId: api.mainPhotoId,
-            mainPhoto: nil,
+            mainPhoto: mainDomainPhoto,
             memorialSentence: api.memorialSentence,
             metOrAdoptionDate: api.arrivedOn.map { PartialDate(precision: .day, value: $0) },
             birthDate: api.bornOn.map { PartialDate(precision: .day, value: $0) },
@@ -154,6 +162,20 @@ class AppState: ObservableObject {
     // MARK: - Debug
 
     #if DEBUG
+    func resetAll() {
+        KeychainHelper.deleteToken()
+        currentUser = nil
+        currentPet = nil
+        entitlement = nil
+        photos = []
+        story = nil
+        letters = []
+        hugs = []
+        share = nil
+        newHugCount = 0
+        ownerStage = .unauthenticated
+    }
+
     func debugLoginAndStart() async {
         do {
             let response = try await APIClient.shared.debugLogin()

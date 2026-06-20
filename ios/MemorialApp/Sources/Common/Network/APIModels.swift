@@ -50,6 +50,31 @@ struct ApiPet: Decodable {
             }
         }
     }
+
+    // Custom init because some endpoints omit relation fields (photos, entitlement, share)
+    // Swift's synthesized Decodable throws keyNotFound for absent optional keys
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        userId = try c.decode(String.self, forKey: .userId)
+        name = try c.decode(String.self, forKey: .name)
+        type = try c.decode(ApiPetType.self, forKey: .type)
+        mainPhotoId = try c.decodeIfPresent(String.self, forKey: .mainPhotoId)
+        story = try c.decodeIfPresent(String.self, forKey: .story)
+        memorialSentence = try c.decodeIfPresent(String.self, forKey: .memorialSentence)
+        arrivedOn = try c.decodeIfPresent(String.self, forKey: .arrivedOn)
+        bornOn = try c.decodeIfPresent(String.self, forKey: .bornOn)
+        leftOn = try c.decodeIfPresent(String.self, forKey: .leftOn)
+        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        entitlement = try c.decodeIfPresent(ApiEntitlement.self, forKey: .entitlement)
+        share = try c.decodeIfPresent(ApiShare.self, forKey: .share)
+        photos = try c.decodeIfPresent([ApiPhoto].self, forKey: .photos)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, userId, name, type, mainPhotoId, story, memorialSentence
+        case arrivedOn, bornOn, leftOn, createdAt, entitlement, share, photos
+    }
 }
 
 struct ApiEntitlement: Decodable {
