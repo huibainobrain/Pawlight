@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 import { Visibility } from '@prisma/client';
 
 export class UpdateShareDto {
-  visibility?: Visibility;
-  hugEnabled?: boolean;
+  @IsEnum(Visibility) @IsOptional() visibility?: Visibility;
+  @IsBoolean() @IsOptional() hugEnabled?: boolean;
 }
 
 @Injectable()

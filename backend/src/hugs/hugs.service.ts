@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { IsOptional, IsString } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 
 export class CreateHugDto {
-  visitorName?: string;
-  message?: string;
+  @IsString() @IsOptional() visitorName?: string;
+  @IsString() @IsOptional() message?: string;
 }
 
 @Injectable()

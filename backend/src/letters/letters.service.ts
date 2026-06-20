@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { IsString } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 
 export class UpsertLetterDto {
+  @IsString()
   content: string;
 }
 

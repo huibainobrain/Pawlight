@@ -1,22 +1,26 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 import { PetType } from '@prisma/client';
 import { randomBytes } from 'crypto';
 
 export class CreatePetDto {
+  @IsString()
   name: string;
+
+  @IsEnum(PetType)
   type: PetType;
 }
 
 export class UpdatePetDto {
-  name?: string;
-  type?: PetType;
-  arrivedOn?: string;
-  bornOn?: string;
-  leftOn?: string;
-  story?: string;
-  memorialSentence?: string;
-  mainPhotoId?: string;
+  @IsString() @IsOptional() name?: string;
+  @IsEnum(PetType) @IsOptional() type?: PetType;
+  @IsString() @IsOptional() arrivedOn?: string;
+  @IsString() @IsOptional() bornOn?: string;
+  @IsString() @IsOptional() leftOn?: string;
+  @IsString() @IsOptional() story?: string;
+  @IsString() @IsOptional() memorialSentence?: string;
+  @IsString() @IsOptional() mainPhotoId?: string;
 }
 
 @Injectable()
