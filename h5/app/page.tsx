@@ -11,7 +11,7 @@ export default function Home() {
         星屿纪念
       </h1>
       <p className="text-sm" style={{ color: "#8a8078" }}>
-        为每一个离去的生命，留下一颗永恒的星球
+        为每一个离去的小生命，留下一颗永恒的星球
       </p>
     </main>
   );
