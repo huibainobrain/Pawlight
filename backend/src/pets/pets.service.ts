@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 import { PetType } from '@prisma/client';
@@ -29,21 +29,17 @@ export class PetsService {
 
   async create(userId: string, dto: CreatePetDto) {
     const slug = randomBytes(6).toString('hex');
-    try {
-      const pet = await this.prisma.pet.create({
-        data: {
-          userId,
-          name: dto.name,
-          type: dto.type,
-          entitlement: { create: { tier: 'FREE' } },
-          share: { create: { slug } },
-        },
-        include: { entitlement: true, share: true },
-      });
-      return pet;
-    } catch (e) {
-      throw new BadRequestException(`create failed: ${e?.message ?? e}`);
-    }
+    const pet = await this.prisma.pet.create({
+      data: {
+        userId,
+        name: dto.name,
+        type: dto.type,
+        entitlement: { create: { tier: 'FREE' } },
+        share: { create: { slug } },
+      },
+      include: { entitlement: true, share: true },
+    });
+    return pet;
   }
 
   async findMine(userId: string) {
