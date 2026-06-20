@@ -98,42 +98,15 @@ struct TierSelectView: View {
 
     private func confirmSelection() {
         guard let tier = selectedTier else { return }
-        if tier == .paid {
-            // TODO: StoreKit 2 purchase flow
-            isPurchasing = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isPurchasing = false
-                createPet(tier: tier)
+        isPurchasing = true
+        Task { @MainActor in
+            if tier == .paid {
+                // StoreKit IAP not yet implemented — fall through to free for now
             }
-        } else {
-            createPet(tier: tier)
+            await appState.loadCurrentPet()
+            isPurchasing = false
+            navigateToSuccess = true
         }
-    }
-
-    private func createPet(tier: Entitlement.EntitlementType) {
-        // TODO: POST /api/v1/pets
-        appState.currentPet = Pet(
-            id: "pet_mock",
-            ownerUserId: appState.currentUser?.id ?? "",
-            name: petName,
-            type: petType,
-            mainPhotoId: nil,
-            mainPhoto: nil,
-            memorialSentence: nil,
-            metOrAdoptionDate: nil,
-            birthDate: nil,
-            passedAwayDate: nil,
-            status: .active,
-            createdAt: Date()
-        )
-        appState.entitlement = Entitlement(
-            entitlementType: tier,
-            photoLimit: tier == .paid ? 50 : 9,
-            mailboxEnabled: tier == .paid,
-            purchaseStatus: tier == .paid ? .paid : .none
-        )
-        appState.ownerStage = tier == .paid ? .hasPetPaid : .hasPetFree
-        navigateToSuccess = true
     }
 }
 

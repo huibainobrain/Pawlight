@@ -54,22 +54,18 @@ struct LoginView: View {
 
                     #if DEBUG
                     VStack(spacing: 8) {
-                        Button("跳过登录 → 创建流程") {
-                            appState.currentUser = User(
-                                id: "usr_debug",
-                                loginStatus: .loggedIn,
-                                loginProvider: "debug",
-                                nickname: nil,
-                                avatarURL: nil,
-                                createdAt: Date()
-                            )
-                            appState.ownerStage = .loggedInNoPet
-                            navigateToPetInfo = true
+                        Button("跳过登录 → 创建流程（真实API）") {
+                            Task { @MainActor in
+                                await appState.debugLoginAndStart()
+                                if appState.ownerStage == .loggedInNoPet {
+                                    navigateToPetInfo = true
+                                }
+                            }
                         }
                         .font(AppFonts.body(12))
                         .foregroundColor(AppColors.muted.opacity(0.5))
 
-                        Button("跳过登录 → 直接进主界面") {
+                        Button("跳过登录 → 直接进主界面（Mock）") {
                             appState.loadMockData()
                         }
                         .font(AppFonts.body(12))
@@ -91,19 +87,24 @@ struct LoginView: View {
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let auth):
-            guard auth.credential is ASAuthorizationAppleIDCredential else { return }
-            // TODO: send identity_token to backend /api/v1/auth/login
-            // For now, simulate login success
-            appState.currentUser = User(
-                id: "usr_mock",
-                loginStatus: .loggedIn,
-                loginProvider: "apple",
-                nickname: nil,
-                avatarURL: nil,
-                createdAt: Date()
-            )
-            appState.ownerStage = .loggedInNoPet
-            navigateToPetInfo = true
+            guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = credential.identityToken,
+                  let identityToken = String(data: tokenData, encoding: .utf8) else {
+                errorMessage = "无法获取登录凭证"
+                return
+            }
+            Task { @MainActor in
+                do {
+                    try await appState.login(identityToken: identityToken)
+                    if appState.ownerStage == .loggedInNoPet {
+                        navigateToPetInfo = true
+                    }
+                    // hasPetFree/hasPetPaid: RootView auto-switches to MainTabView
+                } catch {
+                    errorMessage = "登录遇到问题，请再试一次"
+                    print("Login error: \(error)")
+                }
+            }
         case .failure(let error):
             errorMessage = "登录遇到问题，请再试一次"
             print("Apple Sign In error: \(error)")

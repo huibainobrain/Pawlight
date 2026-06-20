@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { IsString } from 'class-validator';
 
@@ -14,5 +14,10 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.loginWithApple(dto.identity_token);
+  }
+
+  @Post('debug-login')
+  debugLogin(@Headers('x-debug-secret') secret: string) {
+    return this.authService.debugLogin(secret);
   }
 }

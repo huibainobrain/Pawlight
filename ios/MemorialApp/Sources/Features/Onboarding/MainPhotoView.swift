@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct MainPhotoView: View {
+    let petId: String
     let petName: String
     let petType: Pet.PetType
 
@@ -117,13 +118,22 @@ struct MainPhotoView: View {
     }
 
     private func uploadPhoto() {
-        guard selectedImage != nil else { return }
+        guard let image = selectedImage else { return }
+        guard let imageData = image.jpegData(compressionQuality: 0.85) else {
+            uploadError = "图片处理失败"
+            return
+        }
         isUploading = true
         uploadError = nil
-        // TODO: upload to backend, get photo_id
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        Task { @MainActor in
+            do {
+                try await appState.uploadMainPhoto(petId: petId, imageData: imageData)
+                navigateToTier = true
+            } catch {
+                uploadError = "上传失败，请重试"
+                print("uploadPhoto error: \(error)")
+            }
             isUploading = false
-            navigateToTier = true
         }
     }
 }

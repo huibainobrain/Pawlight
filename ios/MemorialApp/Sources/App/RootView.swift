@@ -4,11 +4,16 @@ struct RootView: View {
     @EnvironmentObject var appState: AppState
 
     var body: some View {
-        switch appState.ownerStage {
-        case .unauthenticated, .loggedInNoPet:
-            OnboardingStartView()
-        case .hasPetFree, .hasPetPaid:
-            MainTabView()
+        Group {
+            switch appState.ownerStage {
+            case .unauthenticated, .loggedInNoPet:
+                OnboardingStartView()
+            case .hasPetFree, .hasPetPaid:
+                MainTabView()
+            }
+        }
+        .task {
+            await appState.checkAuthAndLoad()
         }
     }
 }
