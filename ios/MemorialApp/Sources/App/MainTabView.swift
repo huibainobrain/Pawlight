@@ -32,5 +32,21 @@ struct MainTabView: View {
             UITabBar.appearance().standardAppearance = appearance
             UITabBar.appearance().scrollEdgeAppearance = appearance
         }
+        #if DEBUG
+        .overlay(alignment: .topLeading) {
+            Button {
+                appState.resetAll()
+            } label: {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(AppColors.muted)
+                    .padding(8)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+            }
+            .padding(.leading, 16)
+            .padding(.top, 56)
+        }
+        #endif
     }
 }
