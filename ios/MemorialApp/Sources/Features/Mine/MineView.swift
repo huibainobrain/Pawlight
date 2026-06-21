@@ -90,6 +90,36 @@ struct MineView: View {
                     #if DEBUG
                     Section("开发调试") {
                         Button {
+                            appState.entitlement = Entitlement(
+                                entitlementType: .paid, photoLimit: 50,
+                                mailboxEnabled: true, purchaseStatus: .paid)
+                            appState.ownerStage = .hasPetPaid
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(AppColors.gold)
+                                    .frame(width: 20)
+                                Text("切换：完整纪念空间（付费）")
+                                    .font(AppFonts.body(15))
+                                    .foregroundColor(AppColors.ink)
+                            }
+                        }
+                        Button {
+                            appState.entitlement = Entitlement(
+                                entitlementType: .free, photoLimit: 9,
+                                mailboxEnabled: false, purchaseStatus: .none)
+                            appState.ownerStage = .hasPetFree
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "star")
+                                    .foregroundColor(AppColors.muted)
+                                    .frame(width: 20)
+                                Text("切换：免费纪念空间")
+                                    .font(AppFonts.body(15))
+                                    .foregroundColor(AppColors.ink)
+                            }
+                        }
+                        Button {
                             appState.resetAll()
                         } label: {
                             HStack(spacing: 12) {
