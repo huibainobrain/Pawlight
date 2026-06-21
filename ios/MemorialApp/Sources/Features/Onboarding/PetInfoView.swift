@@ -2,12 +2,14 @@ import SwiftUI
 
 struct PetInfoView: View {
     @EnvironmentObject var appState: AppState
+    @Environment(\.dismiss) var dismiss
     @State private var name = ""
     @State private var selectedType: Pet.PetType?
     @State private var navigateToPhoto = false
     @State private var createdPetId: String?
     @State private var isCreating = false
     @State private var createError: String?
+    @State private var showExitAlert = false
     @FocusState private var nameFocused: Bool
 
     private var canContinue: Bool {
@@ -94,6 +96,28 @@ struct PetInfoView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(!name.trimmingCharacters(in: .whitespaces).isEmpty)
+        .toolbar {
+            if !name.trimmingCharacters(in: .whitespaces).isEmpty {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showExitAlert = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("返回")
+                        }
+                        .foregroundColor(AppColors.greenDeep)
+                    }
+                }
+            }
+        }
+        .alert("暂时离开？", isPresented: $showExitAlert) {
+            Button("继续创建", role: .cancel) {}
+            Button("先离开", role: .destructive) { dismiss() }
+        } message: {
+            Text("现在离开的话，本次填写的内容不会保存。")
+        }
         .onAppear { nameFocused = true }
         .navigationDestination(isPresented: $navigateToPhoto) {
             if let petId = createdPetId {

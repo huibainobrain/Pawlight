@@ -6,6 +6,7 @@ struct MineView: View {
     @State private var showPrivacy = false
     @State private var showPetProfile = false
     @State private var showDeleteAlert = false
+    @State private var showOnboarding = false
     @Environment(\.openURL) var openURL
 
     private let privacyURL = URL(string: "https://pet-memory-psi.vercel.app/privacy")!
@@ -15,7 +16,10 @@ struct MineView: View {
         NavigationStack {
             ZStack {
                 AppColors.paper.ignoresSafeArea()
-                List {
+                if !appState.hasPet {
+                    MineUnboardedView(showOnboarding: $showOnboarding)
+                }
+                if appState.hasPet { List {
                     Section {
                         AccountHeaderRow()
                     }
@@ -146,6 +150,7 @@ struct MineView: View {
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
                 .background(AppColors.paper)
+                }  // if appState.hasPet
             }
             .navigationTitle("我的")
             .alert("注销账号", isPresented: $showDeleteAlert) {
@@ -154,6 +159,58 @@ struct MineView: View {
             } message: {
                 Text("注销后将退出登录并清除本地数据，账号内容仍保留在服务器。")
             }
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingStartView()
+        }
+        .onChange(of: appState.hasPet) { _, hasPet in
+            if hasPet { showOnboarding = false }
+        }
+    }
+}
+
+// MARK: - 未入驻空态
+
+struct MineUnboardedView: View {
+    @Binding var showOnboarding: Bool
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+            VStack(spacing: 24) {
+                ZStack {
+                    Circle()
+                        .fill(AppColors.green.opacity(0.1))
+                        .frame(width: 100, height: 100)
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 38))
+                        .foregroundColor(AppColors.green.opacity(0.45))
+                }
+                VStack(spacing: 10) {
+                    Text("还没有创建TA的星球")
+                        .font(AppFonts.serif(20, weight: .medium))
+                        .foregroundColor(AppColors.ink)
+                    Text("创建后，这里可以查看\n权益、账号和宠物设置。")
+                        .font(AppFonts.body(14))
+                        .foregroundColor(AppColors.muted)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                }
+            }
+            Spacer()
+            Button {
+                showOnboarding = true
+            } label: {
+                Text("为TA创建星球")
+                    .font(AppFonts.body(16, weight: .medium))
+                    .foregroundColor(AppColors.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(AppColors.greenDeep)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 48)
         }
     }
 }

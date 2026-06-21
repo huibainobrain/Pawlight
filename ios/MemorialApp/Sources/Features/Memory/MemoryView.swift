@@ -13,7 +13,11 @@ struct MemoryView: View {
         NavigationStack {
             ZStack {
                 AppColors.paper.ignoresSafeArea()
-                ScrollView {
+                if !appState.hasPet {
+                    MemoryUnboardedView()
+                }
+                if appState.hasPet {
+                    ScrollView {
                     VStack(spacing: 0) {
                         MemoryHeaderView(showMemorialEdit: $showMemorialEdit, showShare: $showShare)
 
@@ -93,7 +97,8 @@ struct MemoryView: View {
                         .padding(.top, 12)
                         .padding(.bottom, 40)
                     }
-                }
+                    }  // ScrollView
+                }  // if appState.hasPet
             }
             .navigationTitle("")
             .navigationBarHidden(true)
@@ -106,6 +111,31 @@ struct MemoryView: View {
             }
             .navigationDestination(isPresented: $showHugs) { HugsView() }
         }
+    }
+}
+
+// MARK: - 未入驻空态
+
+struct MemoryUnboardedView: View {
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            Image(systemName: "heart.text.clipboard")
+                .font(.system(size: 48))
+                .foregroundColor(AppColors.green.opacity(0.35))
+            VStack(spacing: 10) {
+                Text("TA的回忆，等你来记录")
+                    .font(AppFonts.serif(20, weight: .medium))
+                    .foregroundColor(AppColors.ink)
+                Text("创建星球后，这里可以留下\nTA的故事、照片和你写给TA的话。")
+                    .font(AppFonts.body(14))
+                    .foregroundColor(AppColors.muted)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 32)
     }
 }
 

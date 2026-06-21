@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
+    @State private var showOnboarding = false
 
     var body: some View {
         NavigationStack {
@@ -10,9 +11,15 @@ struct HomeView: View {
                 if appState.hasPet {
                     HomeCreatedView()
                 } else {
-                    HomeUnboardedView()
+                    HomeUnboardedView(showOnboarding: $showOnboarding)
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingStartView()
+        }
+        .onChange(of: appState.hasPet) { _, hasPet in
+            if hasPet { showOnboarding = false }
         }
     }
 }
@@ -20,35 +27,42 @@ struct HomeView: View {
 // MARK: - 未入驻
 
 struct HomeUnboardedView: View {
-    @EnvironmentObject var appState: AppState
-    @State private var showOnboarding = false
+    @Binding var showOnboarding: Bool
+    @State private var showLearnMore = false
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-            VStack(spacing: 24) {
+            VStack(spacing: 28) {
                 ZStack {
                     Circle()
-                        .fill(AppColors.green.opacity(0.15))
-                        .frame(width: 160, height: 160)
-                    Circle()
-                        .fill(AppColors.green.opacity(0.08))
+                        .fill(LinearGradient(
+                            colors: [AppColors.green.opacity(0.18), AppColors.blue.opacity(0.12)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing))
                         .frame(width: 200, height: 200)
+                    Circle()
+                        .fill(AppColors.paperSoft)
+                        .frame(width: 160, height: 160)
+                        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 6)
                     Image(systemName: "sparkles")
-                        .font(.system(size: 52))
-                        .foregroundColor(AppColors.green)
+                        .font(.system(size: 44))
+                        .foregroundColor(AppColors.green.opacity(0.5))
                 }
                 VStack(spacing: 12) {
-                    Text("回来看看TA")
-                        .font(AppFonts.serif(26, weight: .medium))
+                    Text("回来看看TA，\n把想念慢慢放在这里。")
+                        .font(AppFonts.serif(22, weight: .medium))
                         .foregroundColor(AppColors.ink)
-                    Text("把想念慢慢放在这里")
-                        .font(AppFonts.body(16))
+                        .multilineTextAlignment(.center)
+                    Text("这里不是任务系统，也不是社交广场。\n它只是一个安静的位置，留给你和那只小动物。")
+                        .font(AppFonts.body(14))
                         .foregroundColor(AppColors.muted)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 8)
                 }
             }
             Spacer()
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 Button {
                     showOnboarding = true
                 } label: {
@@ -60,15 +74,107 @@ struct HomeUnboardedView: View {
                         .background(AppColors.greenDeep)
                         .cornerRadius(12)
                 }
-                Button("稍后再说") {}
-                    .font(AppFonts.body(14))
-                    .foregroundColor(AppColors.muted)
+                Button("先了解一下") {
+                    showLearnMore = true
+                }
+                .font(AppFonts.body(14))
+                .foregroundColor(AppColors.muted)
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 48)
         }
-        .fullScreenCover(isPresented: $showOnboarding) {
-            OnboardingStartView()
+        .sheet(isPresented: $showLearnMore) {
+            LearnMoreSheet()
+        }
+    }
+}
+
+// MARK: - 了解一下
+
+struct LearnMoreSheet: View {
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("关于星屿纪念")
+                    .font(AppFonts.serif(18, weight: .medium))
+                    .foregroundColor(AppColors.ink)
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppColors.muted)
+                        .padding(8)
+                        .background(AppColors.line)
+                        .clipShape(Circle())
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 28)
+            .padding(.bottom, 28)
+
+            VStack(alignment: .leading, spacing: 24) {
+                LearnMoreItem(
+                    icon: "moon.stars.fill",
+                    title: "一个安静的地方",
+                    detail: "不是说说，不是动态。只是一个你可以随时回来、静静想念TA的空间。"
+                )
+                LearnMoreItem(
+                    icon: "photo.on.rectangle",
+                    title: "留下TA的样子",
+                    detail: "上传照片、写下TA的故事和纪念语——只属于你和TA。"
+                )
+                LearnMoreItem(
+                    icon: "heart.fill",
+                    title: "分享给也记得TA的人",
+                    detail: "把纪念页分享给家人或朋友，让他们也能来看看，留下抱抱。"
+                )
+            }
+            .padding(.horizontal, 24)
+
+            Spacer()
+
+            Button {
+                dismiss()
+            } label: {
+                Text("好，我知道了")
+                    .font(AppFonts.body(15, weight: .medium))
+                    .foregroundColor(AppColors.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(AppColors.greenDeep)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 40)
+        }
+        .background(AppColors.paper.ignoresSafeArea())
+        .presentationDetents([.medium])
+    }
+}
+
+struct LearnMoreItem: View {
+    let icon: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(AppColors.green)
+                .frame(width: 22, height: 22)
+                .padding(.top, 1)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(AppFonts.body(15, weight: .medium))
+                    .foregroundColor(AppColors.ink)
+                Text(detail)
+                    .font(AppFonts.body(14))
+                    .foregroundColor(AppColors.muted)
+                    .lineSpacing(3)
+            }
         }
     }
 }

@@ -7,11 +7,13 @@ struct MainPhotoView: View {
     let petType: Pet.PetType
 
     @EnvironmentObject var appState: AppState
+    @Environment(\.dismiss) var dismiss
     @State private var selectedItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
     @State private var isUploading = false
     @State private var uploadError: String?
     @State private var navigateToTier = false
+    @State private var showExitAlert = false
 
     var body: some View {
         ZStack {
@@ -71,6 +73,28 @@ struct MainPhotoView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(selectedImage != nil)
+        .toolbar {
+            if selectedImage != nil {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showExitAlert = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("返回")
+                        }
+                        .foregroundColor(AppColors.greenDeep)
+                    }
+                }
+            }
+        }
+        .alert("暂时离开？", isPresented: $showExitAlert) {
+            Button("继续上传", role: .cancel) {}
+            Button("先离开", role: .destructive) { dismiss() }
+        } message: {
+            Text("TA的星球已创建，但主照片还没有上传。可以稍后在回忆页继续补充。")
+        }
         .navigationDestination(isPresented: $navigateToTier) {
             TierSelectView(petName: petName, petType: petType)
         }
