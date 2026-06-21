@@ -201,14 +201,18 @@ struct NewHugCard: View {
 
 struct QuickActionsRow: View {
     @EnvironmentObject var appState: AppState
+    @State private var showStoryEdit = false
     @State private var showShare = false
     @State private var showAlbum = false
 
     var body: some View {
         HStack(spacing: 12) {
-            QuickActionButton(icon: "text.quote", label: "写给TA") {}
+            QuickActionButton(icon: "text.quote", label: "写给TA") { showStoryEdit = true }
             QuickActionButton(icon: "photo", label: "放张照片") { showAlbum = true }
             QuickActionButton(icon: "paperplane", label: "分享") { showShare = true }
+        }
+        .sheet(isPresented: $showStoryEdit) {
+            StoryEditView().environmentObject(appState)
         }
         .sheet(isPresented: $showShare) {
             SharePanelView().environmentObject(appState)

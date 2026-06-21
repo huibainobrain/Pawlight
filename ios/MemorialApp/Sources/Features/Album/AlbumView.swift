@@ -6,6 +6,7 @@ struct AlbumView: View {
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var showLimitAlert = false
     @State private var isUploading = false
+    @State private var showEntitlement = false
 
     private var albumPhotos: [Photo] { appState.photos.filter { $0.type == .album } }
 
@@ -97,10 +98,13 @@ struct AlbumView: View {
         .navigationTitle("照片回忆")
         .navigationBarTitleDisplayMode(.inline)
         .alert("照片已达上限", isPresented: $showLimitAlert) {
-            Button("了解完整纪念空间", role: .none) {}
+            Button("了解完整纪念空间", role: .none) { showEntitlement = true }
             Button("取消", role: .cancel) {}
         } message: {
             Text(appState.isPaid ? "已达 50 张上限。" : "免费档最多保存 9 张照片，开启完整纪念空间可保存至 50 张。")
+        }
+        .navigationDestination(isPresented: $showEntitlement) {
+            EntitlementView()
         }
     }
 }

@@ -19,6 +19,7 @@ struct MemoryView: View {
 
                         MemoryQuickActions(
                             showStoryEdit: $showStoryEdit,
+                            showAlbum: $showAlbum,
                             showShare: $showShare
                         )
                         .padding(.horizontal, 20)
@@ -182,12 +183,13 @@ struct MemoryHeaderView: View {
 
 struct MemoryQuickActions: View {
     @Binding var showStoryEdit: Bool
+    @Binding var showAlbum: Bool
     @Binding var showShare: Bool
 
     var body: some View {
         HStack(spacing: 10) {
             QuickActionButton(icon: "text.quote", label: "写TA的故事") { showStoryEdit = true }
-            QuickActionButton(icon: "photo.badge.plus", label: "添加照片") {}
+            QuickActionButton(icon: "photo.badge.plus", label: "添加照片") { showAlbum = true }
             QuickActionButton(icon: "paperplane", label: "分享给也记得TA的人") { showShare = true }
         }
     }

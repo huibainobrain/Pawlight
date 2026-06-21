@@ -5,6 +5,11 @@ struct MineView: View {
     @State private var showEntitlement = false
     @State private var showPrivacy = false
     @State private var showPetProfile = false
+    @State private var showDeleteAlert = false
+    @Environment(\.openURL) var openURL
+
+    private let privacyURL = URL(string: "https://pet-memory-psi.vercel.app/privacy")!
+    private let feedbackEmail = URL(string: "mailto:ntuwangyiming@gmail.com?subject=星屿纪念反馈")!
 
     var body: some View {
         NavigationStack {
@@ -101,10 +106,10 @@ struct MineView: View {
                     #endif
 
                     Section("支持") {
-                        MineSupportRow(icon: "questionmark.circle", label: "客服与反馈")
-                        MineSupportRow(icon: "doc.text", label: "用户协议")
-                        MineSupportRow(icon: "hand.raised", label: "隐私政策")
-                        MineSupportRow(icon: "trash", label: "注销账号", tint: AppColors.rose)
+                        MineSupportRow(icon: "questionmark.circle", label: "客服与反馈") { openURL(feedbackEmail) }
+                        MineSupportRow(icon: "doc.text", label: "用户协议") { openURL(privacyURL) }
+                        MineSupportRow(icon: "hand.raised", label: "隐私政策") { openURL(privacyURL) }
+                        MineSupportRow(icon: "trash", label: "注销账号", tint: AppColors.rose) { showDeleteAlert = true }
                     }
                     .listRowBackground(AppColors.white)
                 }
@@ -113,6 +118,12 @@ struct MineView: View {
                 .background(AppColors.paper)
             }
             .navigationTitle("我的")
+            .alert("注销账号", isPresented: $showDeleteAlert) {
+                Button("确认注销", role: .destructive) { appState.resetAll() }
+                Button("取消", role: .cancel) {}
+            } message: {
+                Text("注销后将退出登录并清除本地数据，账号内容仍保留在服务器。")
+            }
         }
     }
 }
@@ -147,9 +158,10 @@ struct MineSupportRow: View {
     let icon: String
     let label: String
     var tint: Color = AppColors.muted
+    var action: () -> Void = {}
 
     var body: some View {
-        Button {} label: {
+        Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .foregroundColor(tint)

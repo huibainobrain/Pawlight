@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MailboxLockedView: View {
     @Environment(\.dismiss) var dismiss
+    @State private var showEntitlement = false
 
     var body: some View {
         ZStack {
@@ -34,7 +35,7 @@ struct MailboxLockedView: View {
                 }
                 Spacer()
                 VStack(spacing: 14) {
-                    Button {} label: {
+                    Button { showEntitlement = true } label: {
                         Text("了解完整纪念空间")
                             .font(AppFonts.body(16, weight: .medium))
                             .foregroundColor(AppColors.white)
@@ -53,5 +54,8 @@ struct MailboxLockedView: View {
         }
         .navigationTitle("天堂信箱")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $showEntitlement) {
+            EntitlementView()
+        }
     }
 }
