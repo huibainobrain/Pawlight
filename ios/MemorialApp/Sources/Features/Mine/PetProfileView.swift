@@ -34,18 +34,40 @@ struct PetProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("保存") {
-                    appState.currentPet?.name = name
-                    appState.currentPet?.type = petType
-                    // TODO: PATCH /api/v1/pets/{pet_id}
+                Button {
+                    save()
+                } label: {
+                    if isSaving {
+                        ProgressView().scaleEffect(0.8)
+                    } else {
+                        Text("保存").foregroundColor(AppColors.greenDeep).fontWeight(.medium)
+                    }
                 }
-                .foregroundColor(AppColors.greenDeep)
-                .fontWeight(.medium)
+                .disabled(isSaving)
             }
         }
         .onAppear {
             name = appState.currentPet?.name ?? ""
             petType = appState.currentPet?.type ?? .cat
+        }
+    }
+
+    private func save() {
+        isSaving = true
+        Task {
+            guard let token = KeychainHelper.loadToken(),
+                  let petId = appState.currentPet?.id else { isSaving = false; return }
+            do {
+                try await APIClient.shared.updatePet(token: token, petId: petId, body: [
+                    "name": name,
+                    "type": petType.rawValue.uppercased()
+                ])
+                appState.currentPet?.name = name
+                appState.currentPet?.type = petType
+            } catch {
+                print("savePetProfile error: \(error)")
+            }
+            isSaving = false
         }
     }
 }

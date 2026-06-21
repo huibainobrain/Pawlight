@@ -23,6 +23,7 @@
 		5137174C420982AA770504D8 /* CreateSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */; };
 		5643DE6B080E87407C9F82A6 /* PetProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0D50567A918025751525DC /* PetProfileView.swift */; };
 		59091E848DE621C8ACAC8AFB /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD71578A5A4A3C1176F500D8 /* LoginView.swift */; };
+		61EB3478A7B4BFC429E8D0B6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 565836C1AD9D7A2ACE578D16 /* Assets.xcassets */; };
 		627E73C0956B550C457A44BE /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4E6B181B4B945D33D6A95C /* AppColors.swift */; };
 		6630F92912A9F72F998175BB /* StoryEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */; };
 		6B412D6905266A68D5C60AF4 /* MemorialApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD62992F1C9DD82FBC6187F /* MemorialApp.swift */; };
@@ -47,6 +48,7 @@
 		4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryEditView.swift; sourceTree = "<group>"; };
 		4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
 		516B0249E76335F20828B276 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		565836C1AD9D7A2ACE578D16 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B4E6B181B4B945D33D6A95C /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		64245C6BF899F9C1142F86E0 /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		73DA614CCC0D6060777285F4 /* EntitlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementView.swift; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 		EFBBD2DA9412086472483C85 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				565836C1AD9D7A2ACE578D16 /* Assets.xcassets */,
 				D81FC06AD8C5C57B98F1CEAE /* App */,
 				A958C665615B0683D097973F /* Common */,
 				5B589ECE093426D12F2751B0 /* Features */,
@@ -270,6 +273,7 @@
 			buildConfigurationList = 6B6C1923EC2D411CE3D152A5 /* Build configuration list for PBXNativeTarget "MemorialApp" */;
 			buildPhases = (
 				FEB4AC8FB3CB6ACB5EEAE074 /* Sources */,
+				AF65544A496DB6B6F1179A67 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -314,6 +318,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AF65544A496DB6B6F1179A67 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61EB3478A7B4BFC429E8D0B6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FEB4AC8FB3CB6ACB5EEAE074 /* Sources */ = {

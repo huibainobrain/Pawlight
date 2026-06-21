@@ -19,12 +19,15 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: MemorialApp/Sources
+    resources:
+      - path: MemorialApp/Sources/Assets.xcassets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.musayang.memorial
         PRODUCT_NAME: MemorialApp
         INFOPLIST_FILE: MemorialApp/Sources/App/Info.plist
         DEVELOPMENT_TEAM: ""
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     info:
       path: MemorialApp/Sources/App/Info.plist
       properties:

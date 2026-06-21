@@ -38,7 +38,14 @@ struct PrivacySettingsView: View {
                 Button("保存") {
                     appState.share?.visibility = visibility
                     appState.share?.hugEnabled = hugEnabled
-                    // TODO: PUT /api/v1/shares/{share_id}/permission
+                    guard let token = KeychainHelper.loadToken(),
+                          let petId = appState.currentPet?.id else { return }
+                    let visStr = visibility == .link ? "LINK" : "PRIVATE"
+                    let enabled = hugEnabled
+                    Task {
+                        try? await APIClient.shared.updateShare(token: token, petId: petId,
+                                                                 visibility: visStr, hugEnabled: enabled)
+                    }
                 }
                 .foregroundColor(AppColors.greenDeep)
                 .fontWeight(.medium)
