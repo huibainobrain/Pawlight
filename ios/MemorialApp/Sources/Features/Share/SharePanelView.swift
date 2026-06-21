@@ -3,6 +3,7 @@ import SwiftUI
 struct SharePanelView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) var openURL
     @State private var visibility: Share.Visibility = .link
     @State private var hugEnabled = true
     @State private var showPrivacyConfirm = false
@@ -59,6 +60,19 @@ struct SharePanelView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
+
+                    #if DEBUG
+                    if !shareURL.isEmpty, let url = URL(string: shareURL) {
+                        Button {
+                            openURL(url)
+                        } label: {
+                            Label("预览 H5 页面", systemImage: "safari")
+                                .font(AppFonts.body(13))
+                                .foregroundColor(AppColors.muted)
+                        }
+                        .padding(.top, 16)
+                    }
+                    #endif
 
                     Spacer()
                 }
