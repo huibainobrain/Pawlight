@@ -102,3 +102,23 @@ struct ApiPhoto: Decodable {
     let sortOrder: Int
     let createdAt: Date
 }
+
+// MARK: - Letter
+
+struct ApiLetter: Decodable {
+    let id: String
+    let petId: String
+    let content: String
+    let createdAt: Date
+    let updatedAt: Date
+}
+
+// MARK: - Hug
+
+struct ApiHug: Decodable {
+    let id: String
+    let shareId: String
+    let visitorName: String?
+    let message: String?
+    let createdAt: Date
+}

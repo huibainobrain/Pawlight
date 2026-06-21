@@ -70,6 +70,12 @@ struct SharePanelView: View {
                     Button("关闭") { dismiss() }.foregroundColor(AppColors.muted)
                 }
             }
+            .onAppear {
+                visibility = appState.share?.visibility ?? .link
+                hugEnabled = appState.share?.hugEnabled ?? true
+            }
+            .onChange(of: visibility) { _ in saveShare() }
+            .onChange(of: hugEnabled) { _ in saveShare() }
             .alert("改为链接可见", isPresented: $showPrivacyConfirm) {
                 Button("确认改为链接可见") {
                     visibility = .link
@@ -86,6 +92,17 @@ struct SharePanelView: View {
         UIPasteboard.general.string = shareURL
         withAnimation { copied = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
+    }
+
+    private func saveShare() {
+        guard let token = KeychainHelper.loadToken(),
+              let petId = appState.currentPet?.id else { return }
+        let visStr = visibility == .link ? "LINK" : "PRIVATE"
+        let enabled = hugEnabled
+        Task {
+            try? await APIClient.shared.updateShare(token: token, petId: petId,
+                                                     visibility: visStr, hugEnabled: enabled)
+        }
     }
 }
 

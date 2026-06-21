@@ -61,19 +61,22 @@ struct StoryEditView: View {
     }
 
     private func save() {
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
         isSaving = true
-        // TODO: PUT /api/v1/pets/{pet_id}/story
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            appState.story = Story(
-                id: "story_mock",
-                petId: appState.currentPet?.id ?? "",
-                content: content,
-                visibility: .publicLink,
-                createdAt: Date(),
-                updatedAt: Date()
-            )
-            isSaving = false
-            dismiss()
+        Task {
+            guard let token = KeychainHelper.loadToken(),
+                  let petId = appState.currentPet?.id else { isSaving = false; return }
+            do {
+                try await APIClient.shared.updatePet(token: token, petId: petId, body: ["story": trimmed])
+                appState.story = Story(id: "story_\(petId)", petId: petId, content: trimmed,
+                                       visibility: .publicLink, createdAt: Date(), updatedAt: Date())
+                isSaving = false
+                dismiss()
+            } catch {
+                print("saveStory error: \(error)")
+                isSaving = false
+            }
         }
     }
 }

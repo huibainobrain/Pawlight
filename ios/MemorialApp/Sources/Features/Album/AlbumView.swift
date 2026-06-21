@@ -5,6 +5,7 @@ struct AlbumView: View {
     @EnvironmentObject var appState: AppState
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var showLimitAlert = false
+    @State private var isUploading = false
 
     private var albumPhotos: [Photo] { appState.photos.filter { $0.type == .album } }
 
@@ -18,15 +19,21 @@ struct AlbumView: View {
                             .font(AppFonts.body(13))
                             .foregroundColor(AppColors.muted)
                         Spacer()
-                        PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
-                            Label("添加照片", systemImage: "plus")
-                                .font(AppFonts.body(14, weight: .medium))
-                                .foregroundColor(AppColors.greenDeep)
+                        if isUploading {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                                .frame(height: 20)
+                        } else {
+                            PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
+                                Label("添加照片", systemImage: "plus")
+                                    .font(AppFonts.body(14, weight: .medium))
+                                    .foregroundColor(AppColors.greenDeep)
+                            }
+                            .disabled(!appState.canUploadPhoto)
+                            .simultaneousGesture(TapGesture().onEnded {
+                                if !appState.canUploadPhoto { showLimitAlert = true }
+                            })
                         }
-                        .disabled(!appState.canUploadPhoto)
-                        .simultaneousGesture(TapGesture().onEnded {
-                            if !appState.canUploadPhoto { showLimitAlert = true }
-                        })
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 16)
@@ -58,6 +65,32 @@ struct AlbumView: View {
                             }
                         }
                     }
+                }
+            }
+        }
+        .onChange(of: selectedItems) { items in
+            guard let item = items.first else { return }
+            isUploading = true
+            Task {
+                defer {
+                    isUploading = false
+                    selectedItems = []
+                }
+                guard let token = KeychainHelper.loadToken(),
+                      let petId = appState.currentPet?.id,
+                      let rawData = try? await item.loadTransferable(type: Data.self),
+                      let uiImage = UIImage(data: rawData),
+                      let jpegData = uiImage.jpegData(compressionQuality: 0.85) else { return }
+                do {
+                    let apiPhoto = try await APIClient.shared.uploadPhoto(token: token, petId: petId, imageData: jpegData)
+                    let photo = Photo(id: apiPhoto.id, petId: apiPhoto.petId,
+                                      userId: appState.currentUser?.id ?? "",
+                                      type: .album, url: apiPhoto.r2Url, thumbnailURL: apiPhoto.r2Url,
+                                      uploadStatus: .success, isMain: false,
+                                      sortOrder: apiPhoto.sortOrder, createdAt: apiPhoto.createdAt)
+                    appState.photos.append(photo)
+                } catch {
+                    print("uploadAlbumPhoto error: \(error)")
                 }
             }
         }

@@ -72,12 +72,29 @@ class AppState: ObservableObject {
             let pets = try await APIClient.shared.fetchMyPets(token: token)
             if let first = pets.first {
                 applyPet(first)
+                await loadSideData(token: token, petId: first.id, isPaid: first.entitlement?.tier == "PAID")
             } else {
                 ownerStage = .loggedInNoPet
             }
         } catch {
             print("loadCurrentPet error: \(error)")
             ownerStage = .loggedInNoPet
+        }
+    }
+
+    private func loadSideData(token: String, petId: String, isPaid: Bool) async {
+        if isPaid, let apiLetters = try? await APIClient.shared.fetchLetters(token: token, petId: petId) {
+            letters = apiLetters.map { l in
+                Letter(id: l.id, petId: l.petId, userId: currentUser?.id ?? "",
+                       title: nil, content: l.content,
+                       createdAt: l.createdAt, updatedAt: l.updatedAt)
+            }
+        }
+        if let apiHugs = try? await APIClient.shared.fetchHugs(token: token, petId: petId) {
+            hugs = apiHugs.map { h in
+                Hug(id: h.id, petId: petId, shareId: h.shareId,
+                    visitorName: h.visitorName, source: "share", createdAt: h.createdAt)
+            }
         }
     }
 
@@ -127,6 +144,13 @@ class AppState: ObservableObject {
             purchaseStatus: isPaid ? .paid : .none
         )
         ownerStage = isPaid ? .hasPetPaid : .hasPetFree
+
+        if let storyContent = api.story, !storyContent.isEmpty {
+            story = Story(id: "story_\(api.id)", petId: api.id, content: storyContent,
+                          visibility: .publicLink, createdAt: api.createdAt, updatedAt: api.createdAt)
+        } else {
+            story = nil
+        }
 
         if let s = api.share {
             share = Share(

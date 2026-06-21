@@ -108,6 +108,42 @@ final class APIClient {
         return try await perform(req)
     }
 
+    // MARK: - Letters
+
+    func fetchLetters(token: String, petId: String) async throws -> [ApiLetter] {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/letters"))
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    func createLetter(token: String, petId: String, content: String) async throws -> ApiLetter {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/letters"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["content": content])
+        return try await perform(req)
+    }
+
+    // MARK: - Hugs
+
+    func fetchHugs(token: String, petId: String) async throws -> [ApiHug] {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/hugs"))
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    // MARK: - Share
+
+    func updateShare(token: String, petId: String, visibility: String, hugEnabled: Bool) async throws {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/share"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["visibility": visibility, "hugEnabled": hugEnabled])
+        let _: Empty = try await perform(req)
+    }
+
     // MARK: - Private
 
     private struct Empty: Decodable {}

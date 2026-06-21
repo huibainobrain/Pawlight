@@ -33,8 +33,14 @@ struct MemorialSentenceEditView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("保存") {
-                        appState.currentPet?.memorialSentence = text
-                        // TODO: PATCH /api/v1/pets/{pet_id}/memorial-sentence
+                        let finalText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                        appState.currentPet?.memorialSentence = finalText
+                        Task {
+                            guard let token = KeychainHelper.loadToken(),
+                                  let petId = appState.currentPet?.id else { return }
+                            try? await APIClient.shared.updatePet(token: token, petId: petId,
+                                                                   body: ["memorialSentence": finalText])
+                        }
                         dismiss()
                     }
                     .foregroundColor(AppColors.greenDeep)
