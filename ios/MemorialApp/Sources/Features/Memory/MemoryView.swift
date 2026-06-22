@@ -6,7 +6,6 @@ struct MemoryView: View {
     @State private var showAlbum = false
     @State private var showMailbox = false
     @State private var showHugs = false
-    @State private var showShare = false
     @State private var showMemorialEdit = false
 
     var body: some View {
@@ -19,15 +18,11 @@ struct MemoryView: View {
                 if appState.hasPet {
                     ScrollView {
                     VStack(spacing: 0) {
-                        MemoryHeaderView(showMemorialEdit: $showMemorialEdit, showShare: $showShare)
+                        MemoryHeaderView(showMemorialEdit: $showMemorialEdit)
 
-                        MemoryQuickActions(
-                            showStoryEdit: $showStoryEdit,
-                            showAlbum: $showAlbum,
-                            showShare: $showShare
-                        )
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
+                        ShareGuideCard()
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
 
                         MemorySectionCard(title: "TA的故事", icon: "text.quote") {
                             showStoryEdit = true
@@ -39,10 +34,17 @@ struct MemoryView: View {
                                     .lineSpacing(6)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             } else {
-                                Text("还没有写下TA的故事。\n可以从第一次见到TA开始。")
-                                    .font(AppFonts.body(14))
-                                    .foregroundColor(AppColors.muted)
-                                    .lineSpacing(4)
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("还没有写下TA的故事。\n可以从第一次见到TA，或者最想念TA的一件小事开始。")
+                                        .font(AppFonts.body(14))
+                                        .foregroundColor(AppColors.muted)
+                                        .lineSpacing(4)
+                                    Button { showStoryEdit = true } label: {
+                                        Text("写下TA的故事")
+                                            .font(AppFonts.body(14, weight: .medium))
+                                            .foregroundColor(AppColors.greenDeep)
+                                    }
+                                }
                             }
                         }
                         .padding(.horizontal, 20)
@@ -51,15 +53,27 @@ struct MemoryView: View {
                         MemorySectionCard(title: "照片回忆", icon: "photo.on.rectangle") {
                             showAlbum = true
                         } content: {
-                            AlbumThumbnailGrid(photos: appState.photos.filter { $0.type == .album })
+                            let albumPhotos = appState.photos.filter { $0.type == .album }
+                            if albumPhotos.isEmpty {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("还没有添加照片。\n放一张TA的照片吧。")
+                                        .font(AppFonts.body(14))
+                                        .foregroundColor(AppColors.muted)
+                                        .lineSpacing(4)
+                                    Button { showAlbum = true } label: {
+                                        Text("添加照片")
+                                            .font(AppFonts.body(14, weight: .medium))
+                                            .foregroundColor(AppColors.greenDeep)
+                                    }
+                                }
+                            } else {
+                                AlbumThumbnailGrid(photos: albumPhotos)
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 12)
 
-                        MemorySectionCard(
-                            title: appState.mailboxEnabled ? "天堂信箱" : "天堂信箱（付费开启）",
-                            icon: "envelope.fill"
-                        ) {
+                        MemorySectionCard(title: "天堂信箱", icon: "envelope.fill") {
                             showMailbox = true
                         } content: {
                             if appState.mailboxEnabled {
@@ -67,14 +81,10 @@ struct MemoryView: View {
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                             } else {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "lock.fill")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(AppColors.muted)
-                                    Text("开启完整纪念空间后可用")
-                                        .font(AppFonts.body(14))
-                                        .foregroundColor(AppColors.muted)
-                                }
+                                Text("开启完整纪念空间后，可以把想对TA说的话慢慢留在这里。")
+                                    .font(AppFonts.body(14))
+                                    .foregroundColor(AppColors.muted)
+                                    .lineSpacing(4)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -84,11 +94,12 @@ struct MemoryView: View {
                             showHugs = true
                         } content: {
                             if appState.hugs.isEmpty {
-                                Text("还没有人抱抱TA，分享后朋友们可以来抱抱。")
+                                Text("还没有收到抱抱。\n分享给也记得TA的人，他们可以轻轻抱抱TA。")
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
+                                    .lineSpacing(4)
                             } else {
-                                Text("共 \(appState.hugs.count) 个抱抱")
+                                Text("TA收到了 \(appState.hugs.count) 个抱抱")
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                             }
@@ -104,7 +115,6 @@ struct MemoryView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showStoryEdit) { StoryEditView() }
             .sheet(isPresented: $showMemorialEdit) { MemorialSentenceEditView() }
-            .sheet(isPresented: $showShare) { SharePanelView() }
             .navigationDestination(isPresented: $showAlbum) { AlbumView() }
             .navigationDestination(isPresented: $showMailbox) {
                 appState.mailboxEnabled ? AnyView(MailboxView()) : AnyView(MailboxLockedView())
@@ -144,7 +154,6 @@ struct MemoryUnboardedView: View {
 struct MemoryHeaderView: View {
     @EnvironmentObject var appState: AppState
     @Binding var showMemorialEdit: Bool
-    @Binding var showShare: Bool
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -209,18 +218,54 @@ struct MemoryHeaderView: View {
     }
 }
 
-// MARK: - 快捷操作
+// MARK: - 分享引导卡
 
-struct MemoryQuickActions: View {
-    @Binding var showStoryEdit: Bool
-    @Binding var showAlbum: Bool
-    @Binding var showShare: Bool
+struct ShareGuideCard: View {
+    @EnvironmentObject var appState: AppState
+    @State private var showShare = false
+    @State private var showPrivacyAlert = false
+
+    private var hasContent: Bool {
+        let hasStory = appState.story.map { !$0.content.isEmpty } ?? false
+        let hasPhotos = !appState.photos.filter { $0.type == .album }.isEmpty
+        return hasStory || hasPhotos
+    }
 
     var body: some View {
-        HStack(spacing: 10) {
-            QuickActionButton(icon: "text.quote", label: "写TA的故事") { showStoryEdit = true }
-            QuickActionButton(icon: "photo.badge.plus", label: "添加照片") { showAlbum = true }
-            QuickActionButton(icon: "paperplane", label: "分享给也记得TA的人") { showShare = true }
+        VStack(alignment: .leading, spacing: 10) {
+            Text(hasContent ? "分享给也记得TA的人" : "补充一点回忆后，也可以分享给记得TA的人")
+                .font(AppFonts.body(14, weight: .medium))
+                .foregroundColor(AppColors.ink)
+            Text(hasContent ? "他们可以看看TA，也轻轻抱抱TA。" : "先写下一点故事或放一张照片，会让纪念页更完整。")
+                .font(AppFonts.body(13))
+                .foregroundColor(AppColors.muted)
+                .lineSpacing(3)
+            Button {
+                if appState.share?.visibility == .private {
+                    showPrivacyAlert = true
+                } else {
+                    showShare = true
+                }
+            } label: {
+                Text("分享纪念页")
+                    .font(AppFonts.body(14, weight: .medium))
+                    .foregroundColor(AppColors.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(AppColors.greenDeep)
+                    .cornerRadius(8)
+            }
+        }
+        .padding(16)
+        .background(AppColors.white)
+        .cornerRadius(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.line, lineWidth: 1))
+        .sheet(isPresented: $showShare) { SharePanelView() }
+        .alert("需要调整分享设置", isPresented: $showPrivacyAlert) {
+            Button("进入分享设置") { showShare = true }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("当前设置为仅自己可见，分享前需要改为通过链接可见。")
         }
     }
 }
