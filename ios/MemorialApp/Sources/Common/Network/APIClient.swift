@@ -133,6 +133,13 @@ final class APIClient {
         return try await perform(req)
     }
 
+    func deletePhoto(token: String, petId: String, photoId: String) async throws {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/photos/\(photoId)"))
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        try await performVoid(req)
+    }
+
     // MARK: - Share
 
     func updateShare(token: String, petId: String, visibility: String, hugEnabled: Bool) async throws {
@@ -147,6 +154,14 @@ final class APIClient {
     // MARK: - Private
 
     private struct Empty: Decodable {}
+
+    private func performVoid(_ request: URLRequest) async throws {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIError.serverError(http.statusCode, String(data: data, encoding: .utf8) ?? "")
+        }
+    }
 
     private func url(_ path: String) -> URL {
         URL(string: baseURL + path)!

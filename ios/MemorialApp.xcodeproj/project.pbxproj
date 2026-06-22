@@ -36,6 +36,7 @@
 		EF1E1B725956A118E21538F3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40540C59A31F39495D189F7 /* RootView.swift */; };
 		F7998E3E4B140A831D629C74 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64245C6BF899F9C1142F86E0 /* AlbumView.swift */; };
 		F87BC66E8BD41D36F7EC9071 /* PetInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856E4EB784D031CDEA78CBBD /* PetInfoView.swift */; };
+		CC112233445566778899AABB /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD112233445566778899AABB /* PhotoDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		46FBDB325D733AE8E09C8DF2 /* HugsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HugsView.swift; sourceTree = "<group>"; };
 		4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryEditView.swift; sourceTree = "<group>"; };
 		4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
+		DD112233445566778899AABB /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
 		516B0249E76335F20828B276 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		565836C1AD9D7A2ACE578D16 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B4E6B181B4B945D33D6A95C /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
@@ -202,6 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				64245C6BF899F9C1142F86E0 /* AlbumView.swift */,
+				DD112233445566778899AABB /* PhotoDetailView.swift */,
 			);
 			path = Album;
 			sourceTree = "<group>";
@@ -338,6 +341,7 @@
 				7E0E9C7397EB79949A74070B /* APIClient.swift in Sources */,
 				4E0731FB8DCF7D0A12CDCA61 /* APIModels.swift in Sources */,
 				F7998E3E4B140A831D629C74 /* AlbumView.swift in Sources */,
+				CC112233445566778899AABB /* PhotoDetailView.swift in Sources */,
 				627E73C0956B550C457A44BE /* AppColors.swift in Sources */,
 				237503EEAB4CA1CA32FD985F /* AppState.swift in Sources */,
 				5137174C420982AA770504D8 /* CreateSuccessView.swift in Sources */,
