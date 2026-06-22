@@ -13,6 +13,7 @@ enum OwnerStage {
 class AppState: ObservableObject {
     @Published var ownerStage: OwnerStage = .unauthenticated
     @Published var hasSkippedOnboarding: Bool = false  // in-memory only; resets on every app launch
+    @Published var selectedTab: Int = 0
     @Published var currentUser: User?
     @Published var currentPet: Pet?
     @Published var entitlement: Entitlement?
@@ -200,6 +201,7 @@ class AppState: ObservableObject {
         newHugCount = 0
         ownerStage = .unauthenticated
         hasSkippedOnboarding = false
+        selectedTab = 0
     }
 
     func debugLoginAndStart() async {

@@ -196,7 +196,10 @@ struct HomeCreatedView: View {
                     NewHugCard(count: appState.newHugCount)
                         .padding(.horizontal, 20)
                         .padding(.top, 20)
-                        .onTapGesture { showHugs = true }
+                        .onTapGesture {
+                            appState.newHugCount = 0
+                            showHugs = true
+                        }
                 }
 
                 QuickActionsRow()
@@ -268,9 +271,17 @@ struct PlanetWindowView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }
+                Text("轻触，看看TA的回忆")
+                    .font(AppFonts.body(11))
+                    .foregroundColor(AppColors.muted.opacity(0.45))
+                    .padding(.top, 2)
             }
         }
         .padding(.vertical, 8)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            appState.selectedTab = 1
+        }
     }
 }
 
@@ -284,7 +295,7 @@ struct NewHugCard: View {
             Image(systemName: "heart.fill")
                 .foregroundColor(AppColors.rose)
                 .font(.system(size: 18))
-            Text("有 \(count) 个新抱抱")
+            Text("有 \(count) 个新的抱抱")
                 .font(AppFonts.body(15))
                 .foregroundColor(AppColors.ink)
             Spacer()
@@ -313,8 +324,8 @@ struct QuickActionsRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            QuickActionButton(icon: "text.quote", label: "写给TA") { showStoryEdit = true }
-            QuickActionButton(icon: "photo", label: "放张照片") { showAlbum = true }
+            QuickActionButton(icon: "text.quote", label: "写故事") { showStoryEdit = true }
+            QuickActionButton(icon: "photo", label: "放照片") { showAlbum = true }
             QuickActionButton(icon: "paperplane", label: "分享") { showShare = true }
         }
         .sheet(isPresented: $showStoryEdit) {
@@ -359,24 +370,34 @@ struct QuickActionButton: View {
 // MARK: - 免费升级卡
 
 struct FreeUpgradeCard: View {
+    @EnvironmentObject var appState: AppState
+    @State private var showEntitlement = false
+
+    private var isPhotoFull: Bool { !appState.canUploadPhoto }
+
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("更多照片，更完整的纪念空间")
-                    .font(AppFonts.body(13, weight: .medium))
-                    .foregroundColor(AppColors.ink)
-                Text("了解完整纪念空间")
-                    .font(AppFonts.body(12))
-                    .foregroundColor(AppColors.green)
+        Button { showEntitlement = true } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(isPhotoFull ? "照片已到免费上限" : "想留下更多照片时")
+                        .font(AppFonts.body(13, weight: .medium))
+                        .foregroundColor(AppColors.ink)
+                    Text("了解完整纪念空间")
+                        .font(AppFonts.body(12))
+                        .foregroundColor(AppColors.green)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13))
+                    .foregroundColor(AppColors.muted)
             }
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.system(size: 13))
-                .foregroundColor(AppColors.muted)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(AppColors.green.opacity(0.07))
+            .cornerRadius(10)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(AppColors.green.opacity(0.07))
-        .cornerRadius(10)
+        .navigationDestination(isPresented: $showEntitlement) {
+            EntitlementView()
+        }
     }
 }
