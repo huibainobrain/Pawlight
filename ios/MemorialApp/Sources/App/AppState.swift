@@ -12,6 +12,7 @@ enum OwnerStage {
 @MainActor
 class AppState: ObservableObject {
     @Published var ownerStage: OwnerStage = .unauthenticated
+    @Published var hasSkippedOnboarding: Bool = false  // in-memory only; resets on every app launch
     @Published var currentUser: User?
     @Published var currentPet: Pet?
     @Published var entitlement: Entitlement?
@@ -198,6 +199,7 @@ class AppState: ObservableObject {
         share = nil
         newHugCount = 0
         ownerStage = .unauthenticated
+        hasSkippedOnboarding = false
     }
 
     func debugLoginAndStart() async {

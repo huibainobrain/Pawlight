@@ -4,9 +4,17 @@ struct RootView: View {
     @EnvironmentObject var appState: AppState
 
     var body: some View {
-        MainTabView()
-            .task {
-                await appState.checkAuthAndLoad()
+        Group {
+            if appState.hasPet {
+                MainTabView()
+            } else if appState.hasSkippedOnboarding {
+                MainTabView()
+            } else {
+                OnboardingStartView(onSkip: { appState.hasSkippedOnboarding = true })
             }
+        }
+        .task {
+            await appState.checkAuthAndLoad()
+        }
     }
 }
