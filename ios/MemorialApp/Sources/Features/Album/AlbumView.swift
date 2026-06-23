@@ -73,6 +73,7 @@ struct AlbumView: View {
                 toolbarButton
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .onChange(of: selectedItems) { _, items in
             guard !items.isEmpty else { return }
             selectedItems = []

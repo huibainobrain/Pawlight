@@ -24,7 +24,7 @@ struct PhotoDetailView: View {
                             Image(systemName: "photo")
                                 .font(.system(size: 36))
                                 .foregroundColor(.white.opacity(0.4))
-                            Text("照片加载失败")
+                            Text("这张照片暂时没有加载出来")
                                 .font(AppFonts.body(14))
                                 .foregroundColor(.white.opacity(0.4))
                         }
