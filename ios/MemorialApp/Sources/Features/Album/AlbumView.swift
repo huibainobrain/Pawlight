@@ -2,7 +2,12 @@ import SwiftUI
 import PhotosUI
 
 private enum UploadBannerState: Equatable {
-    case idle, uploading, success, failure, formatError
+    case idle
+    case uploading(Int, Int)   // current index, total
+    case allSuccess(Int)       // count
+    case partial(Int, Int)     // succeeded, failed
+    case allFailed
+    case formatError
 }
 
 struct AlbumView: View {
@@ -14,6 +19,10 @@ struct AlbumView: View {
     @State private var wantsEntitlement = false
     @State private var showEntitlement = false
     @State private var selectedPhoto: Photo? = nil
+    @State private var showOverLimitAlert = false
+    @State private var overLimitSelected = 0
+    @State private var overLimitAvailable = 0
+    @State private var pendingPartialItems: [PhotosPickerItem] = []
 
     private var albumPhotos: [Photo] {
         appState.photos.filter { $0.type == .album }
@@ -22,6 +31,11 @@ struct AlbumView: View {
     private var count: Int { albumPhotos.count }
     private var limit: Int { appState.photoLimit }
     private var atLimit: Bool { count >= limit }
+    private var remainingSlots: Int { max(0, limit - count) }
+    private var isUploading: Bool {
+        if case .uploading = uploadState { return true }
+        return false
+    }
 
     var body: some View {
         ZStack {
@@ -60,9 +74,29 @@ struct AlbumView: View {
             }
         }
         .onChange(of: selectedItems) { _, items in
-            guard let item = items.first else { return }
+            guard !items.isEmpty else { return }
             selectedItems = []
-            handleUpload(item: item)
+            let available = remainingSlots
+            if items.count > available {
+                overLimitSelected = items.count
+                overLimitAvailable = available
+                pendingPartialItems = Array(items.prefix(available))
+                showOverLimitAlert = true
+            } else {
+                handleMultiUpload(items: items)
+            }
+        }
+        .alert("照片数量超出上限", isPresented: $showOverLimitAlert) {
+            Button("取消", role: .cancel) { pendingPartialItems = [] }
+            if overLimitAvailable > 0 {
+                Button("仅上传前 \(overLimitAvailable) 张") {
+                    let items = pendingPartialItems
+                    pendingPartialItems = []
+                    handleMultiUpload(items: items)
+                }
+            }
+        } message: {
+            Text("你选择了 \(overLimitSelected) 张照片，但目前只能再保存 \(overLimitAvailable) 张。")
         }
         .sheet(isPresented: $showLimitSheet, onDismiss: {
             if wantsEntitlement {
@@ -86,13 +120,17 @@ struct AlbumView: View {
     // MARK: Toolbar
 
     @ViewBuilder private var toolbarButton: some View {
-        if uploadState == .uploading {
+        if isUploading {
             ProgressView().scaleEffect(0.8)
         } else if atLimit {
             Button("添加照片") { showLimitSheet = true }
                 .foregroundColor(AppColors.muted)
         } else {
-            PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
+            PhotosPicker(
+                selection: $selectedItems,
+                maxSelectionCount: remainingSlots,
+                matching: .images
+            ) {
                 Text("添加照片")
                     .font(AppFonts.body(14, weight: .medium))
                     .foregroundColor(AppColors.greenDeep)
@@ -157,7 +195,11 @@ struct AlbumView: View {
                     }
                     .padding(.horizontal, 32)
                 } else {
-                    PhotosPicker(selection: $selectedItems, maxSelectionCount: 1, matching: .images) {
+                    PhotosPicker(
+                        selection: $selectedItems,
+                        maxSelectionCount: remainingSlots,
+                        matching: .images
+                    ) {
                         Text("添加第一张照片")
                             .font(AppFonts.body(15, weight: .medium))
                             .foregroundColor(AppColors.white)
@@ -232,7 +274,7 @@ struct AlbumView: View {
     @ViewBuilder private var uploadBanner: some View {
         let (message, bg) = bannerContent
         HStack(spacing: 8) {
-            if uploadState == .uploading {
+            if isUploading {
                 ProgressView()
                     .scaleEffect(0.75)
                     .tint(.white)
@@ -250,49 +292,79 @@ struct AlbumView: View {
 
     private var bannerContent: (String, Color) {
         switch uploadState {
-        case .uploading:   return ("正在保存照片……", AppColors.ink.opacity(0.85))
-        case .success:     return ("照片已放进回忆里。", AppColors.greenDeep)
-        case .failure:     return ("这张照片暂时没能保存，请重新试一次。", AppColors.rose)
-        case .formatError: return ("V1暂时只支持图片上传，视频回忆会在后续版本考虑。", AppColors.rose)
-        case .idle:        return ("", .clear)
+        case .uploading(let current, let total):
+            let msg = total == 1 ? "正在保存照片……" : "正在保存第 \(current) / \(total) 张……"
+            return (msg, AppColors.ink.opacity(0.85))
+        case .allSuccess(let n):
+            let msg = n == 1 ? "照片已放进回忆里。" : "\(n) 张照片已放进回忆里。"
+            return (msg, AppColors.greenDeep)
+        case .partial(let ok, let fail):
+            return ("保存了 \(ok) 张，\(fail) 张暂时没能保存。", AppColors.rose)
+        case .allFailed:
+            return ("照片暂时没能保存，请重新试一次。", AppColors.rose)
+        case .formatError:
+            return ("V1暂时只支持图片上传，视频回忆会在后续版本考虑。", AppColors.rose)
+        case .idle:
+            return ("", .clear)
         }
     }
 
     // MARK: Upload Logic
 
-    private func handleUpload(item: PhotosPickerItem) {
-        withAnimation { uploadState = .uploading }
+    private func handleMultiUpload(items: [PhotosPickerItem]) {
+        let total = items.count
+        var succeeded = 0
+        var failed = 0
+
+        withAnimation { uploadState = .uploading(1, total) }
+
         Task { @MainActor in
             guard let token = KeychainHelper.loadToken(),
                   let petId = appState.currentPet?.id else {
-                withAnimation { uploadState = .failure }
+                withAnimation { uploadState = .allFailed }
                 autoDismiss(after: 4)
                 return
             }
-            guard let rawData = try? await item.loadTransferable(type: Data.self),
-                  let uiImage = UIImage(data: rawData),
-                  let jpegData = uiImage.jpegData(compressionQuality: 0.85) else {
-                withAnimation { uploadState = .formatError }
-                autoDismiss(after: 3)
-                return
+
+            for (index, item) in items.enumerated() {
+                withAnimation { uploadState = .uploading(index + 1, total) }
+
+                guard let rawData = try? await item.loadTransferable(type: Data.self),
+                      let uiImage = UIImage(data: rawData),
+                      let jpegData = uiImage.jpegData(compressionQuality: 0.85) else {
+                    failed += 1
+                    continue
+                }
+
+                do {
+                    let apiPhoto = try await APIClient.shared.uploadPhoto(
+                        token: token, petId: petId, imageData: jpegData
+                    )
+                    let photo = Photo(
+                        id: apiPhoto.id, petId: apiPhoto.petId,
+                        userId: appState.currentUser?.id ?? "",
+                        type: .album, url: apiPhoto.r2Url, thumbnailURL: apiPhoto.r2Url,
+                        uploadStatus: .success, isMain: false,
+                        sortOrder: apiPhoto.sortOrder, createdAt: apiPhoto.createdAt
+                    )
+                    appState.photos.append(photo)
+                    succeeded += 1
+                } catch {
+                    print("uploadPhoto [\(index + 1)/\(total)] error: \(error)")
+                    failed += 1
+                }
             }
-            do {
-                let apiPhoto = try await APIClient.shared.uploadPhoto(token: token, petId: petId, imageData: jpegData)
-                let photo = Photo(
-                    id: apiPhoto.id, petId: apiPhoto.petId,
-                    userId: appState.currentUser?.id ?? "",
-                    type: .album, url: apiPhoto.r2Url, thumbnailURL: apiPhoto.r2Url,
-                    uploadStatus: .success, isMain: false,
-                    sortOrder: apiPhoto.sortOrder, createdAt: apiPhoto.createdAt
-                )
-                appState.photos.append(photo)
-                withAnimation { uploadState = .success }
-                autoDismiss(after: 2)
-            } catch {
-                print("uploadAlbumPhoto error: \(error)")
-                withAnimation { uploadState = .failure }
-                autoDismiss(after: 4)
+
+            withAnimation {
+                if failed == 0 {
+                    uploadState = .allSuccess(succeeded)
+                } else if succeeded > 0 {
+                    uploadState = .partial(succeeded, failed)
+                } else {
+                    uploadState = .allFailed
+                }
             }
+            autoDismiss(after: failed == 0 ? 2.5 : 4)
         }
     }
 
@@ -322,7 +394,9 @@ private struct LimitSheet: View {
                 .padding(.bottom, 24)
 
             VStack(alignment: .leading, spacing: 12) {
-                Text(isPaid ? "当前照片数量已达上限。" : "免费纪念空间最多可保存 \(limit) 张照片。\n如果还想继续留下更多瞬间，可以了解完整纪念空间。")
+                Text(isPaid
+                     ? "当前照片数量已达上限。"
+                     : "免费纪念空间最多可保存 \(limit) 张照片。\n如果还想继续留下更多瞬间，可以了解完整纪念空间。")
                     .font(AppFonts.body(15))
                     .foregroundColor(AppColors.ink)
                     .lineSpacing(5)
@@ -333,9 +407,7 @@ private struct LimitSheet: View {
 
             VStack(spacing: 10) {
                 if !isPaid {
-                    Button {
-                        onUpgrade()
-                    } label: {
+                    Button { onUpgrade() } label: {
                         Text("了解完整纪念空间")
                             .font(AppFonts.body(15, weight: .medium))
                             .foregroundColor(AppColors.white)
