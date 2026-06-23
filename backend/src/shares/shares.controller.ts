@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { SharesService, UpdateShareDto } from './shares.service';
@@ -7,15 +15,22 @@ import { SharesService, UpdateShareDto } from './shares.service';
 export class SharesController {
   constructor(private sharesService: SharesService) {}
 
-  // Public endpoint — no auth
+  // Public endpoint — no auth. Optional visitorFingerprint resolves
+  // viewerHasHugged for the H5 page.
   @Get('shares/:slug')
-  findBySlug(@Param('slug') slug: string) {
-    return this.sharesService.findBySlug(slug);
+  findBySlug(
+    @Param('slug') slug: string,
+    @Query('visitorFingerprint') visitorFingerprint?: string,
+  ) {
+    return this.sharesService.findBySlug(slug, visitorFingerprint);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('pets/:petId/share')
-  findByPet(@CurrentUser() user: { id: string }, @Param('petId') petId: string) {
+  findByPet(
+    @CurrentUser() user: { id: string },
+    @Param('petId') petId: string,
+  ) {
     return this.sharesService.findByPet(user.id, petId);
   }
 

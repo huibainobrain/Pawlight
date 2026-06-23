@@ -17,6 +17,7 @@ model User {
   updatedAt   DateTime @updatedAt
 
   pets        Pet[]
+  entitlement Entitlement?
 }
 
 model Pet {
@@ -35,7 +36,6 @@ model Pet {
   updatedAt        DateTime    @updatedAt
 
   photos      Photo[]
-  entitlement Entitlement?
   share       Share?
   letters     Letter[]
 }
@@ -46,15 +46,16 @@ enum PetType {
   OTHER
 }
 
+// Entitlement is account-level (one per User), not per-pet.
 model Entitlement {
-  id         String    @id @default(cuid())
-  petId      String    @unique
-  pet        Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
-  tier       Tier      @default(FREE)
-  purchaseId String?
-  expiredAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier           Tier     @default(FREE)
+  photoLimit     Int      @default(9)
+  mailboxEnabled Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 enum Tier {
@@ -62,15 +63,23 @@ enum Tier {
   PAID
 }
 
+enum PhotoType {
+  MAIN
+  ALBUM
+}
+
 model Photo {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   petId     String
-  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  pet       Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type      PhotoType @default(ALBUM)
   r2Key     String
   r2Url     String
   caption   String?
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([petId, type])
 }
 
 model Share {
@@ -92,18 +101,23 @@ enum Visibility {
 }
 
 model Hug {
-  id          String   @id @default(cuid())
-  shareId     String
-  share       Share    @relation(fields: [shareId], references: [id], onDelete: Cascade)
-  visitorName String?
-  message     String?
-  createdAt   DateTime @default(now())
+  id                 String   @id @default(cuid())
+  shareId            String
+  share              Share    @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  visitorFingerprint String
+  visitorName        String?
+  message            String?
+  createdAt          DateTime @default(now())
+
+  @@unique([shareId, visitorFingerprint])
+  @@index([shareId])
 }
 
 model Letter {
   id        String   @id @default(cuid())
   petId     String
   pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  title     String?
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

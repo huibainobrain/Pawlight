@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 import { PetType } from '@prisma/client';
 import { randomBytes } from 'crypto';
+import { albumPhotoLimit } from '../common/entitlement.util';
 
 export class CreatePetDto {
   @IsString()
@@ -28,34 +34,82 @@ export class PetsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, dto: CreatePetDto) {
+    // V1: a user may only own a single pet.
+    const existing = await this.prisma.pet.count({ where: { userId } });
+    if (existing > 0) {
+      throw new ConflictException({
+        code: 'PET_LIMIT_REACHED',
+        message: 'V1阶段暂时只支持创建一只宠物',
+      });
+    }
+
+    // Entitlement is account-level, created at login — not per pet.
     const slug = randomBytes(6).toString('hex');
     const pet = await this.prisma.pet.create({
       data: {
         userId,
         name: dto.name,
         type: dto.type,
-        entitlement: { create: { tier: 'FREE' } },
         share: { create: { slug } },
       },
-      include: { entitlement: true, share: true },
+      include: { share: true },
     });
-    return pet;
+    return this.withQuota(userId, pet);
   }
 
   async findMine(userId: string) {
-    return this.prisma.pet.findMany({
+    const pets = await this.prisma.pet.findMany({
       where: { userId },
-      include: { entitlement: true, share: true, photos: { take: 1, orderBy: { sortOrder: 'asc' } } },
+      include: {
+        share: true,
+        photos: {
+          where: { type: 'ALBUM' },
+          take: 1,
+          orderBy: { sortOrder: 'asc' },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
+
+    const entitlement = await this.prisma.entitlement.findUnique({
+      where: { userId },
+    });
+    const limit = albumPhotoLimit(entitlement);
+
+    // Attach per-pet album quota. Quota itself is account-level (from the
+    // user's entitlement), the count is per-pet (album photos only).
+    return Promise.all(
+      pets.map(async (pet) => {
+        const albumPhotoCount = await this.prisma.photo.count({
+          where: { petId: pet.id, type: 'ALBUM' },
+        });
+        return { ...pet, albumPhotoCount, albumPhotoLimit: limit };
+      }),
+    );
   }
 
   async update(userId: string, petId: string, dto: UpdatePetDto) {
     await this.assertOwner(userId, petId);
-    return this.prisma.pet.update({
+    const pet = await this.prisma.pet.update({
       where: { id: petId },
       data: dto,
+      include: { share: true },
     });
+    return this.withQuota(userId, pet);
+  }
+
+  private async withQuota<T extends { id: string }>(userId: string, pet: T) {
+    const entitlement = await this.prisma.entitlement.findUnique({
+      where: { userId },
+    });
+    const albumPhotoCount = await this.prisma.photo.count({
+      where: { petId: pet.id, type: 'ALBUM' },
+    });
+    return {
+      ...pet,
+      albumPhotoCount,
+      albumPhotoLimit: albumPhotoLimit(entitlement),
+    };
   }
 
   private async assertOwner(userId: string, petId: string) {

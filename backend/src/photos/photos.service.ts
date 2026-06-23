@@ -1,10 +1,23 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { randomBytes } from 'crypto';
+import { PhotoType } from '@prisma/client';
+import { albumPhotoLimit } from '../common/entitlement.util';
 
 @Injectable()
 export class PhotosService {
+  private readonly logger = new Logger(PhotosService.name);
   private s3: S3Client;
   private bucket = process.env.R2_BUCKET!;
   private publicUrl = process.env.R2_PUBLIC_URL!;
@@ -20,17 +33,35 @@ export class PhotosService {
     });
   }
 
-  async upload(userId: string, petId: string, file: Express.Multer.File) {
-    const pet = await this.prisma.pet.findUnique({
-      where: { id: petId },
-      include: { entitlement: true, _count: { select: { photos: true } } },
-    });
+  async upload(
+    userId: string,
+    petId: string,
+    file: Express.Multer.File,
+    type: PhotoType = 'ALBUM',
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+
+    const pet = await this.prisma.pet.findUnique({ where: { id: petId } });
     if (!pet) throw new NotFoundException('Pet not found');
     if (pet.userId !== userId) throw new ForbiddenException();
 
-    const limit = pet.entitlement?.tier === 'PAID' ? 50 : 9;
-    if (pet._count.photos >= limit) {
-      throw new BadRequestException(`Photo quota reached (${limit})`);
+    // Album photos count against the account-level quota. Main photos do not.
+    if (type === 'ALBUM') {
+      const entitlement = await this.prisma.entitlement.findUnique({
+        where: { userId },
+      });
+      const limit = albumPhotoLimit(entitlement);
+      const albumPhotoCount = await this.prisma.photo.count({
+        where: { petId, type: 'ALBUM' },
+      });
+      if (albumPhotoCount >= limit) {
+        throw new BadRequestException({
+          code: 'PHOTO_QUOTA_REACHED',
+          message: `Photo quota reached (${limit})`,
+          albumPhotoCount,
+          albumPhotoLimit: limit,
+        });
+      }
     }
 
     const ext = file.originalname.split('.').pop() ?? 'jpg';
@@ -47,7 +78,7 @@ export class PhotosService {
 
     const r2Url = `${this.publicUrl}/${key}`;
     const photo = await this.prisma.photo.create({
-      data: { petId, r2Key: key, r2Url },
+      data: { petId, r2Key: key, r2Url, type },
     });
 
     return photo;
@@ -57,10 +88,22 @@ export class PhotosService {
     const pet = await this.prisma.pet.findUnique({ where: { id: petId } });
     if (!pet) throw new NotFoundException();
     if (pet.userId !== userId) throw new ForbiddenException();
-    return this.prisma.photo.findMany({
-      where: { petId },
+
+    // Album page / H5 only ever show ALBUM photos.
+    const photos = await this.prisma.photo.findMany({
+      where: { petId, type: 'ALBUM' },
       orderBy: { sortOrder: 'asc' },
     });
+
+    const entitlement = await this.prisma.entitlement.findUnique({
+      where: { userId },
+    });
+
+    return {
+      photos,
+      albumPhotoCount: photos.length,
+      albumPhotoLimit: albumPhotoLimit(entitlement),
+    };
   }
 
   async remove(userId: string, photoId: string) {
@@ -71,7 +114,27 @@ export class PhotosService {
     if (!photo) throw new NotFoundException();
     if (photo.pet.userId !== userId) throw new ForbiddenException();
 
-    await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: photo.r2Key }));
+    // The album delete endpoint must never delete the main (avatar) photo.
+    if (photo.type === 'MAIN') {
+      throw new BadRequestException({
+        code: 'CANNOT_DELETE_MAIN_PHOTO',
+        message: '主照片不能在照片回忆页删除',
+      });
+    }
+
+    // R2 deletion is best-effort: a failed object delete must not block removing
+    // the DB record (and freeing quota).
+    try {
+      await this.s3.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key: photo.r2Key }),
+      );
+    } catch (err) {
+      this.logger.warn(
+        `Best-effort R2 delete failed for ${photo.r2Key}: ${String(err)}`,
+      );
+    }
+
     await this.prisma.photo.delete({ where: { id: photoId } });
+    return { status: 'success', id: photoId };
   }
 }

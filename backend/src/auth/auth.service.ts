@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import appleSignin from 'apple-signin-auth';
@@ -31,6 +35,8 @@ export class AuthService {
       });
     }
 
+    await this.ensureEntitlement(user.id);
+
     const token = this.jwt.sign({ sub: user.id });
     return { access_token: token, user };
   }
@@ -46,7 +52,23 @@ export class AuthService {
         data: { appleUserId, email: 'debug@simulator.local' },
       });
     }
+
+    await this.ensureEntitlement(user.id);
+
     const token = this.jwt.sign({ sub: user.id });
     return { access_token: token, user };
+  }
+
+  // Entitlement is account-level: every user gets a FREE entitlement on first
+  // login if one does not already exist.
+  private async ensureEntitlement(userId: string) {
+    const existing = await this.prisma.entitlement.findUnique({
+      where: { userId },
+    });
+    if (!existing) {
+      await this.prisma.entitlement.create({
+        data: { userId, tier: 'FREE', photoLimit: 9, mailboxEnabled: false },
+      });
+    }
   }
 }
