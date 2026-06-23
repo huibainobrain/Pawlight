@@ -41,10 +41,10 @@ struct CreateSuccessView: View {
                 Spacer()
                 VStack(spacing: 14) {
                     Button {
-                        // Navigate to memory tab
-                        appState.ownerStage = appState.isPaid ? .hasPetPaid : .hasPetFree
+                        appState.selectedTab = 0
+                        Task { await appState.loadCurrentPet() }
                     } label: {
-                        Text("继续补充回忆")
+                        Text("去看看TA")
                             .font(AppFonts.body(16, weight: .medium))
                             .foregroundColor(AppColors.white)
                             .frame(maxWidth: .infinity)
@@ -53,9 +53,10 @@ struct CreateSuccessView: View {
                             .cornerRadius(12)
                     }
                     Button {
-                        appState.ownerStage = appState.isPaid ? .hasPetPaid : .hasPetFree
+                        appState.selectedTab = 1
+                        Task { await appState.loadCurrentPet() }
                     } label: {
-                        Text("去看看TA")
+                        Text("继续补充回忆")
                             .font(AppFonts.body(15))
                             .foregroundColor(AppColors.green)
                     }

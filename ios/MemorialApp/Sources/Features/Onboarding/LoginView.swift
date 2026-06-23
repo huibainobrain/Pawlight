@@ -10,9 +10,6 @@ struct LoginView: View {
         ZStack {
             AppColors.paper.ignoresSafeArea()
             VStack(spacing: 0) {
-                StepIndicator(current: 0, total: 3)
-                    .padding(.top, 16)
-
                 Spacer()
                 VStack(spacing: 20) {
                     Image(systemName: "lock.open.fill")

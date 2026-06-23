@@ -7,13 +7,14 @@ struct MemoryView: View {
     @State private var showMailbox = false
     @State private var showHugs = false
     @State private var showMemorialEdit = false
+    @State private var showOnboarding = false
 
     var body: some View {
         NavigationStack {
             ZStack {
                 AppColors.paper.ignoresSafeArea()
                 if !appState.hasPet {
-                    MemoryUnboardedView()
+                    MemoryUnboardedView(showOnboarding: $showOnboarding)
                 }
                 if appState.hasPet {
                     ScrollView {
@@ -152,12 +153,20 @@ struct MemoryView: View {
             }
             .navigationDestination(isPresented: $showHugs) { HugsView() }
         }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingStartView()
+        }
+        .onChange(of: appState.hasPet) { _, hasPet in
+            if hasPet { showOnboarding = false }
+        }
     }
 }
 
 // MARK: - 未入驻空态
 
 struct MemoryUnboardedView: View {
+    @Binding var showOnboarding: Bool
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -165,15 +174,27 @@ struct MemoryUnboardedView: View {
                 .font(.system(size: 48))
                 .foregroundColor(AppColors.green.opacity(0.35))
             VStack(spacing: 10) {
-                Text("TA的回忆，等你来记录")
+                Text("还没有为TA创建星球")
                     .font(AppFonts.serif(20, weight: .medium))
                     .foregroundColor(AppColors.ink)
-                Text("创建星球后，这里可以留下\nTA的故事、照片和你写给TA的话。")
+                Text("先留下TA的名字和一张照片，之后再慢慢补充回忆。")
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.muted)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
+            Button {
+                showOnboarding = true
+            } label: {
+                Text("开始创建")
+                    .font(AppFonts.body(16, weight: .medium))
+                    .foregroundColor(AppColors.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(AppColors.greenDeep)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 32)
             Spacer()
         }
         .padding(.horizontal, 32)

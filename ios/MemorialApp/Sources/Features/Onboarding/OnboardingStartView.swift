@@ -3,6 +3,8 @@ import SwiftUI
 struct OnboardingStartView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) var dismiss
+    @State private var navigateToLogin = false
+    @State private var navigateToPetInfo = false
 
     var onSkip: (() -> Void)? = nil
 
@@ -42,7 +44,13 @@ struct OnboardingStartView: View {
                     }
                     Spacer()
                     VStack(spacing: 16) {
-                        NavigationLink(destination: LoginView()) {
+                        Button {
+                            if appState.isLoggedIn {
+                                navigateToPetInfo = true
+                            } else {
+                                navigateToLogin = true
+                            }
+                        } label: {
                             Text("开始创建")
                                 .font(AppFonts.body(16, weight: .medium))
                                 .foregroundColor(AppColors.white)
@@ -66,6 +74,12 @@ struct OnboardingStartView: View {
                 }
             }
             .navigationBarHidden(true)
+            .navigationDestination(isPresented: $navigateToLogin) {
+                LoginView()
+            }
+            .navigationDestination(isPresented: $navigateToPetInfo) {
+                PetInfoView()
+            }
         }
     }
 }

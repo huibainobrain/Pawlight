@@ -49,11 +49,11 @@ struct HomeUnboardedView: View {
                         .foregroundColor(AppColors.green.opacity(0.5))
                 }
                 VStack(spacing: 12) {
-                    Text("回来看看TA，\n把想念慢慢放在这里。")
+                    Text("还没有为TA创建星球")
                         .font(AppFonts.serif(22, weight: .medium))
                         .foregroundColor(AppColors.ink)
                         .multilineTextAlignment(.center)
-                    Text("这里不是任务系统，也不是社交广场。\n它只是一个安静的位置，留给你和那只小动物。")
+                    Text("先留下TA的名字和一张照片，之后再慢慢补充回忆。")
                         .font(AppFonts.body(14))
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)

@@ -7,7 +7,6 @@ struct TierSelectView: View {
     @EnvironmentObject var appState: AppState
     @State private var navigateToSuccess = false
     @State private var selectedTier: Entitlement.EntitlementType?
-    @State private var isPurchasing = false
 
     var body: some View {
         ZStack {
@@ -63,22 +62,17 @@ struct TierSelectView: View {
                 Button {
                     confirmSelection()
                 } label: {
-                    HStack(spacing: 8) {
-                        if isPurchasing {
-                            ProgressView().tint(AppColors.white)
-                        }
-                        Text(buttonTitle)
-                            .font(AppFonts.body(16, weight: .medium))
-                            .foregroundColor(selectedTier != nil ? AppColors.white : AppColors.muted)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(selectedTier != nil ? AppColors.greenDeep : AppColors.line)
-                    .cornerRadius(12)
+                    Text(buttonTitle)
+                        .font(AppFonts.body(16, weight: .medium))
+                        .foregroundColor(selectedTier != nil ? AppColors.white : AppColors.muted)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(selectedTier != nil ? AppColors.greenDeep : AppColors.line)
+                        .cornerRadius(12)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
-                .disabled(selectedTier == nil || isPurchasing)
+                .disabled(selectedTier == nil)
             }
         }
         .navigationTitle("")
@@ -97,16 +91,9 @@ struct TierSelectView: View {
     }
 
     private func confirmSelection() {
-        guard let tier = selectedTier else { return }
-        isPurchasing = true
-        Task { @MainActor in
-            if tier == .paid {
-                // StoreKit IAP not yet implemented — fall through to free for now
-            }
-            await appState.loadCurrentPet()
-            isPurchasing = false
-            navigateToSuccess = true
-        }
+        guard selectedTier != nil else { return }
+        // StoreKit IAP not yet implemented; loadCurrentPet is deferred to CreateSuccessView
+        navigateToSuccess = true
     }
 }
 

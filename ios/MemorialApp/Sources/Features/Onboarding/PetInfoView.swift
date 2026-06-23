@@ -20,7 +20,7 @@ struct PetInfoView: View {
         ZStack {
             AppColors.paper.ignoresSafeArea()
             VStack(spacing: 0) {
-                StepIndicator(current: 1, total: 3)
+                StepIndicator(current: 0, total: 3)
                     .padding(.top, 16)
                     .padding(.horizontal, 24)
 
