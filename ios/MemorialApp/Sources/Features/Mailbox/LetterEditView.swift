@@ -113,7 +113,7 @@ struct LetterEditView: View {
 
                     // MARK: Save error
                     if saveError {
-                        Text("保存遇到了问题，请稍后再试。")
+                        Text("这封信暂时没有保存成功，请稍后再试。")
                             .font(AppFonts.body(13))
                             .foregroundColor(AppColors.rose)
                             .padding(.horizontal, 20)
@@ -160,6 +160,7 @@ struct LetterEditView: View {
         .navigationTitle("写给TA")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(hasChanges)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("取消") {

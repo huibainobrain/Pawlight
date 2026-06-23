@@ -24,6 +24,7 @@ struct MailboxView: View {
         }
         .navigationTitle("天堂信箱")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
