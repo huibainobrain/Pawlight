@@ -100,7 +100,7 @@ struct StoryEditView: View {
 
                         // MARK: 保存失败提示
                         if saveError {
-                            Text("保存遇到了问题，请稍后再试。")
+                            Text("故事暂时没有保存成功，请稍后再试。")
                                 .font(AppFonts.body(13))
                                 .foregroundColor(AppColors.rose)
                                 .padding(.horizontal, 20)
