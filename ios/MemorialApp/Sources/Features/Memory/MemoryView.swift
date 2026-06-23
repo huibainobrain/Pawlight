@@ -279,8 +279,8 @@ struct MemorySectionCard<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Button(action: onTap) {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     HStack(spacing: 8) {
                         Image(systemName: icon)
@@ -295,10 +295,13 @@ struct MemorySectionCard<Content: View>: View {
                         .font(.system(size: 12))
                         .foregroundColor(AppColors.muted)
                 }
+                content
             }
-            content
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
         }
-        .padding(16)
+        .buttonStyle(.plain)
         .background(AppColors.white)
         .cornerRadius(12)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.line, lineWidth: 1))
