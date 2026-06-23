@@ -116,13 +116,33 @@ final class APIClient {
         return try await perform(req)
     }
 
-    func createLetter(token: String, petId: String, content: String) async throws -> ApiLetter {
+    func createLetter(token: String, petId: String, title: String?, content: String) async throws -> ApiLetter {
         var req = URLRequest(url: url("/api/v1/pets/\(petId)/letters"))
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        req.httpBody = try? JSONSerialization.data(withJSONObject: ["content": content])
+        var body: [String: Any] = ["content": content]
+        if let title { body["title"] = title }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
         return try await perform(req)
+    }
+
+    func updateLetter(token: String, petId: String, letterId: String, title: String?, content: String) async throws -> ApiLetter {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/letters/\(letterId)"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        var body: [String: Any] = ["content": content]
+        if let title { body["title"] = title }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        return try await perform(req)
+    }
+
+    func deleteLetter(token: String, petId: String, letterId: String) async throws {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/letters/\(letterId)"))
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        try await performVoid(req)
     }
 
     // MARK: - Hugs

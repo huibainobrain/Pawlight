@@ -108,6 +108,7 @@ struct ApiPhoto: Decodable {
 struct ApiLetter: Decodable {
     let id: String
     let petId: String
+    let title: String?
     let content: String
     let createdAt: Date
     let updatedAt: Date

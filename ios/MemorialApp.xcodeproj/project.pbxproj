@@ -13,6 +13,7 @@
 		1226FAD4D9D078719D3CB817 /* MemorialSentenceEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */; };
 		162884CC621EA2A8E9C0F7FF /* MailboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1020B1B660C233418782944 /* MailboxView.swift */; };
 		1F953BE202ED0B123ABF3AED /* MailboxLockedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793C643D0522E264F127E573 /* MailboxLockedView.swift */; };
+		EE112233445566778899AABB /* LetterEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF112233445566778899AABB /* LetterEditView.swift */; };
 		212E63EAFD46B6B7660091D2 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8510878390A19F7D46D31821 /* KeychainHelper.swift */; };
 		237503EEAB4CA1CA32FD985F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8830EE2A3C903C1A16AE7670 /* AppState.swift */; };
 		4272315CFC0783C8732416AF /* SharePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB94814E21284C70E752BAE2 /* SharePanelView.swift */; };
@@ -55,6 +56,7 @@
 		64245C6BF899F9C1142F86E0 /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		73DA614CCC0D6060777285F4 /* EntitlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementView.swift; sourceTree = "<group>"; };
 		793C643D0522E264F127E573 /* MailboxLockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxLockedView.swift; sourceTree = "<group>"; };
+		FF112233445566778899AABB /* LetterEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterEditView.swift; sourceTree = "<group>"; };
 		8510878390A19F7D46D31821 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		856E4EB784D031CDEA78CBBD /* PetInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetInfoView.swift; sourceTree = "<group>"; };
 		8830EE2A3C903C1A16AE7670 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 			children = (
 				793C643D0522E264F127E573 /* MailboxLockedView.swift */,
 				C1020B1B660C233418782944 /* MailboxView.swift */,
+				FF112233445566778899AABB /* LetterEditView.swift */,
 			);
 			path = Mailbox;
 			sourceTree = "<group>";
@@ -352,6 +355,7 @@
 				59091E848DE621C8ACAC8AFB /* LoginView.swift in Sources */,
 				1F953BE202ED0B123ABF3AED /* MailboxLockedView.swift in Sources */,
 				162884CC621EA2A8E9C0F7FF /* MailboxView.swift in Sources */,
+				EE112233445566778899AABB /* LetterEditView.swift in Sources */,
 				D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */,
 				43080225A217466CC254B91F /* MainTabView.swift in Sources */,
 				6B412D6905266A68D5C60AF4 /* MemorialApp.swift in Sources */,

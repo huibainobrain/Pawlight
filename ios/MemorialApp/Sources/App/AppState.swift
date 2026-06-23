@@ -88,7 +88,7 @@ class AppState: ObservableObject {
         if isPaid, let apiLetters = try? await APIClient.shared.fetchLetters(token: token, petId: petId) {
             letters = apiLetters.map { l in
                 Letter(id: l.id, petId: l.petId, userId: currentUser?.id ?? "",
-                       title: nil, content: l.content,
+                       title: l.title, content: l.content,
                        createdAt: l.createdAt, updatedAt: l.updatedAt)
             }
         }
