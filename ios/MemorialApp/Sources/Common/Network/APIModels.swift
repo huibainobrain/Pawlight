@@ -35,7 +35,11 @@ struct ApiPet: Decodable {
     let bornOn: String?
     let leftOn: String?
     let createdAt: Date
-    let entitlement: ApiEntitlement?
+    // Per-P0: entitlement is now user-level; the pet response no longer embeds it.
+    // The backend returns these flattened quota/capability fields instead.
+    let albumPhotoCount: Int?
+    let albumPhotoLimit: Int?
+    let mailboxEnabled: Bool?
     let share: ApiShare?
     let photos: [ApiPhoto]?
 
@@ -51,8 +55,7 @@ struct ApiPet: Decodable {
         }
     }
 
-    // Custom init because some endpoints omit relation fields (photos, entitlement, share)
-    // Swift's synthesized Decodable throws keyNotFound for absent optional keys
+    // Custom init: some endpoints omit relation fields (photos, share).
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)
@@ -66,20 +69,27 @@ struct ApiPet: Decodable {
         bornOn = try c.decodeIfPresent(String.self, forKey: .bornOn)
         leftOn = try c.decodeIfPresent(String.self, forKey: .leftOn)
         createdAt = try c.decode(Date.self, forKey: .createdAt)
-        entitlement = try c.decodeIfPresent(ApiEntitlement.self, forKey: .entitlement)
+        albumPhotoCount = try c.decodeIfPresent(Int.self, forKey: .albumPhotoCount)
+        albumPhotoLimit = try c.decodeIfPresent(Int.self, forKey: .albumPhotoLimit)
+        mailboxEnabled = try c.decodeIfPresent(Bool.self, forKey: .mailboxEnabled)
         share = try c.decodeIfPresent(ApiShare.self, forKey: .share)
         photos = try c.decodeIfPresent([ApiPhoto].self, forKey: .photos)
     }
 
     enum CodingKeys: String, CodingKey {
         case id, userId, name, type, mainPhotoId, story, memorialSentence
-        case arrivedOn, bornOn, leftOn, createdAt, entitlement, share, photos
+        case arrivedOn, bornOn, leftOn, createdAt
+        case albumPhotoCount, albumPhotoLimit, mailboxEnabled
+        case share, photos
     }
 }
 
+// Entitlement is now user-level (P0 change). The pet response no longer
+// embeds a per-pet entitlement; instead albumPhotoCount/albumPhotoLimit/
+// mailboxEnabled are returned directly on the pet.
 struct ApiEntitlement: Decodable {
     let id: String
-    let petId: String
+    let userId: String
     let tier: String
     let createdAt: Date
 }
@@ -101,6 +111,7 @@ struct ApiPhoto: Decodable {
     let r2Url: String
     let sortOrder: Int
     let createdAt: Date
+    let type: String?  // "MAIN" | "ALBUM" — may be absent on older endpoints
 }
 
 // MARK: - Letter

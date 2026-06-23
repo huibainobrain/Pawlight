@@ -56,7 +56,7 @@ struct MemoryView: View {
                             let albumPhotos = appState.photos.filter { $0.type == .album }
                             if albumPhotos.isEmpty {
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("还没有添加照片。\n放一张TA的照片吧。")
+                                    Text("还没有添加照片。\n可以先放一张和TA有关的瞬间。")
                                         .font(AppFonts.body(14))
                                         .foregroundColor(AppColors.muted)
                                         .lineSpacing(4)
@@ -67,7 +67,12 @@ struct MemoryView: View {
                                     }
                                 }
                             } else {
-                                AlbumThumbnailGrid(photos: albumPhotos)
+                                VStack(alignment: .leading, spacing: 8) {
+                                    AlbumThumbnailGrid(photos: albumPhotos)
+                                    Text("\(albumPhotos.count) / \(appState.photoLimit) 张")
+                                        .font(AppFonts.body(12))
+                                        .foregroundColor(AppColors.muted)
+                                }
                             }
                         }
                         .padding(.horizontal, 20)
@@ -77,11 +82,25 @@ struct MemoryView: View {
                             showMailbox = true
                         } content: {
                             if appState.mailboxEnabled {
-                                Text(appState.letters.isEmpty ? "想说的话，慢慢写在这里。" : "\(appState.letters.count) 封信")
-                                    .font(AppFonts.body(14))
-                                    .foregroundColor(AppColors.muted)
+                                if appState.letters.isEmpty {
+                                    Text("想说的话，可以慢慢写在这里。\n这些信只给主人自己看。")
+                                        .font(AppFonts.body(14))
+                                        .foregroundColor(AppColors.muted)
+                                        .lineSpacing(4)
+                                } else {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        let latest = appState.letters.first
+                                        Text(latest?.title.flatMap { $0.isEmpty ? nil : $0 } ?? "写给TA的一封信")
+                                            .font(AppFonts.body(14, weight: .medium))
+                                            .foregroundColor(AppColors.ink)
+                                            .lineLimit(1)
+                                        Text("共 \(appState.letters.count) 封信")
+                                            .font(AppFonts.body(12))
+                                            .foregroundColor(AppColors.muted)
+                                    }
+                                }
                             } else {
-                                Text("开启完整纪念空间后，可以把想对TA说的话慢慢留在这里。")
+                                Text("有些话，不一定要放在纪念页里。\n开启完整纪念空间后，可以把想对TA说的话留在这里，只有你自己可以看到。")
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                                     .lineSpacing(4)
@@ -99,9 +118,21 @@ struct MemoryView: View {
                                     .foregroundColor(AppColors.muted)
                                     .lineSpacing(4)
                             } else {
-                                Text("TA收到了 \(appState.hugs.count) 个抱抱")
-                                    .font(AppFonts.body(14))
-                                    .foregroundColor(AppColors.muted)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    if appState.newHugCount > 0 {
+                                        HStack(spacing: 6) {
+                                            Circle()
+                                                .fill(AppColors.rose)
+                                                .frame(width: 6, height: 6)
+                                            Text("有 \(appState.newHugCount) 个新的抱抱")
+                                                .font(AppFonts.body(13, weight: .medium))
+                                                .foregroundColor(AppColors.rose)
+                                        }
+                                    }
+                                    Text("已经有 \(appState.hugs.count) 位朋友轻轻抱过TA")
+                                        .font(AppFonts.body(14))
+                                        .foregroundColor(AppColors.muted)
+                                }
                             }
                         }
                         .padding(.horizontal, 20)
@@ -155,6 +186,23 @@ struct MemoryHeaderView: View {
     @EnvironmentObject var appState: AppState
     @Binding var showMemorialEdit: Bool
 
+    private var datesLine: String? {
+        guard let pet = appState.currentPet else { return nil }
+        // Use year-only for compact header display
+        let arrived = pet.metOrAdoptionDate.flatMap { yearString($0) }
+        let left = pet.passedAwayDate.flatMap { yearString($0) }
+        if let a = arrived, let l = left { return "\(a) — \(l)" }
+        if let l = left { return "\(l)离开" }
+        if let a = arrived { return "\(a)来到" }
+        return nil
+    }
+
+    private func yearString(_ d: PartialDate) -> String? {
+        guard let v = d.value, !v.isEmpty else { return nil }
+        let year = String(v.prefix(4))
+        return year.isEmpty ? nil : "\(year)年"
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Rectangle()
@@ -165,21 +213,25 @@ struct MemoryHeaderView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .frame(height: 260)
+                .frame(height: 280)
 
             VStack(spacing: 12) {
+                // Main photo
                 ZStack {
                     Circle()
                         .fill(AppColors.white.opacity(0.9))
                         .frame(width: 100, height: 100)
                         .shadow(color: .black.opacity(0.08), radius: 12)
                     if let photo = appState.currentPet?.mainPhoto {
-                        AsyncImage(url: URL(string: photo.url)) { img in
-                            img.resizable().scaledToFill()
-                        } placeholder: {
-                            Image(systemName: "pawprint.fill")
-                                .font(.system(size: 32))
-                                .foregroundColor(AppColors.green.opacity(0.5))
+                        AsyncImage(url: URL(string: photo.url)) { phase in
+                            switch phase {
+                            case .success(let img):
+                                img.resizable().scaledToFill()
+                            default:
+                                Image(systemName: "pawprint.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundColor(AppColors.green.opacity(0.5))
+                            }
                         }
                         .frame(width: 100, height: 100)
                         .clipShape(Circle())
@@ -189,31 +241,37 @@ struct MemoryHeaderView: View {
                             .foregroundColor(AppColors.green.opacity(0.5))
                     }
                 }
-                VStack(spacing: 6) {
+
+                VStack(spacing: 5) {
                     Text(appState.currentPet?.name ?? "")
                         .font(AppFonts.serif(22, weight: .medium))
                         .foregroundColor(AppColors.ink)
+
+                    if let dates = datesLine {
+                        Text(dates)
+                            .font(AppFonts.body(12))
+                            .foregroundColor(AppColors.muted.opacity(0.75))
+                    }
+
                     Button {
                         showMemorialEdit = true
                     } label: {
                         HStack(spacing: 4) {
-                            Text(
-                                appState.currentPet?.memorialSentence?.isEmpty == false
-                                    ? (appState.currentPet?.memorialSentence ?? "")
-                                    : "写一句纪念语"
-                            )
-                            .font(AppFonts.body(14))
-                            .foregroundColor(AppColors.muted)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.center)
+                            let sentence = appState.currentPet?.memorialSentence ?? ""
+                            Text(sentence.isEmpty ? "写一句想留给TA的话" : sentence)
+                                .font(AppFonts.body(14))
+                                .foregroundColor(sentence.isEmpty ? AppColors.muted.opacity(0.5) : AppColors.muted)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.center)
                             Image(systemName: "pencil")
                                 .font(.system(size: 11))
-                                .foregroundColor(AppColors.muted)
+                                .foregroundColor(AppColors.muted.opacity(0.6))
                         }
                     }
+                    .padding(.top, 2)
                 }
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, 24)
         }
     }
 }

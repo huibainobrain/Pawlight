@@ -62,11 +62,9 @@ export class PetsService {
       where: { userId },
       include: {
         share: true,
-        photos: {
-          where: { type: 'ALBUM' },
-          take: 1,
-          orderBy: { sortOrder: 'asc' },
-        },
+        // Include ALL photos (MAIN + ALBUM) so the client can display the
+        // main photo in the header and album thumbnails in the grid.
+        photos: { orderBy: { sortOrder: 'asc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -76,14 +74,17 @@ export class PetsService {
     });
     const limit = albumPhotoLimit(entitlement);
 
-    // Attach per-pet album quota. Quota itself is account-level (from the
-    // user's entitlement), the count is per-pet (album photos only).
     return Promise.all(
       pets.map(async (pet) => {
         const albumPhotoCount = await this.prisma.photo.count({
           where: { petId: pet.id, type: 'ALBUM' },
         });
-        return { ...pet, albumPhotoCount, albumPhotoLimit: limit };
+        return {
+          ...pet,
+          albumPhotoCount,
+          albumPhotoLimit: limit,
+          mailboxEnabled: entitlement?.mailboxEnabled ?? false,
+        };
       }),
     );
   }
@@ -109,6 +110,7 @@ export class PetsService {
       ...pet,
       albumPhotoCount,
       albumPhotoLimit: albumPhotoLimit(entitlement),
+      mailboxEnabled: entitlement?.mailboxEnabled ?? false,
     };
   }
 

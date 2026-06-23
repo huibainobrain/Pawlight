@@ -74,7 +74,9 @@ class AppState: ObservableObject {
             let pets = try await APIClient.shared.fetchMyPets(token: token)
             if let first = pets.first {
                 applyPet(first)
-                await loadSideData(token: token, petId: first.id, isPaid: first.entitlement?.tier == "PAID")
+                // isPaid is derived from the albumPhotoLimit field returned by the backend.
+                let isPaid = (first.albumPhotoLimit ?? 9) >= 50
+                await loadSideData(token: token, petId: first.id, isPaid: isPaid)
             } else {
                 ownerStage = .loggedInNoPet
             }
@@ -115,13 +117,21 @@ class AppState: ObservableObject {
     // MARK: - API → Domain Conversion
 
     private func applyPet(_ api: ApiPet) {
-        let mainApiPhoto = api.photos?.first(where: { $0.id == api.mainPhotoId })
-            ?? api.photos?.first
-        let mainDomainPhoto: Photo? = mainApiPhoto.map { p in
-            Photo(id: p.id, petId: p.petId, userId: api.userId, type: .main,
-                  url: p.r2Url, thumbnailURL: p.r2Url, uploadStatus: .success,
-                  isMain: true, sortOrder: p.sortOrder, createdAt: p.createdAt)
+        // Photo type: use the `type` field returned by the backend (P0 model).
+        // Fall back to mainPhotoId comparison for responses that don't include type.
+        let domainPhotos: [Photo] = (api.photos ?? []).map { p in
+            let isMain = (p.type == "MAIN") || (p.id == api.mainPhotoId)
+            return Photo(
+                id: p.id, petId: p.petId, userId: api.userId,
+                type: isMain ? .main : .album,
+                url: p.r2Url, thumbnailURL: p.r2Url,
+                uploadStatus: .success, isMain: isMain,
+                sortOrder: p.sortOrder, createdAt: p.createdAt
+            )
         }
+        photos = domainPhotos
+
+        let mainDomainPhoto = domainPhotos.first(where: { $0.type == .main })
 
         currentPet = Pet(
             id: api.id,
@@ -138,11 +148,15 @@ class AppState: ObservableObject {
             createdAt: api.createdAt
         )
 
-        let isPaid = api.entitlement?.tier == "PAID"
+        // Entitlement is user-level (P0). Backend returns albumPhotoLimit and
+        // mailboxEnabled directly on the pet response; derive isPaid from limit.
+        let limit = api.albumPhotoLimit ?? 9
+        let mbEnabled = api.mailboxEnabled ?? false
+        let isPaid = limit >= 50 || mbEnabled
         entitlement = Entitlement(
             entitlementType: isPaid ? .paid : .free,
-            photoLimit: isPaid ? 50 : 9,
-            mailboxEnabled: isPaid,
+            photoLimit: limit,
+            mailboxEnabled: mbEnabled,
             purchaseStatus: isPaid ? .paid : .none
         )
         ownerStage = isPaid ? .hasPetPaid : .hasPetFree
@@ -165,23 +179,6 @@ class AppState: ObservableObject {
                 status: .active,
                 createdAt: s.createdAt
             )
-        }
-
-        if let apiPhotos = api.photos {
-            photos = apiPhotos.map { p in
-                Photo(
-                    id: p.id,
-                    petId: p.petId,
-                    userId: api.userId,
-                    type: p.id == api.mainPhotoId ? .main : .album,
-                    url: p.r2Url,
-                    thumbnailURL: p.r2Url,
-                    uploadStatus: .success,
-                    isMain: p.id == api.mainPhotoId,
-                    sortOrder: p.sortOrder,
-                    createdAt: p.createdAt
-                )
-            }
         }
     }
 
