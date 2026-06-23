@@ -5,6 +5,7 @@ struct PetProfileView: View {
     @State private var name = ""
     @State private var petType: Pet.PetType = .cat
     @State private var isSaving = false
+    @State private var saveError = false
 
     var body: some View {
         ZStack {
@@ -32,6 +33,7 @@ struct PetProfileView: View {
         }
         .navigationTitle("宠物资料")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button {
@@ -50,6 +52,11 @@ struct PetProfileView: View {
             name = appState.currentPet?.name ?? ""
             petType = appState.currentPet?.type ?? .cat
         }
+        .alert("保存失败", isPresented: $saveError) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text("宠物资料暂时没有保存成功，请稍后再试。")
+        }
     }
 
     private func save() {
@@ -66,6 +73,7 @@ struct PetProfileView: View {
                 appState.currentPet?.type = petType
             } catch {
                 print("savePetProfile error: \(error)")
+                saveError = true
             }
             isSaving = false
         }

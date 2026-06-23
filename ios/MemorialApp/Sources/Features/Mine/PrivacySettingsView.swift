@@ -4,6 +4,8 @@ struct PrivacySettingsView: View {
     @EnvironmentObject var appState: AppState
     @State private var visibility: Share.Visibility = .link
     @State private var hugEnabled = true
+    @State private var isSaving = false
+    @State private var saveError = false
 
     var body: some View {
         ZStack {
@@ -33,27 +35,50 @@ struct PrivacySettingsView: View {
         }
         .navigationTitle("权限设置")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("保存") {
-                    appState.share?.visibility = visibility
-                    appState.share?.hugEnabled = hugEnabled
-                    guard let token = KeychainHelper.loadToken(),
-                          let petId = appState.currentPet?.id else { return }
-                    let visStr = visibility == .link ? "LINK" : "PRIVATE"
-                    let enabled = hugEnabled
-                    Task {
-                        try? await APIClient.shared.updateShare(token: token, petId: petId,
-                                                                 visibility: visStr, hugEnabled: enabled)
+                Button { save() } label: {
+                    if isSaving {
+                        ProgressView().scaleEffect(0.8)
+                    } else {
+                        Text("保存")
+                            .foregroundColor(AppColors.greenDeep)
+                            .fontWeight(.medium)
                     }
                 }
-                .foregroundColor(AppColors.greenDeep)
-                .fontWeight(.medium)
+                .disabled(isSaving)
             }
         }
         .onAppear {
             visibility = appState.share?.visibility ?? .link
             hugEnabled = appState.share?.hugEnabled ?? true
+        }
+        .alert("保存失败", isPresented: $saveError) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text("权限设置暂时没有保存成功，请稍后再试。")
+        }
+    }
+
+    private func save() {
+        guard let token = KeychainHelper.loadToken(),
+              let petId = appState.currentPet?.id else { return }
+        let visStr = visibility == .link ? "LINK" : "PRIVATE"
+        let vis = visibility
+        let hug = hugEnabled
+        isSaving = true
+        Task { @MainActor in
+            do {
+                try await APIClient.shared.updateShare(token: token, petId: petId,
+                                                       visibility: visStr, hugEnabled: hug)
+                appState.share?.visibility = vis
+                appState.share?.hugEnabled = hug
+            } catch {
+                print("updateShare error: \(error)")
+                saveError = true
+            }
+            isSaving = false
         }
     }
 }

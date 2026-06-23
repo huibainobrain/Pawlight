@@ -57,6 +57,7 @@ struct EntitlementView: View {
         }
         .navigationTitle("纪念空间")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
     }
 }
 

@@ -41,6 +41,7 @@ struct HugsView: View {
         }
         .navigationTitle("抱抱记录")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             appState.newHugCount = 0
         }
