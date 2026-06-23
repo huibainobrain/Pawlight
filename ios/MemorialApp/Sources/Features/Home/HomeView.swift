@@ -184,7 +184,6 @@ struct LearnMoreItem: View {
 struct HomeCreatedView: View {
     @EnvironmentObject var appState: AppState
     @State private var showHugs = false
-    @State private var showMemory = false
 
     var body: some View {
         ScrollView {
@@ -295,9 +294,14 @@ struct NewHugCard: View {
             Image(systemName: "heart.fill")
                 .foregroundColor(AppColors.rose)
                 .font(.system(size: 18))
-            Text("有 \(count) 个新的抱抱")
-                .font(AppFonts.body(15))
-                .foregroundColor(AppColors.ink)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("有 \(count) 个新的抱抱")
+                    .font(AppFonts.body(15, weight: .medium))
+                    .foregroundColor(AppColors.ink)
+                Text("有人也来看看TA，轻轻抱抱了TA。")
+                    .font(AppFonts.body(13))
+                    .foregroundColor(AppColors.muted)
+            }
             Spacer()
             Image(systemName: "chevron.right")
                 .font(.system(size: 13, weight: .medium))
@@ -319,13 +323,17 @@ struct NewHugCard: View {
 struct QuickActionsRow: View {
     @EnvironmentObject var appState: AppState
     @State private var showStoryEdit = false
+    @State private var showAlbum = false
     @State private var showShare = false
 
     var body: some View {
         HStack(spacing: 12) {
             QuickActionButton(icon: "text.quote", label: "写故事") { showStoryEdit = true }
-            QuickActionButton(icon: "photo", label: "放照片") { appState.selectedTab = 1 }
+            QuickActionButton(icon: "photo", label: "放照片") { showAlbum = true }
             QuickActionButton(icon: "paperplane", label: "分享") { showShare = true }
+        }
+        .navigationDestination(isPresented: $showAlbum) {
+            AlbumView()
         }
         .sheet(isPresented: $showStoryEdit) {
             StoryEditView().environmentObject(appState)
@@ -378,6 +386,10 @@ struct FreeUpgradeCard: View {
                     Text(isPhotoFull ? "照片已到免费上限" : "想留下更多照片时")
                         .font(AppFonts.body(13, weight: .medium))
                         .foregroundColor(AppColors.ink)
+                    Text(isPhotoFull ? "完整纪念空间可以保存更多和TA有关的瞬间。" : "完整纪念空间可以留下更多照片，也可以使用天堂信箱。")
+                        .font(AppFonts.body(12))
+                        .foregroundColor(AppColors.muted)
+                        .lineSpacing(2)
                     Text("了解完整纪念空间")
                         .font(AppFonts.body(12))
                         .foregroundColor(AppColors.green)

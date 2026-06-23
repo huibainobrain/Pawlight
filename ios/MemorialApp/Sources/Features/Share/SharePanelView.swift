@@ -7,6 +7,8 @@ struct SharePanelView: View {
     @State private var visibility: Share.Visibility = .link
     @State private var hugEnabled = true
     @State private var showPrivacyConfirm = false
+    @State private var pendingCopyOnConfirm = true
+    @State private var showSystemShare = false
     @State private var copied = false
 
     private var shareURL: String { appState.share?.shareURL ?? "" }
@@ -34,6 +36,7 @@ struct SharePanelView: View {
                     VStack(spacing: 12) {
                         Button {
                             if visibility == .private {
+                                pendingCopyOnConfirm = true
                                 showPrivacyConfirm = true
                             } else {
                                 copyLink()
@@ -48,14 +51,29 @@ struct SharePanelView: View {
                                 .cornerRadius(10)
                         }
 
-                        ShareLink(item: URL(string: shareURL) ?? URL(string: "https://pet-memory-psi.vercel.app")!) {
-                            Label("分享给好友", systemImage: "paperplane")
-                                .font(AppFonts.body(15, weight: .medium))
-                                .foregroundColor(AppColors.greenDeep)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(AppColors.green.opacity(0.08))
-                                .cornerRadius(10)
+                        if visibility == .link {
+                            ShareLink(item: URL(string: shareURL) ?? URL(string: "https://pet-memory-psi.vercel.app")!) {
+                                Label("分享给好友", systemImage: "paperplane")
+                                    .font(AppFonts.body(15, weight: .medium))
+                                    .foregroundColor(AppColors.greenDeep)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(AppColors.green.opacity(0.08))
+                                    .cornerRadius(10)
+                            }
+                        } else {
+                            Button {
+                                pendingCopyOnConfirm = false
+                                showPrivacyConfirm = true
+                            } label: {
+                                Label("分享给好友", systemImage: "paperplane")
+                                    .font(AppFonts.body(15, weight: .medium))
+                                    .foregroundColor(AppColors.greenDeep)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(AppColors.green.opacity(0.08))
+                                    .cornerRadius(10)
+                            }
                         }
                     }
                     .padding(.horizontal, 20)
@@ -93,11 +111,20 @@ struct SharePanelView: View {
             .alert("改为链接可见", isPresented: $showPrivacyConfirm) {
                 Button("确认改为链接可见") {
                     visibility = .link
-                    copyLink()
+                    if pendingCopyOnConfirm {
+                        copyLink()
+                    } else {
+                        showSystemShare = true
+                    }
                 }
                 Button("取消", role: .cancel) {}
             } message: {
                 Text("当前设置为仅自己可见。分享前需要改为通过链接可见，确认吗？")
+            }
+            .sheet(isPresented: $showSystemShare) {
+                if let url = URL(string: shareURL), !shareURL.isEmpty {
+                    ShareSheet(url: url)
+                }
             }
         }
     }
@@ -198,4 +225,12 @@ struct HugToggleRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
     }
+}
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let url: URL
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    }
+    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }
