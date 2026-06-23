@@ -49,4 +49,15 @@ export class PhotosController {
   remove(@CurrentUser() user: { id: string }, @Param('id') id: string) {
     return this.photosService.remove(user.id, id);
   }
+
+  // iOS calls DELETE /api/v1/pets/:petId/photos/:photoId — this route matches
+  // that pattern. petId is not needed by the service (ownership is derived from
+  // the photo record itself), but we accept it for REST consistency.
+  @Delete('pets/:petId/photos/:photoId')
+  removeByPet(
+    @CurrentUser() user: { id: string },
+    @Param('photoId') photoId: string,
+  ) {
+    return this.photosService.remove(user.id, photoId);
+  }
 }

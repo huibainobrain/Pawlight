@@ -8,6 +8,7 @@ struct SharePanelView: View {
     @State private var hugEnabled = true
     @State private var showPrivacyConfirm = false
     @State private var pendingCopyOnConfirm = true
+    @State private var shareConfirmError = false
     @State private var showSystemShare = false
     @State private var copied = false
 
@@ -110,16 +111,28 @@ struct SharePanelView: View {
             .onChange(of: hugEnabled) { _ in saveShare() }
             .alert("改为链接可见", isPresented: $showPrivacyConfirm) {
                 Button("确认改为链接可见") {
-                    visibility = .link
-                    if pendingCopyOnConfirm {
-                        copyLink()
-                    } else {
-                        showSystemShare = true
+                    Task { @MainActor in
+                        guard let token = KeychainHelper.loadToken(),
+                              let petId = appState.currentPet?.id else { return }
+                        do {
+                            try await APIClient.shared.updateShare(token: token, petId: petId,
+                                                                   visibility: "LINK", hugEnabled: hugEnabled)
+                            appState.share?.visibility = .link
+                            visibility = .link
+                            if pendingCopyOnConfirm { copyLink() } else { showSystemShare = true }
+                        } catch {
+                            shareConfirmError = true
+                        }
                     }
                 }
                 Button("取消", role: .cancel) {}
             } message: {
                 Text("当前设置为仅自己可见。分享前需要改为通过链接可见，确认吗？")
+            }
+            .alert("设置失败", isPresented: $shareConfirmError) {
+                Button("好的", role: .cancel) {}
+            } message: {
+                Text("暂时没有改成功，请稍后再试。链接尚未送出。")
             }
             .sheet(isPresented: $showSystemShare) {
                 if let url = URL(string: shareURL), !shareURL.isEmpty {

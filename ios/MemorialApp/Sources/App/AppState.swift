@@ -99,6 +99,7 @@ class AppState: ObservableObject {
                 Hug(id: h.id, petId: petId, shareId: h.shareId,
                     visitorName: h.visitorName, source: "share", createdAt: h.createdAt)
             }
+            newHugCount = apiHugs.count
         }
     }
 
@@ -110,7 +111,7 @@ class AppState: ObservableObject {
 
     func uploadMainPhoto(petId: String, imageData: Data) async throws {
         guard let token = KeychainHelper.loadToken() else { throw APIError.noToken }
-        let photo = try await APIClient.shared.uploadPhoto(token: token, petId: petId, imageData: imageData)
+        let photo = try await APIClient.shared.uploadPhoto(token: token, petId: petId, imageData: imageData, type: "MAIN")
         try await APIClient.shared.updatePet(token: token, petId: petId, body: ["mainPhotoId": photo.id])
     }
 

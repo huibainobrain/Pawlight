@@ -295,10 +295,10 @@ struct NewHugCard: View {
                 .foregroundColor(AppColors.rose)
                 .font(.system(size: 18))
             VStack(alignment: .leading, spacing: 2) {
-                Text("有 \(count) 个新的抱抱")
+                Text("已经有 \(count) 位朋友轻轻抱过TA")
                     .font(AppFonts.body(15, weight: .medium))
                     .foregroundColor(AppColors.ink)
-                Text("有人也来看看TA，轻轻抱抱了TA。")
+                Text("点击查看谁来看望过TA。")
                     .font(AppFonts.body(13))
                     .foregroundColor(AppColors.muted)
             }

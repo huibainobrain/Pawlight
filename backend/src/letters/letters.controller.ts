@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -31,7 +31,7 @@ export class LettersController {
     return this.lettersService.upsert(user.id, petId, null, dto);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(
     @CurrentUser() user: { id: string },
     @Param('petId') petId: string,

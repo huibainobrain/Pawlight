@@ -89,7 +89,7 @@ final class APIClient {
 
     // MARK: - Photos
 
-    func uploadPhoto(token: String, petId: String, imageData: Data) async throws -> ApiPhoto {
+    func uploadPhoto(token: String, petId: String, imageData: Data, type: String = "ALBUM") async throws -> ApiPhoto {
         var req = URLRequest(url: url("/api/v1/pets/\(petId)/photos"))
         req.httpMethod = "POST"
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -98,6 +98,12 @@ final class APIClient {
         req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         var body = Data()
+        // type field (MAIN or ALBUM)
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"type\"\r\n\r\n".data(using: .utf8)!)
+        body.append(type.data(using: .utf8)!)
+        body.append("\r\n".data(using: .utf8)!)
+        // file field
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"file\"; filename=\"photo.jpg\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
