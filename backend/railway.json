@@ -4,8 +4,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npx prisma migrate resolve --applied 00000000000000_baseline && npx prisma migrate deploy && npm run start:prod",
+    "startCommand": "npx prisma migrate deploy && npm run start:prod",
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 30
+    "healthcheckTimeout": 120
   }
 }
