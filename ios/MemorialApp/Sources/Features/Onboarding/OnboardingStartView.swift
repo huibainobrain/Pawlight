@@ -79,6 +79,27 @@ struct OnboardingStartView: View {
                         }
                         .font(AppFonts.body(14))
                         .foregroundColor(AppColors.muted)
+
+                        #if DEBUG
+                        VStack(spacing: 6) {
+                            Divider().opacity(0.4).padding(.vertical, 4)
+                            Button("🧪 真实API登录 → 创建流程") {
+                                Task { @MainActor in
+                                    await appState.debugLoginAndStart()
+                                    if appState.ownerStage == .loggedInNoPet {
+                                        navigateToPetInfo = true
+                                    }
+                                }
+                            }
+                            .font(AppFonts.body(11))
+                            .foregroundColor(AppColors.muted.opacity(0.55))
+                            Button("🧪 Mock数据 → 直接进主界面") {
+                                appState.loadMockData()
+                            }
+                            .font(AppFonts.body(11))
+                            .foregroundColor(AppColors.muted.opacity(0.55))
+                        }
+                        #endif
                     }
                     .padding(.horizontal, 32)
                     .padding(.bottom, 56)
