@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Main View
+
 struct PetInfoView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) var dismiss
@@ -20,40 +22,86 @@ struct PetInfoView: View {
         ZStack {
             AppColors.paper.ignoresSafeArea()
             VStack(spacing: 0) {
+
+                // Progress bar
                 StepIndicator(current: 0, total: 3)
                     .padding(.top, 16)
                     .padding(.horizontal, 24)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 32) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("1 / 3  基础信息")
-                                .font(AppFonts.body(13))
-                                .foregroundColor(AppColors.muted)
-                            Text("TA叫什么名字？")
-                                .font(AppFonts.serif(24, weight: .medium))
-                                .foregroundColor(AppColors.ink)
-                        }
-                        .padding(.top, 28)
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 28) {
 
-                        VStack(alignment: .leading, spacing: 12) {
+                        // Header: step label + title + ambient illustration
+                        ZStack(alignment: .topLeading) {
+                            // Ambient circle bleeds off the right edge
+                            HStack(spacing: 0) {
+                                Spacer()
+                                PetInfoAmbientCircle()
+                                    .padding(.trailing, -48)
+                            }
+                            .allowsHitTesting(false)
+
+                            // Step info and title
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("1 / 3  基础信息")
+                                    .font(AppFonts.body(12))
+                                    .foregroundColor(AppColors.green)
+
+                                Text("TA叫什么名字？")
+                                    .font(AppFonts.serif(26, weight: .medium))
+                                    .foregroundColor(AppColors.ink)
+
+                                Text("先给TA取个名字，以后在这里\n我们就一起记住TA。")
+                                    .font(AppFonts.body(14))
+                                    .foregroundColor(AppColors.muted)
+                                    .lineSpacing(4)
+                                    .padding(.trailing, 108)
+                            }
+                        }
+                        .padding(.top, 24)
+
+                        // Name input
+                        VStack(alignment: .leading, spacing: 10) {
                             Text("名字")
                                 .font(AppFonts.body(14, weight: .medium))
                                 .foregroundColor(AppColors.ink)
-                            TextField("TA的名字", text: $name)
-                                .font(AppFonts.body(16))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 14)
-                                .background(AppColors.white)
-                                .cornerRadius(10)
-                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.line, lineWidth: 1))
-                                .focused($nameFocused)
+
+                            VStack(alignment: .leading, spacing: 0) {
+                                TextField("TA的名字", text: $name)
+                                    .font(AppFonts.body(16))
+                                    .foregroundColor(AppColors.ink)
+                                    .padding(.horizontal, 18)
+                                    .padding(.top, 18)
+                                    .padding(.bottom, 10)
+                                    .focused($nameFocused)
+
+                                HStack {
+                                    Spacer()
+                                    Text("\(name.count)/20")
+                                        .font(AppFonts.body(11))
+                                        .foregroundColor(AppColors.muted.opacity(0.48))
+                                        .padding(.trailing, 16)
+                                        .padding(.bottom, 12)
+                                }
+                            }
+                            .background(AppColors.white)
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(
+                                        nameFocused ? AppColors.green.opacity(0.45) : AppColors.line,
+                                        lineWidth: 1
+                                    )
+                            )
+                            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
                         }
 
+                        // Pet type selection
                         VStack(alignment: .leading, spacing: 12) {
                             Text("TA是")
                                 .font(AppFonts.body(14, weight: .medium))
                                 .foregroundColor(AppColors.ink)
+
                             HStack(spacing: 12) {
                                 ForEach(Pet.PetType.allCases, id: \.self) { type in
                                     PetTypeButton(type: type, isSelected: selectedType == type) {
@@ -63,6 +111,7 @@ struct PetInfoView: View {
                             }
                         }
 
+                        // Error
                         if let error = createError {
                             Text(error)
                                 .font(AppFonts.body(13))
@@ -70,44 +119,74 @@ struct PetInfoView: View {
                         }
                     }
                     .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
                 }
 
-                Button {
-                    guard canContinue else { return }
-                    createPetAndNavigate()
-                } label: {
-                    HStack(spacing: 8) {
-                        if isCreating {
-                            ProgressView().tint(canContinue ? AppColors.white : AppColors.muted)
+                // Bottom CTA
+                VStack(spacing: 12) {
+                    Button {
+                        guard canContinue else { return }
+                        createPetAndNavigate()
+                    } label: {
+                        HStack(spacing: 8) {
+                            if isCreating {
+                                ProgressView().tint(canContinue ? AppColors.white : AppColors.muted)
+                            }
+                            Text(isCreating ? "创建中..." : "下一步")
+                                .font(AppFonts.body(16, weight: .medium))
+                                .foregroundColor(canContinue ? AppColors.white : AppColors.muted)
                         }
-                        Text(isCreating ? "创建中..." : "下一步")
-                            .font(AppFonts.body(16, weight: .medium))
-                            .foregroundColor(canContinue ? AppColors.white : AppColors.muted)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(canContinue ? AppColors.greenDeep.opacity(0.86) : AppColors.line)
+                        .cornerRadius(14)
+                        .shadow(
+                            color: canContinue ? AppColors.greenDeep.opacity(0.10) : .clear,
+                            radius: 8, x: 0, y: 3
+                        )
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(canContinue ? AppColors.greenDeep : AppColors.line)
-                    .cornerRadius(12)
+                    .disabled(!canContinue)
+
+                    HStack(spacing: 5) {
+                        Image(systemName: "sparkle")
+                            .font(.system(size: 8))
+                            .foregroundColor(AppColors.muted.opacity(0.32))
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 9))
+                            .foregroundColor(AppColors.muted.opacity(0.38))
+                        Text("创建后你可以随时修改")
+                            .font(AppFonts.body(12))
+                            .foregroundColor(AppColors.muted.opacity(0.52))
+                        Image(systemName: "sparkle")
+                            .font(.system(size: 8))
+                            .foregroundColor(AppColors.muted.opacity(0.32))
+                    }
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 32)
-                .disabled(!canContinue)
+                .padding(.top, 12)
+                .padding(.bottom, 40)
             }
         }
+        .navigationBarBackButtonHidden(true)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(!name.trimmingCharacters(in: .whitespaces).isEmpty)
         .toolbar {
-            if !name.trimmingCharacters(in: .whitespaces).isEmpty {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    if !name.trimmingCharacters(in: .whitespaces).isEmpty {
                         showExitAlert = true
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("返回")
-                        }
-                        .foregroundColor(AppColors.greenDeep)
+                    } else {
+                        dismiss()
+                    }
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(AppColors.white)
+                            .frame(width: 34, height: 34)
+                            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(AppColors.ink)
                     }
                 }
             }
@@ -119,6 +198,9 @@ struct PetInfoView: View {
             Text("现在离开的话，本次填写的内容不会保存。")
         }
         .onAppear { nameFocused = true }
+        .onChange(of: name) { newValue in
+            if newValue.count > 20 { name = String(newValue.prefix(20)) }
+        }
         .navigationDestination(isPresented: $navigateToPhoto) {
             if let petId = createdPetId {
                 MainPhotoView(petId: petId, petName: name, petType: selectedType ?? .cat)
@@ -143,38 +225,131 @@ struct PetInfoView: View {
     }
 }
 
+// MARK: - Ambient Illustration
+
+private struct PetInfoAmbientCircle: View {
+    var body: some View {
+        ZStack {
+            // Scene inside the circle
+            ZStack {
+                // Sky gradient
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.92, green: 0.96, blue: 0.97).opacity(0.90),
+                        Color(red: 0.86, green: 0.92, blue: 0.88).opacity(0.90),
+                        Color(red: 0.76, green: 0.86, blue: 0.78).opacity(0.85),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                // Hill
+                GeometryReader { geo in
+                    let w = geo.size.width, h = geo.size.height
+                    Path { p in
+                        p.move(to: CGPoint(x: 0, y: h * 0.70))
+                        p.addCurve(
+                            to: CGPoint(x: w, y: h * 0.66),
+                            control1: CGPoint(x: w * 0.28, y: h * 0.50),
+                            control2: CGPoint(x: w * 0.70, y: h * 0.76)
+                        )
+                        p.addLine(to: CGPoint(x: w, y: h))
+                        p.addLine(to: CGPoint(x: 0, y: h))
+                        p.closeSubpath()
+                    }
+                    .fill(Color(red: 0.52, green: 0.66, blue: 0.46).opacity(0.48))
+                }
+
+                // Paw prints — decorative, low opacity
+                Image(systemName: "pawprint.fill")
+                    .font(.system(size: 22))
+                    .foregroundColor(Color(red: 0.65, green: 0.58, blue: 0.50).opacity(0.30))
+                    .offset(x: 14, y: 30)
+
+                Image(systemName: "pawprint.fill")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(red: 0.65, green: 0.58, blue: 0.50).opacity(0.18))
+                    .offset(x: -24, y: 44)
+
+                // Single soft star
+                Image(systemName: "sparkle")
+                    .font(.system(size: 12, weight: .ultraLight))
+                    .foregroundColor(Color.white.opacity(0.80))
+                    .offset(x: 4, y: -44)
+            }
+            .frame(width: 158, height: 158)
+            .clipShape(Circle())
+
+            // Rim light
+            Circle()
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.82), AppColors.green.opacity(0.08)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 2
+                )
+                .frame(width: 158, height: 158)
+        }
+        .frame(width: 178, height: 178)
+        .shadow(color: Color.black.opacity(0.04), radius: 12, x: 0, y: 4)
+    }
+}
+
+// MARK: - Pet Type Card
+
 struct PetTypeButton: View {
     let type: Pet.PetType
     let isSelected: Bool
     let action: () -> Void
 
+    private var iconName: String {
+        switch type {
+        case .cat:   return "cat.fill"
+        case .dog:   return "dog.fill"
+        case .other: return "pawprint.fill"
+        }
+    }
+
     var body: some View {
         Button(action: action) {
-            Text(type.displayName)
-                .font(AppFonts.body(14, weight: isSelected ? .medium : .regular))
-                .foregroundColor(isSelected ? AppColors.greenDeep : AppColors.muted)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(isSelected ? AppColors.green.opacity(0.12) : AppColors.white)
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(isSelected ? AppColors.green : AppColors.line, lineWidth: isSelected ? 1.5 : 1)
-                )
+            VStack(spacing: 8) {
+                Image(systemName: iconName)
+                    .font(.system(size: 26))
+                    .foregroundColor(isSelected ? AppColors.greenDeep : AppColors.muted.opacity(0.60))
+                Text(type.displayName)
+                    .font(AppFonts.body(13, weight: isSelected ? .medium : .regular))
+                    .foregroundColor(isSelected ? AppColors.greenDeep : AppColors.muted)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 18)
+            .background(isSelected ? AppColors.green.opacity(0.08) : AppColors.white)
+            .cornerRadius(14)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        isSelected ? AppColors.green.opacity(0.55) : AppColors.line,
+                        lineWidth: isSelected ? 1.5 : 1
+                    )
+            )
+            .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
         }
     }
 }
+
+// MARK: - Step Indicator
 
 struct StepIndicator: View {
     let current: Int
     let total: Int
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             ForEach(0..<total, id: \.self) { i in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(i <= current ? AppColors.greenDeep : AppColors.line)
-                    .frame(height: 3)
+                RoundedRectangle(cornerRadius: 2.5)
+                    .fill(i <= current ? AppColors.greenDeep.opacity(0.78) : AppColors.muted.opacity(0.15))
+                    .frame(height: 3.5)
             }
         }
     }
