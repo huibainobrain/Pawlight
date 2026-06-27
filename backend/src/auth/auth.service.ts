@@ -54,6 +54,7 @@ export class AuthService {
     }
 
     await this.ensureEntitlement(user.id);
+    await this.prisma.pet.deleteMany({ where: { userId: user.id } });
 
     const token = this.jwt.sign({ sub: user.id });
     return { access_token: token, user };
