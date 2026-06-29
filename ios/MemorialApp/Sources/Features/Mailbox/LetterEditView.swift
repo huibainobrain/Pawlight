@@ -2,9 +2,9 @@ import SwiftUI
 
 struct LetterEditView: View {
     let existingLetter: Letter?
+    @Binding var isPresented: Bool
 
     @EnvironmentObject var appState: AppState
-    @Environment(\.dismiss) var dismiss
 
     @State private var title = ""
     @State private var content = ""
@@ -164,7 +164,7 @@ struct LetterEditView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("取消") {
-                    if hasChanges { showCancelAlert = true } else { dismiss() }
+                    if hasChanges { showCancelAlert = true } else { isPresented = false }
                 }
                 .foregroundColor(AppColors.muted)
             }
@@ -192,7 +192,7 @@ struct LetterEditView: View {
         }
         .alert("你还没有保存这封信", isPresented: $showCancelAlert) {
             Button("继续写", role: .cancel) {}
-            Button("确认退出", role: .destructive) { dismiss() }
+            Button("确认退出", role: .destructive) { isPresented = false }
         } message: {
             Text("你还没有保存这封信，确认要退出吗？")
         }
@@ -219,7 +219,11 @@ struct LetterEditView: View {
         saveError = false
         Task { @MainActor in
             guard let token = KeychainHelper.loadToken(),
-                  let petId = appState.currentPet?.id else { isSaving = false; return }
+                  let petId = appState.currentPet?.id else {
+                saveError = true
+                isSaving = false
+                return
+            }
             do {
                 if let existing = existingLetter {
                     let api = try await APIClient.shared.updateLetter(
@@ -245,7 +249,7 @@ struct LetterEditView: View {
                     appState.letters.insert(letter, at: 0)
                 }
                 isSaving = false
-                dismiss()
+                isPresented = false
             } catch {
                 print("saveLetter error: \(error)")
                 saveError = true
@@ -270,7 +274,7 @@ struct LetterEditView: View {
                 try await APIClient.shared.deleteLetter(token: token, petId: petId, letterId: letterId)
                 appState.letters.removeAll { $0.id == letterId }
                 isDeleting = false
-                dismiss()
+                isPresented = false
             } catch {
                 print("deleteLetter error: \(error)")
                 isDeleting = false

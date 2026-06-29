@@ -23,6 +23,7 @@ class AppState: ObservableObject {
     @Published var hugs: [Hug] = []
     @Published var share: Share?
     @Published var newHugCount: Int = 0
+    @Published var tabBarHidden: Bool = false
 
     var isLoggedIn: Bool { currentUser != nil }
     var hasPet: Bool { currentPet != nil }
@@ -210,6 +211,17 @@ class AppState: ObservableObject {
             currentUser = User(id: response.user.id, loginStatus: .loggedIn,
                                loginProvider: "debug", nickname: nil, avatarURL: nil,
                                createdAt: response.user.createdAt)
+            // Backend deletes all pets on debug login — clear local pet state so
+            // stale currentPet/entitlement don't let the user reach mailbox with a
+            // deleted petId and get a silent save failure.
+            currentPet = nil
+            entitlement = nil
+            photos = []
+            story = nil
+            letters = []
+            hugs = []
+            share = nil
+            newHugCount = 0
             ownerStage = .loggedInNoPet
         } catch {
             print("debugLogin error: \(error)")

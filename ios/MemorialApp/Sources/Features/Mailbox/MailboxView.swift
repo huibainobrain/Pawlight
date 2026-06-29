@@ -37,7 +37,7 @@ struct MailboxView: View {
             }
         }
         .navigationDestination(isPresented: $showLetterEdit) {
-            LetterEditView(existingLetter: editingLetter)
+            LetterEditView(existingLetter: editingLetter, isPresented: $showLetterEdit)
         }
         .task { await loadLetters() }
     }
