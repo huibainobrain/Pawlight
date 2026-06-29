@@ -54,6 +54,12 @@ export class AuthService {
     }
 
     await this.ensureEntitlement(user.id);
+    // Always grant full access for debug sessions so the mailbox and album
+    // features work without manual DB edits.
+    await this.prisma.entitlement.update({
+      where: { userId: user.id },
+      data: { mailboxEnabled: true, photoLimit: 50, tier: 'PAID' },
+    });
     await this.prisma.pet.deleteMany({ where: { userId: user.id } });
 
     const token = this.jwt.sign({ sub: user.id });

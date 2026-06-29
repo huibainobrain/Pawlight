@@ -220,6 +220,8 @@ struct LetterEditView: View {
         Task { @MainActor in
             guard let token = KeychainHelper.loadToken(),
                   let petId = appState.currentPet?.id else {
+                let hasToken = KeychainHelper.loadToken() != nil
+                print("[LetterEdit] save guard failed — token:\(hasToken) petId:\(appState.currentPet?.id ?? "nil")")
                 saveError = true
                 isSaving = false
                 return
