@@ -16,4 +16,11 @@ body {
   background-color: #f7f1e8;
   color: #2c2c2c;
   font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Viewport height with svh fallback for mobile address-bar correctness */
+.h5-hero {
+  min-height: 100vh;
+  min-height: 100svh;
 }

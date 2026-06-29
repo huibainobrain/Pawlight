@@ -17,27 +17,6 @@ function getOrCreateFingerprint(): string {
 
 type HugState = "idle" | "submitting" | "error";
 
-// Small heart icon used throughout
-function HeartIcon({ filled = false }: { filled?: boolean }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      {filled ? (
-        <path
-          d="M8 13.5S2 9.8 2 5.8A3.3 3.3 0 0 1 8 4a3.3 3.3 0 0 1 6 2c0 4-6 7.5-6 7.5z"
-          fill="#c97b7b"
-        />
-      ) : (
-        <path
-          d="M8 13.5S2 9.8 2 5.8A3.3 3.3 0 0 1 8 4a3.3 3.3 0 0 1 6 2c0 4-6 7.5-6 7.5z"
-          stroke="#c97b7b"
-          strokeWidth="1.2"
-          fill="none"
-        />
-      )}
-    </svg>
-  );
-}
-
 export default function HugSection({
   slug,
   initialHugCount,
@@ -60,7 +39,6 @@ export default function HugSection({
   async function sendHug() {
     if (hasHugged || state === "submitting") return;
     setState("submitting");
-
     const fingerprint = getOrCreateFingerprint();
     try {
       const res = await fetch(`${API}/api/v1/shares/${slug}/hugs`, {
@@ -69,7 +47,6 @@ export default function HugSection({
         body: JSON.stringify({ visitorFingerprint: fingerprint }),
       });
       const data = (await res.json()) as { status: string };
-
       if (data.status === "success") {
         localStorage.setItem(huggedKey(slug), "true");
         setHasHugged(true);
@@ -87,24 +64,29 @@ export default function HugSection({
     }
   }
 
+  // ── Disabled ────────────────────────────────────────────────────────────────
   if (!hugEnabled) {
     return (
-      <p className="text-center text-sm py-3" style={{ color: "#8a8078" }}>
+      <p
+        className="text-center text-sm py-1"
+        style={{ color: "rgba(138,128,120,0.70)", letterSpacing: "0.02em" }}
+      >
         主人暂时没有开放抱抱
       </p>
     );
   }
 
+  // ── Error ───────────────────────────────────────────────────────────────────
   if (state === "error") {
     return (
-      <div className="text-center py-2">
-        <p className="text-sm mb-3" style={{ color: "#8a8078" }}>
-          抱抱暂时没有送出，请稍后再试。
+      <div className="flex flex-col items-center gap-3">
+        <p className="text-sm text-center" style={{ color: "#8a8078" }}>
+          暂时没有抱到TA，请再试一次
         </p>
         <button
           onClick={() => setState("idle")}
           className="text-sm underline"
-          style={{ color: "#526744" }}
+          style={{ color: "#526744", minHeight: "44px" }}
         >
           重新试一次
         </button>
@@ -112,63 +94,89 @@ export default function HugSection({
     );
   }
 
+  // ── Already hugged ──────────────────────────────────────────────────────────
   if (hasHugged) {
     return (
-      <div className="flex flex-col items-center gap-3 py-2">
-        <div className="flex items-center gap-2">
-          <HeartIcon filled />
-          <span className="text-base font-medium" style={{ color: "#526744", fontFamily: "Georgia, serif" }}>
-            已抱抱
+      <div className="flex flex-col items-center gap-2 py-1">
+        <div
+          className="flex items-center gap-2 px-5 py-3 rounded-full"
+          style={{ background: "rgba(82,103,68,0.10)" }}
+        >
+          {/* heart filled */}
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <path
+              d="M7.5 12.8S1.5 9 1.5 5.3a3.2 3.2 0 0 1 6-1.5 3.2 3.2 0 0 1 6 1.5c0 3.7-6 7.5-6 7.5z"
+              fill="#526744"
+            />
+          </svg>
+          <span
+            className="text-sm font-medium"
+            style={{ color: "#526744", letterSpacing: "0.03em" }}
+          >
+            已经轻轻抱抱过TA
           </span>
         </div>
-        <p className="text-sm text-center" style={{ color: "#8a8078" }}>
-          你的心意已经留在这里了。
+        <p className="text-xs" style={{ color: "#a89e94" }}>
+          你的心意已经留下了
         </p>
         {hugCount > 0 && (
-          <p className="text-xs" style={{ color: "#a89e94" }}>
-            已有 {hugCount} 位朋友轻轻抱过TA
+          <p className="text-xs" style={{ color: "#b8b0a6" }}>
+            已有 {hugCount} 个抱抱
           </p>
         )}
       </div>
     );
   }
 
-  // Default: can hug
+  // ── Idle / submitting ────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col items-center gap-4 py-1">
-      <div className="flex items-center gap-1.5">
-        <HeartIcon />
-        <span className="text-sm font-medium" style={{ color: "#526744" }}>
-          抱抱记录
-        </span>
-      </div>
-
-      {hugCount > 0 && (
-        <p className="text-sm" style={{ color: "#8a8078" }}>
-          已有{" "}
-          <span style={{ color: "#526744", fontWeight: 500 }}>{hugCount}</span>{" "}
-          位朋友轻轻抱过TA
-        </p>
-      )}
-
-      <p className="text-xs text-center leading-relaxed" style={{ color: "#a89e94" }}>
+    <div className="flex flex-col items-center gap-3">
+      <p
+        className="text-xs text-center"
+        style={{ color: "#a89e94", letterSpacing: "0.04em" }}
+      >
         让主人知道，你也记得TA
       </p>
 
+      {/* Main hug button */}
       <button
         onClick={sendHug}
         disabled={state === "submitting"}
-        className="w-full py-3.5 rounded-2xl text-white text-sm font-medium transition-opacity"
+        className="w-full rounded-full text-white text-sm font-medium transition-opacity"
         style={{
-          background: "linear-gradient(135deg, #6b8a54 0%, #526744 100%)",
-          opacity: state === "submitting" ? 0.55 : 1,
+          background:
+            state === "submitting"
+              ? "rgba(82,103,68,0.55)"
+              : "linear-gradient(135deg,#6b8a54 0%,#526744 100%)",
+          padding: "14px 24px",
+          minHeight: "50px",
+          letterSpacing: "0.05em",
           cursor: state === "submitting" ? "not-allowed" : "pointer",
-          letterSpacing: "0.04em",
-          boxShadow: "0 2px 12px rgba(82,103,68,0.20)",
+          boxShadow:
+            state === "submitting"
+              ? "none"
+              : "0 4px 16px rgba(82,103,68,0.28)",
         }}
+        aria-label="轻轻抱抱TA"
       >
-        {state === "submitting" ? "正在留下抱抱……" : "轻轻抱抱TA ♡"}
+        {state === "submitting" ? (
+          <span className="flex items-center justify-center gap-2">
+            <span
+              className="inline-block rounded-full border-2 border-white/40 border-t-white animate-spin"
+              style={{ width: "14px", height: "14px" }}
+            />
+            正在送出抱抱……
+          </span>
+        ) : (
+          "轻轻抱抱TA ♡"
+        )}
       </button>
+
+      {hugCount > 0 && (
+        <p className="text-xs" style={{ color: "#b8b0a6", letterSpacing: "0.03em" }}>
+          已有 {hugCount} 个抱抱
+        </p>
+      )}
     </div>
   );
 }
