@@ -36,6 +36,8 @@ type FetchResult =
   | { type: "not_found" }
   | { type: "error" };
 
+type Lang = "en" | "zh";
+
 // ── Data fetch ───────────────────────────────────────────────────────────────
 
 async function fetchShare(slug: string): Promise<FetchResult> {
@@ -52,23 +54,37 @@ async function fetchShare(slug: string): Promise<FetchResult> {
   }
 }
 
+// ── Bilingual helper ─────────────────────────────────────────────────────────
+
+function t(lang: Lang, zh: string, en: string) { return lang === "zh" ? zh : en; }
+
 // ── Metadata ─────────────────────────────────────────────────────────────────
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ lang?: string }>;
 }) {
   const { slug } = await params;
+  const { lang: rawLang } = await searchParams;
+  const lang: Lang = rawLang === "zh" ? "zh" : "en";
   const result = await fetchShare(slug);
-  if (result.type !== "ok") return { title: "星屿纪念" };
+  if (result.type !== "ok") return { title: lang === "zh" ? "留光" : "Pawlight" };
   const { data } = result;
+  const title = lang === "zh"
+    ? `${data.petName}的纪念 · 留光`
+    : `${data.petName}'s keepsake · Pawlight`;
+  const description = data.memorialSentence ?? (lang === "zh"
+    ? `来看看${data.petName}留在留光的纪念`
+    : `A gentle memorial for ${data.petName} on Pawlight`);
   return {
-    title: `${data.petName}的纪念 · 星屿纪念`,
-    description: data.memorialSentence ?? `来看看${data.petName}留在星屿的纪念`,
+    title,
+    description,
     openGraph: {
-      title: `${data.petName}的纪念`,
-      description: data.memorialSentence ?? `来看看${data.petName}留在星屿的纪念`,
+      title: lang === "zh" ? `${data.petName}的纪念` : `${data.petName}'s keepsake`,
+      description,
       images: data.mainPhoto ? [{ url: data.mainPhoto }] : [],
     },
   };
@@ -76,11 +92,13 @@ export async function generateMetadata({
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDateShort(s?: string | null): string | null {
+function formatDateShort(s?: string | null, lang: Lang = "en"): string | null {
   if (!s) return null;
   const d = new Date(s);
   if (isNaN(d.getTime())) return null;
-  return `${d.getFullYear()}年${d.getMonth() + 1}月`;
+  if (lang === "zh") return `${d.getFullYear()}年${d.getMonth() + 1}月`;
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 // ── State pages (warm, full-bleed) ────────────────────────────────────────────
@@ -104,7 +122,7 @@ function AtmosphereBg() {
   );
 }
 
-function PrivatePage() {
+function PrivatePage({ lang }: { lang: Lang }) {
   return (
     <div className="h5-hero relative w-full flex flex-col items-center justify-center text-center px-8">
       <AtmosphereBg />
@@ -116,17 +134,20 @@ function PrivatePage() {
           className="text-xl font-medium mb-3"
           style={{ fontFamily: "Georgia, serif", color: "#2c2c2c" }}
         >
-          这颗星球暂时只给主人自己可见
+          {t(lang, "这颗星球暂时只给主人自己可见", "This memorial is private for now")}
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: "#8a8078" }}>
-          也许主人还想把这份回忆先安静地留在身边。
+          {t(lang,
+            "也许主人还想把这份回忆先安静地留在身边。",
+            "The owner is keeping these memories close for a while."
+          )}
         </p>
       </div>
     </div>
   );
 }
 
-function NotFoundPage() {
+function NotFoundPage({ lang }: { lang: Lang }) {
   return (
     <div className="h5-hero relative w-full flex flex-col items-center justify-center text-center px-8">
       <AtmosphereBg />
@@ -138,17 +159,20 @@ function NotFoundPage() {
           className="text-xl font-medium mb-3"
           style={{ fontFamily: "Georgia, serif", color: "#2c2c2c" }}
         >
-          这段纪念暂时无法查看
+          {t(lang, "这段纪念暂时无法查看", "This memorial isn't available")}
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: "#8a8078" }}>
-          也许链接已经失效，或主人已经调整了纪念页。
+          {t(lang,
+            "也许链接已经失效，或主人已经调整了纪念页。",
+            "The link may have expired, or the owner has made some changes."
+          )}
         </p>
       </div>
     </div>
   );
 }
 
-function ErrorPage() {
+function ErrorPage({ lang }: { lang: Lang }) {
   return (
     <div className="h5-hero relative w-full flex flex-col items-center justify-center text-center px-8">
       <AtmosphereBg />
@@ -160,17 +184,17 @@ function ErrorPage() {
           className="text-xl font-medium mb-3"
           style={{ fontFamily: "Georgia, serif", color: "#2c2c2c" }}
         >
-          页面暂时没有加载出来
+          {t(lang, "页面暂时没有加载出来", "Couldn't load the page")}
         </h1>
         <p className="text-sm mb-5" style={{ color: "#8a8078" }}>
-          可以稍后再试一次。
+          {t(lang, "可以稍后再试一次。", "Please try again in a moment.")}
         </p>
         <a
           href="."
           className="text-sm underline"
           style={{ color: "#526744", minHeight: "44px", display: "inline-flex", alignItems: "center" }}
         >
-          重新加载
+          {t(lang, "重新加载", "Reload")}
         </a>
       </div>
     </div>
@@ -210,30 +234,39 @@ const IconPhoto = () => (
 
 export default async function SharePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ lang?: string }>;
 }) {
   const { slug } = await params;
+  const { lang: rawLang } = await searchParams;
+  const lang: Lang = rawLang === "zh" ? "zh" : "en";
   const result = await fetchShare(slug);
 
-  if (result.type === "private") return <PrivatePage />;
-  if (result.type === "not_found") return <NotFoundPage />;
-  if (result.type === "error") return <ErrorPage />;
+  if (result.type === "private") return <PrivatePage lang={lang} />;
+  if (result.type === "not_found") return <NotFoundPage lang={lang} />;
+  if (result.type === "error") return <ErrorPage lang={lang} />;
 
   const { data } = result;
 
-  const arrivedStr = formatDateShort(data.arrivedOn);
-  const leftStr = formatDateShort(data.leftOn);
+  const arrivedStr = formatDateShort(data.arrivedOn, lang);
+  const leftStr = formatDateShort(data.leftOn, lang);
   const datesLine =
     arrivedStr && leftStr
       ? `${arrivedStr} — ${leftStr}`
       : leftStr
-        ? `${leftStr} 离开`
+        ? lang === "zh" ? `${leftStr} 离开` : `left on ${leftStr}`
         : arrivedStr
-          ? `${arrivedStr} 来到`
+          ? lang === "zh" ? `${arrivedStr} 来到` : `came home on ${arrivedStr}`
           : null;
 
   const hasContent = !!data.story || data.albumPhotos.length > 0;
+
+  const shareTitle = lang === "zh" ? `${data.petName}的纪念` : `${data.petName}'s keepsake`;
+  const shareText = data.memorialSentence ?? (lang === "zh"
+    ? `来看看${data.petName}留在留光的纪念`
+    : `A gentle memorial for ${data.petName} on Pawlight`);
 
   return (
     <div style={{ background: "#f7f1e8" }}>
@@ -246,7 +279,7 @@ export default async function SharePage({
       ════════════════════════════════════════════════════════════════════ */}
       <section
         className="h5-hero relative w-full overflow-hidden flex flex-col"
-        aria-label="纪念首屏"
+        aria-label={t(lang, "纪念首屏", "Memorial")}
       >
         {/* ── Background botanical image ── */}
         <div className="absolute inset-0">
@@ -310,7 +343,7 @@ export default async function SharePage({
               {data.mainPhoto ? (
                 <Image
                   src={data.mainPhoto}
-                  alt={`${data.petName}的主照片`}
+                  alt={t(lang, `${data.petName}的主照片`, `${data.petName}'s photo`)}
                   fill
                   className="object-cover"
                   sizes="140px"
@@ -320,7 +353,7 @@ export default async function SharePage({
                 <div
                   className="w-full h-full flex items-center justify-center"
                   style={{ background: "#dfd9d0" }}
-                  aria-label="暂无照片"
+                  aria-label={t(lang, "暂无照片", "No photo")}
                 >
                   <span style={{ fontSize: "34px" }}>🐾</span>
                 </div>
@@ -383,7 +416,7 @@ export default async function SharePage({
               letterSpacing: "0.07em",
             }}
           >
-            ✦ 来自主人的一页纪念
+            {t(lang, "✦ 来自主人的一页纪念", "✦ A keepsake from their person")}
           </p>
 
           {/* ── Hug section — front and centre, still in hero ── */}
@@ -399,6 +432,7 @@ export default async function SharePage({
               slug={slug}
               initialHugCount={data.hugCount}
               hugEnabled={data.hugEnabled}
+              lang={lang}
             />
           </div>
         </div>
@@ -416,7 +450,7 @@ export default async function SharePage({
                 letterSpacing: "0.06em",
               }}
             >
-              ↓ 看看TA的回忆
+              {t(lang, "↓ 看看TA的回忆", "↓ Scroll to their memories")}
             </p>
           </div>
         )}
@@ -471,7 +505,7 @@ export default async function SharePage({
                       letterSpacing: "0.04em",
                     }}
                   >
-                    TA的故事
+                    {t(lang, "TA的故事", "Their Story")}
                   </span>
                 </header>
                 <p
@@ -510,7 +544,7 @@ export default async function SharePage({
                     letterSpacing: "0.04em",
                   }}
                 >
-                  照片回忆
+                  {t(lang, "照片回忆", "Photo Memories")}
                 </span>
               </header>
               <PhotoSection photos={data.albumPhotos} />
@@ -566,7 +600,7 @@ export default async function SharePage({
               letterSpacing: "0.04em",
             }}
           >
-            谢谢你来看TA
+            {t(lang, "谢谢你来看TA", "Thank you for visiting")}
           </h2>
 
           <p
@@ -577,19 +611,13 @@ export default async function SharePage({
               lineHeight: "1.85",
             }}
           >
-            TA在这里被爱着，
+            {t(lang, "TA在这里被爱着，", "They are loved here,")}
             <br />
-            也因为你而被记得。
+            {t(lang, "也因为你而被记得。", "and remembered because of you.")}
           </p>
 
           <div style={{ marginTop: "22px" }}>
-            <ShareButton
-              title={`${data.petName}的纪念`}
-              text={
-                data.memorialSentence ??
-                `来看看${data.petName}留在星屿的纪念`
-              }
-            />
+            <ShareButton title={shareTitle} text={shareText} lang={lang} />
           </div>
 
           {/* Soft rule */}
@@ -609,7 +637,7 @@ export default async function SharePage({
               letterSpacing: "0.07em",
             }}
           >
-            ❧ 这份想念，会一直留在这里 ❧
+            {t(lang, "❧ 这份想念，会一直留在这里 ❧", "❧ This love will always be here ❧")}
           </p>
 
           <p
@@ -621,7 +649,7 @@ export default async function SharePage({
               letterSpacing: "0.04em",
             }}
           >
-            由星屿纪念生成
+            {t(lang, "由留光生成", "Made with Pawlight")}
           </p>
         </div>
       </footer>

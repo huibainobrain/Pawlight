@@ -16,15 +16,25 @@ function getOrCreateFingerprint(): string {
 }
 
 type HugState = "idle" | "submitting" | "error";
+type Lang = "en" | "zh";
+
+function t(lang: Lang, zh: string, en: string) { return lang === "zh" ? zh : en; }
+
+function hugCountLabel(lang: Lang, n: number): string {
+  if (lang === "zh") return `已有 ${n} 个抱抱`;
+  return n === 1 ? "1 hug so far" : `${n} hugs so far`;
+}
 
 export default function HugSection({
   slug,
   initialHugCount,
   hugEnabled,
+  lang = "en",
 }: {
   slug: string;
   initialHugCount: number;
   hugEnabled: boolean;
+  lang?: Lang;
 }) {
   const [hasHugged, setHasHugged] = useState(false);
   const [hugCount, setHugCount] = useState(initialHugCount);
@@ -71,7 +81,7 @@ export default function HugSection({
         className="text-center text-sm py-1"
         style={{ color: "rgba(138,128,120,0.70)", letterSpacing: "0.02em" }}
       >
-        主人暂时没有开放抱抱
+        {t(lang, "主人暂时没有开放抱抱", "Hugs aren't open right now")}
       </p>
     );
   }
@@ -81,14 +91,14 @@ export default function HugSection({
     return (
       <div className="flex flex-col items-center gap-3">
         <p className="text-sm text-center" style={{ color: "#8a8078" }}>
-          暂时没有抱到TA，请再试一次
+          {t(lang, "暂时没有抱到TA，请再试一次", "Couldn't send the hug — please try again")}
         </p>
         <button
           onClick={() => setState("idle")}
           className="text-sm underline"
           style={{ color: "#526744", minHeight: "44px" }}
         >
-          重新试一次
+          {t(lang, "重新试一次", "Try again")}
         </button>
       </div>
     );
@@ -113,15 +123,15 @@ export default function HugSection({
             className="text-sm font-medium"
             style={{ color: "#526744", letterSpacing: "0.03em" }}
           >
-            已经轻轻抱抱过TA
+            {t(lang, "已经轻轻抱抱过TA", "You've sent a hug")}
           </span>
         </div>
         <p className="text-xs" style={{ color: "#a89e94" }}>
-          你的心意已经留下了
+          {t(lang, "你的心意已经留下了", "Your hug has been left here")}
         </p>
         {hugCount > 0 && (
           <p className="text-xs" style={{ color: "#b8b0a6" }}>
-            已有 {hugCount} 个抱抱
+            {hugCountLabel(lang, hugCount)}
           </p>
         )}
       </div>
@@ -135,7 +145,7 @@ export default function HugSection({
         className="text-xs text-center"
         style={{ color: "#a89e94", letterSpacing: "0.04em" }}
       >
-        让主人知道，你也记得TA
+        {t(lang, "让主人知道，你也记得TA", "Let them know you remember too")}
       </p>
 
       {/* Main hug button */}
@@ -157,7 +167,7 @@ export default function HugSection({
               ? "none"
               : "0 4px 16px rgba(82,103,68,0.28)",
         }}
-        aria-label="轻轻抱抱TA"
+        aria-label={t(lang, "轻轻抱抱TA", "Send a gentle hug")}
       >
         {state === "submitting" ? (
           <span className="flex items-center justify-center gap-2">
@@ -165,16 +175,16 @@ export default function HugSection({
               className="inline-block rounded-full border-2 border-white/40 border-t-white animate-spin"
               style={{ width: "14px", height: "14px" }}
             />
-            正在送出抱抱……
+            {t(lang, "正在送出抱抱……", "Sending hug…")}
           </span>
         ) : (
-          "轻轻抱抱TA ♡"
+          t(lang, "轻轻抱抱TA ♡", "Send a gentle hug ♡")
         )}
       </button>
 
       {hugCount > 0 && (
         <p className="text-xs" style={{ color: "#b8b0a6", letterSpacing: "0.03em" }}>
-          已有 {hugCount} 个抱抱
+          {hugCountLabel(lang, hugCount)}
         </p>
       )}
     </div>

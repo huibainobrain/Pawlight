@@ -2,8 +2,22 @@
 
 import { useState } from "react";
 
-export default function ShareButton({ title, text }: { title: string; text: string }) {
+type Lang = "en" | "zh";
+
+export default function ShareButton({
+  title,
+  text,
+  lang = "en",
+}: {
+  title: string;
+  text: string;
+  lang?: Lang;
+}) {
   const [copied, setCopied] = useState(false);
+
+  const label = lang === "zh"
+    ? (copied ? "链接已复制" : "分享给也记得TA的人")
+    : (copied ? "Link copied" : "Share with those who remember them");
 
   async function handleShare() {
     const url = window.location.href;
@@ -43,7 +57,7 @@ export default function ShareButton({ title, text }: { title: string; text: stri
         <circle cx="3" cy="7" r="1.8" stroke="#526744" strokeWidth="1.2" fill="none" />
         <path d="M4.6 6.1L9.5 3.3M4.6 7.9l4.9 2.8" stroke="#526744" strokeWidth="1.2" strokeLinecap="round" />
       </svg>
-      {copied ? "链接已复制" : "分享给也记得TA的人"}
+      {label}
     </button>
   );
 }
