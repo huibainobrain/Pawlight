@@ -31,17 +31,19 @@
 		7E0E9C7397EB79949A74070B /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD8E046BB99B466ADE1CC70 /* APIClient.swift */; };
 		7E66E715757137B43349A6D3 /* TierSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017D65EE9976E5085D1863A3 /* TierSelectView.swift */; };
 		8F7F6014ACD7577531F7DE5B /* EntitlementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DA614CCC0D6060777285F4 /* EntitlementView.swift */; };
+		B1C2D3E4F5A607182930BBCC /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */; };
+		BB22CC33DD44EE55FF6611AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */; };
 		CC112233445566778899AABB /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD112233445566778899AABB /* PhotoDetailView.swift */; };
+		D1E2F3A4B5C607182930DDEE /* LanguageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */; };
 		D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */; };
 		D3F87DD0C0761B37CB50F0A8 /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */; };
 		DD334455667788990011AABB /* LetterDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC334455667788990011AABB /* LetterDetailView.swift */; };
+		DD44EE55FF6611AA22BB33CC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CC33DD44EE55FF6611AA22BB /* InfoPlist.strings */; };
 		EE112233445566778899AABB /* LetterEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF112233445566778899AABB /* LetterEditView.swift */; };
 		EF1E1B725956A118E21538F3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40540C59A31F39495D189F7 /* RootView.swift */; };
+		F1A2B3C4D5E607182930FF00 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D607182930EEFF /* Strings.swift */; };
 		F7998E3E4B140A831D629C74 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64245C6BF899F9C1142F86E0 /* AlbumView.swift */; };
 		F87BC66E8BD41D36F7EC9071 /* PetInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856E4EB784D031CDEA78CBBD /* PetInfoView.swift */; };
-		B1C2D3E4F5A607182930BBCC /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */; };
-		D1E2F3A4B5C607182930DDEE /* LanguageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */; };
-		F1A2B3C4D5E607182930FF00 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D607182930EEFF /* Strings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,10 +66,13 @@
 		8830EE2A3C903C1A16AE7670 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		9407F558E5B2349773FE9806 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
 		9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorialSentenceEditView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AD71578A5A4A3C1176F500D8 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AF218F1364C5AAF4DD3C92AC /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
 		B95DC4895BFBD7DFF3205270 /* MemorialApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MemorialApp.entitlements; sourceTree = "<group>"; };
 		C1020B1B660C233418782944 /* MailboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxView.swift; sourceTree = "<group>"; };
+		C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageStore.swift; sourceTree = "<group>"; };
 		C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateSuccessView.swift; sourceTree = "<group>"; };
 		C40540C59A31F39495D189F7 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		CC334455667788990011AABB /* LetterDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterDetailView.swift; sourceTree = "<group>"; };
@@ -75,14 +80,14 @@
 		D7FD3DFD4A69C6AACDAAB5CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DB94814E21284C70E752BAE2 /* SharePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePanelView.swift; sourceTree = "<group>"; };
 		DD112233445566778899AABB /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D607182930EEFF /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 		E31C6461E77A8135CE9C344F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		EE55FF6611AA22BB33CC44DD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F9B3BFF0C456566C5FD3C1C6 /* MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineView.swift; sourceTree = "<group>"; };
 		FAD8E046BB99B466ADE1CC70 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		FE0D50567A918025751525DC /* PetProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetProfileView.swift; sourceTree = "<group>"; };
 		FF112233445566778899AABB /* LetterEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterEditView.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
-		C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageStore.swift; sourceTree = "<group>"; };
-		E1F2A3B4C5D607182930EEFF /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
+		FF6611AA22BB33CC44DD55EE /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -245,10 +250,12 @@
 			isa = PBXGroup;
 			children = (
 				8830EE2A3C903C1A16AE7670 /* AppState.swift */,
+				CC33DD44EE55FF6611AA22BB /* InfoPlist.strings */,
 				D7FD3DFD4A69C6AACDAAB5CE /* Info.plist */,
 				516B0249E76335F20828B276 /* MainTabView.swift */,
 				B95DC4895BFBD7DFF3205270 /* MemorialApp.entitlements */,
 				CDD62992F1C9DD82FBC6187F /* MemorialApp.swift */,
+				AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */,
 				C40540C59A31F39495D189F7 /* RootView.swift */,
 			);
 			path = App;
@@ -312,11 +319,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2660;
-				TargetAttributes = {
-					C2CE6035980329CD05EBFBDC = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = 6B04C9F500D0E79B2695C625 /* Build configuration list for PBXProject "MemorialApp" */;
 			developmentRegion = en;
@@ -324,6 +326,7 @@
 			knownRegions = (
 				Base,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = 2F4E09FD3C1FAC7CEB634F48;
 			minimizedProjectReferenceProxies = 1;
@@ -343,6 +346,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				61EB3478A7B4BFC429E8D0B6 /* Assets.xcassets in Resources */,
+				BB22CC33DD44EE55FF6611AA /* PrivacyInfo.xcprivacy in Resources */,
+				DD44EE55FF6611AA22BB33CC /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,6 +396,18 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		CC33DD44EE55FF6611AA22BB /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EE55FF6611AA22BB33CC44DD /* en */,
+				FF6611AA22BB33CC44DD55EE /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		464CC122B1FCE6AA16BB9D16 /* Debug */ = {
@@ -466,7 +483,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MemorialApp/Sources/App/MemorialApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4N86K62K6D;
 				INFOPLIST_FILE = MemorialApp/Sources/App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -546,7 +563,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MemorialApp/Sources/App/MemorialApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4N86K62K6D;
 				INFOPLIST_FILE = MemorialApp/Sources/App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
