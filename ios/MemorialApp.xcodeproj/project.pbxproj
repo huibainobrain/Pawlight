@@ -13,7 +13,6 @@
 		1226FAD4D9D078719D3CB817 /* MemorialSentenceEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */; };
 		162884CC621EA2A8E9C0F7FF /* MailboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1020B1B660C233418782944 /* MailboxView.swift */; };
 		1F953BE202ED0B123ABF3AED /* MailboxLockedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793C643D0522E264F127E573 /* MailboxLockedView.swift */; };
-		EE112233445566778899AABB /* LetterEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF112233445566778899AABB /* LetterEditView.swift */; };
 		212E63EAFD46B6B7660091D2 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8510878390A19F7D46D31821 /* KeychainHelper.swift */; };
 		237503EEAB4CA1CA32FD985F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8830EE2A3C903C1A16AE7670 /* AppState.swift */; };
 		4272315CFC0783C8732416AF /* SharePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB94814E21284C70E752BAE2 /* SharePanelView.swift */; };
@@ -32,31 +31,34 @@
 		7E0E9C7397EB79949A74070B /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD8E046BB99B466ADE1CC70 /* APIClient.swift */; };
 		7E66E715757137B43349A6D3 /* TierSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017D65EE9976E5085D1863A3 /* TierSelectView.swift */; };
 		8F7F6014ACD7577531F7DE5B /* EntitlementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DA614CCC0D6060777285F4 /* EntitlementView.swift */; };
+		CC112233445566778899AABB /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD112233445566778899AABB /* PhotoDetailView.swift */; };
 		D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */; };
 		D3F87DD0C0761B37CB50F0A8 /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */; };
+		DD334455667788990011AABB /* LetterDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC334455667788990011AABB /* LetterDetailView.swift */; };
+		EE112233445566778899AABB /* LetterEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF112233445566778899AABB /* LetterEditView.swift */; };
 		EF1E1B725956A118E21538F3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40540C59A31F39495D189F7 /* RootView.swift */; };
 		F7998E3E4B140A831D629C74 /* AlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64245C6BF899F9C1142F86E0 /* AlbumView.swift */; };
 		F87BC66E8BD41D36F7EC9071 /* PetInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856E4EB784D031CDEA78CBBD /* PetInfoView.swift */; };
-		CC112233445566778899AABB /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD112233445566778899AABB /* PhotoDetailView.swift */; };
+		B1C2D3E4F5A607182930BBCC /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */; };
+		D1E2F3A4B5C607182930DDEE /* LanguageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */; };
+		F1A2B3C4D5E607182930FF00 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D607182930EEFF /* Strings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		017D65EE9976E5085D1863A3 /* TierSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierSelectView.swift; sourceTree = "<group>"; };
 		1EB467A0A82942285D6C1016 /* OnboardingStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStartView.swift; sourceTree = "<group>"; };
 		26167546E792AA3A0A734513 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		2DC6FBB2725D9E5EB290B2B7 /* MemorialApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MemorialApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2DC6FBB2725D9E5EB290B2B7 /* MemorialApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemorialApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPhotoView.swift; sourceTree = "<group>"; };
 		46FBDB325D733AE8E09C8DF2 /* HugsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HugsView.swift; sourceTree = "<group>"; };
 		4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryEditView.swift; sourceTree = "<group>"; };
 		4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
-		DD112233445566778899AABB /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
 		516B0249E76335F20828B276 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		565836C1AD9D7A2ACE578D16 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B4E6B181B4B945D33D6A95C /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		64245C6BF899F9C1142F86E0 /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		73DA614CCC0D6060777285F4 /* EntitlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementView.swift; sourceTree = "<group>"; };
 		793C643D0522E264F127E573 /* MailboxLockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxLockedView.swift; sourceTree = "<group>"; };
-		FF112233445566778899AABB /* LetterEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterEditView.swift; sourceTree = "<group>"; };
 		8510878390A19F7D46D31821 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		856E4EB784D031CDEA78CBBD /* PetInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetInfoView.swift; sourceTree = "<group>"; };
 		8830EE2A3C903C1A16AE7670 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -68,13 +70,19 @@
 		C1020B1B660C233418782944 /* MailboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxView.swift; sourceTree = "<group>"; };
 		C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateSuccessView.swift; sourceTree = "<group>"; };
 		C40540C59A31F39495D189F7 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		CC334455667788990011AABB /* LetterDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterDetailView.swift; sourceTree = "<group>"; };
 		CDD62992F1C9DD82FBC6187F /* MemorialApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorialApp.swift; sourceTree = "<group>"; };
 		D7FD3DFD4A69C6AACDAAB5CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DB94814E21284C70E752BAE2 /* SharePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePanelView.swift; sourceTree = "<group>"; };
+		DD112233445566778899AABB /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
 		E31C6461E77A8135CE9C344F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		F9B3BFF0C456566C5FD3C1C6 /* MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineView.swift; sourceTree = "<group>"; };
 		FAD8E046BB99B466ADE1CC70 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		FE0D50567A918025751525DC /* PetProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetProfileView.swift; sourceTree = "<group>"; };
+		FF112233445566778899AABB /* LetterEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterEditView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
+		C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageStore.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D607182930EEFF /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -128,6 +136,8 @@
 		4C347BBBF7E78D7C82DE968B /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */,
+				C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -164,6 +174,7 @@
 				793C643D0522E264F127E573 /* MailboxLockedView.swift */,
 				C1020B1B660C233418782944 /* MailboxView.swift */,
 				FF112233445566778899AABB /* LetterEditView.swift */,
+				CC334455667788990011AABB /* LetterDetailView.swift */,
 			);
 			path = Mailbox;
 			sourceTree = "<group>";
@@ -267,6 +278,7 @@
 			isa = PBXGroup;
 			children = (
 				5B4E6B181B4B945D33D6A95C /* AppColors.swift */,
+				E1F2A3B4C5D607182930EEFF /* Strings.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -299,7 +311,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					C2CE6035980329CD05EBFBDC = {
 						DevelopmentTeam = "";
@@ -356,6 +368,7 @@
 				1F953BE202ED0B123ABF3AED /* MailboxLockedView.swift in Sources */,
 				162884CC621EA2A8E9C0F7FF /* MailboxView.swift in Sources */,
 				EE112233445566778899AABB /* LetterEditView.swift in Sources */,
+				DD334455667788990011AABB /* LetterDetailView.swift in Sources */,
 				D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */,
 				43080225A217466CC254B91F /* MainTabView.swift in Sources */,
 				6B412D6905266A68D5C60AF4 /* MemorialApp.swift in Sources */,
@@ -371,6 +384,9 @@
 				4272315CFC0783C8732416AF /* SharePanelView.swift in Sources */,
 				6630F92912A9F72F998175BB /* StoryEditView.swift in Sources */,
 				7E66E715757137B43349A6D3 /* TierSelectView.swift in Sources */,
+				B1C2D3E4F5A607182930BBCC /* PurchaseManager.swift in Sources */,
+				D1E2F3A4B5C607182930DDEE /* LanguageStore.swift in Sources */,
+				F1A2B3C4D5E607182930FF00 /* Strings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -415,6 +431,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -435,6 +452,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = minimal;
@@ -455,7 +473,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.musayang.memorial;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pawlight.app;
 				PRODUCT_NAME = MemorialApp;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -500,6 +518,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -513,6 +532,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = minimal;
@@ -533,7 +553,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.musayang.memorial;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pawlight.app;
 				PRODUCT_NAME = MemorialApp;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
