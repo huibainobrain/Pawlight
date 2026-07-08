@@ -3,8 +3,13 @@ import SwiftUI
 struct LetterEditView: View {
     let existingLetter: Letter?
     @Binding var isPresented: Bool
+    var onSave: ((Letter) -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
 
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
+
+    private var s: Strings { ls.strings }
 
     @State private var title = ""
     @State private var content = ""
@@ -29,141 +34,164 @@ struct LetterEditView: View {
 
     var body: some View {
         ZStack {
+            // Paper color fills any area the image doesn't cover (bottom gap with .fit).
             AppColors.paper.ignoresSafeArea()
-            ScrollView {
+            // .fit fills the full width without horizontal cropping, keeping the image
+            // symmetric. alignment: .top anchors the botanical header to the nav bar.
+            Image("mailbox_paper_bg")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
 
-                    // MARK: Title field
-                    TextField("标题，可选", text: $title)
-                        .font(AppFonts.body(16, weight: .medium))
-                        .foregroundColor(AppColors.ink)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
-                        .padding(.bottom, 14)
-                        .onChange(of: title) { _, new in
-                            if new.count > maxTitle { title = String(new.prefix(maxTitle)) }
-                        }
+                    // MARK: 1. Title section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(s.letterEditTitleLabel)
+                            .font(AppFonts.body(11))
+                            .foregroundColor(AppColors.muted.opacity(0.5))
+                        TextField(s.letterEditTitlePlaceholder, text: $title)
+                            .font(AppFonts.body(16, weight: .medium))
+                            .foregroundColor(AppColors.ink)
+                            .onChange(of: title) { _, new in
+                                if new.count > maxTitle { title = String(new.prefix(maxTitle)) }
+                            }
+                    }
+                    .padding(.horizontal, 36)
+                    .padding(.top, 20)
+                    .padding(.bottom, 16)
 
-                    Divider()
-                        .padding(.horizontal, 20)
+                    Divider().padding(.horizontal, 36)
 
-                    // MARK: Writing prompts (new letter, empty content)
+                    // MARK: 2. Writing prompts (new letter, before typing)
                     if isNewLetter && content.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("有些话不需要整理好，想TA的时候写下来就可以。")
-                                .font(AppFonts.body(13))
-                                .foregroundColor(AppColors.muted.opacity(0.75))
-                                .lineSpacing(3)
-                                .padding(.horizontal, 20)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(s.letterEditPromptsLabel)
+                                .font(AppFonts.body(12))
+                                .foregroundColor(AppColors.muted.opacity(0.55))
+                                .padding(.horizontal, 36)
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
-                                    ForEach(["今天想对TA说的话", "突然想起的一件小事", "没有来得及说出口的话", "想慢慢留在这里的话"], id: \.self) { prompt in
-                                        Text(prompt)
-                                            .font(AppFonts.body(12))
-                                            .foregroundColor(AppColors.muted)
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 5)
-                                            .background(AppColors.white)
-                                            .cornerRadius(14)
-                                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppColors.line, lineWidth: 1))
+                                    ForEach([s.letterEditPrompt1, s.letterEditPrompt2, s.letterEditPrompt3], id: \.self) { prompt in
+                                        Button {
+                                            content = prompt + "："
+                                            contentFocused = true
+                                        } label: {
+                                            Text(prompt)
+                                                .font(AppFonts.body(12))
+                                                .foregroundColor(AppColors.muted)
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 5)
+                                                .background(AppColors.white)
+                                                .cornerRadius(14)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 14)
+                                                        .stroke(AppColors.line, lineWidth: 1)
+                                                )
+                                        }
                                     }
                                 }
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 36)
                             }
                         }
-                        .padding(.top, 14)
+                        .padding(.top, 16)
                         .padding(.bottom, 8)
                     }
 
-                    // MARK: Content editor
-                    ZStack(alignment: .topLeading) {
-                        if content.isEmpty {
-                            Text("想对TA说的话，慢慢写在这里……")
+                    // MARK: 3. Content editor (main writing area)
+                    ZStack(alignment: .bottomTrailing) {
+                        ZStack(alignment: .topLeading) {
+                            if content.isEmpty {
+                                Text(s.letterEditContentPlaceholder)
+                                    .font(AppFonts.body(16))
+                                    .foregroundColor(AppColors.muted.opacity(0.45))
+                                    .padding(.top, 8)
+                                    .padding(.leading, 5)
+                                    .allowsHitTesting(false)
+                            }
+                            TextEditor(text: $content)
                                 .font(AppFonts.body(16))
-                                .foregroundColor(AppColors.muted.opacity(0.4))
-                                .padding(.top, 8)
-                                .padding(.leading, 5)
-                                .allowsHitTesting(false)
+                                .foregroundColor(AppColors.ink)
+                                .scrollContentBackground(.hidden)
+                                .background(Color.clear)
+                                .frame(minHeight: 300)
+                                .focused($contentFocused)
+                                .padding(.bottom, 28)
                         }
-                        TextEditor(text: $content)
-                            .font(AppFonts.body(16))
-                            .foregroundColor(AppColors.ink)
-                            .scrollContentBackground(.hidden)
-                            .background(Color.clear)
-                            .frame(minHeight: 240)
-                            .focused($contentFocused)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
+                        .padding(.horizontal, 36)
+                        .padding(.top, 32)
 
-                    // MARK: Char counter
-                    HStack(spacing: 6) {
-                        if isOverLimit {
-                            Text("这封信有点长了，可以稍微精简一点。")
-                                .font(AppFonts.body(12))
-                                .foregroundColor(AppColors.rose)
+                        // Char counter anchored inside the writing area, bottom-right
+                        HStack(spacing: 8) {
+                            if isOverLimit {
+                                Text(s.letterEditOverLimit)
+                                    .font(AppFonts.body(11))
+                                    .foregroundColor(AppColors.rose)
+                            }
+                            Text("\(content.count) / \(maxContent)")
+                                .font(AppFonts.body(11))
+                                .foregroundColor(isOverLimit ? AppColors.rose : AppColors.muted.opacity(0.4))
                         }
-                        Spacer()
-                        Text("\(content.count) / \(maxContent)")
-                            .font(AppFonts.body(12))
-                            .foregroundColor(isOverLimit ? AppColors.rose : AppColors.muted)
+                        .padding(.trailing, 32)
+                        .padding(.bottom, 10)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
 
                     // MARK: Save error
                     if saveError {
-                        Text("这封信暂时没有保存成功，请稍后再试。")
+                        Text(s.letterEditSaveError)
                             .font(AppFonts.body(13))
                             .foregroundColor(AppColors.rose)
-                            .padding(.horizontal, 20)
-                            .padding(.top, 6)
+                            .padding(.horizontal, 36)
+                            .padding(.top, 8)
                     }
 
-                    // MARK: Privacy notice
+                    // MARK: 4. Privacy notice
                     HStack(alignment: .top, spacing: 6) {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 10))
-                            .foregroundColor(AppColors.muted.opacity(0.45))
+                            .foregroundColor(AppColors.muted.opacity(0.38))
                             .padding(.top, 2)
-                        Text("这封信只会留在天堂信箱里，不会出现在分享出去的纪念页中。")
+                        Text(s.letterEditPrivacyNotice)
                             .font(AppFonts.body(12))
-                            .foregroundColor(AppColors.muted.opacity(0.45))
+                            .foregroundColor(AppColors.muted.opacity(0.38))
                             .lineSpacing(3)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
+                    .padding(.horizontal, 36)
+                    .padding(.top, 24)
 
-                    // MARK: Delete button (edit mode only)
+                    // MARK: 5. Delete (edit mode only)
                     if existingLetter != nil {
                         Divider()
-                            .padding(.horizontal, 20)
-                            .padding(.top, 28)
+                            .padding(.horizontal, 36)
+                            .padding(.top, 32)
                         Button {
                             showDeleteConfirm = true
                         } label: {
-                            Text(isDeleting ? "删除中……" : "删除这封信")
+                            Text(isDeleting ? s.letterEditDeletingBtn : s.letterEditDeleteBtn)
                                 .font(AppFonts.body(14))
                                 .foregroundColor(AppColors.rose.opacity(0.7))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
                         }
                         .disabled(isDeleting)
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 36)
                     }
 
-                    Spacer(minLength: 48)
+                    Spacer(minLength: 60)
                 }
             }
             .scrollDismissesKeyboard(.interactively)
         }
-        .navigationTitle("写给TA")
+        .navigationTitle(s.letterEditNavTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(hasChanges)
+        .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("取消") {
+                Button(s.cancel) {
                     if hasChanges { showCancelAlert = true } else { isPresented = false }
                 }
                 .foregroundColor(AppColors.muted)
@@ -173,7 +201,7 @@ struct LetterEditView: View {
                     if isSaving {
                         ProgressView().scaleEffect(0.8)
                     } else {
-                        Text("保存")
+                        Text(s.save)
                             .foregroundColor(canSave ? AppColors.greenDeep : AppColors.muted)
                             .fontWeight(.medium)
                     }
@@ -190,22 +218,22 @@ struct LetterEditView: View {
             originalContent = c
             if isNewLetter { contentFocused = true }
         }
-        .alert("你还没有保存这封信", isPresented: $showCancelAlert) {
-            Button("继续写", role: .cancel) {}
-            Button("确认退出", role: .destructive) { isPresented = false }
+        .alert(s.letterEditUnsavedTitle(isNewLetter), isPresented: $showCancelAlert) {
+            Button(s.continueEditing, role: .cancel) {}
+            Button(s.leaveWithoutSaving, role: .destructive) { isPresented = false }
         } message: {
-            Text("你还没有保存这封信，确认要退出吗？")
+            Text(s.letterEditUnsavedBody(isNewLetter))
         }
-        .alert("要删除这封信吗？", isPresented: $showDeleteConfirm) {
-            Button("取消", role: .cancel) {}
-            Button("删除", role: .destructive) { deleteLetter() }
+        .alert(s.letterEditDeleteAlertTitle, isPresented: $showDeleteConfirm) {
+            Button(s.cancel, role: .cancel) {}
+            Button(s.delete, role: .destructive) { deleteLetter() }
         } message: {
-            Text("删除后，这封信将不会再保留在天堂信箱中。")
+            Text(s.letterEditDeleteAlertBody)
         }
-        .alert("删除失败", isPresented: $showDeleteError) {
-            Button("好的", role: .cancel) {}
+        .alert(s.letterEditDeleteErrorTitle, isPresented: $showDeleteError) {
+            Button(s.ok, role: .cancel) {}
         } message: {
-            Text("这封信暂时没能删除，请稍后再试。")
+            Text(s.letterEditDeleteErrorBody)
         }
     }
 
@@ -239,6 +267,7 @@ struct LetterEditView: View {
                     if let idx = appState.letters.firstIndex(where: { $0.id == existing.id }) {
                         appState.letters[idx] = updated
                     }
+                    onSave?(updated)
                 } else {
                     let api = try await APIClient.shared.createLetter(
                         token: token, petId: petId,
@@ -276,7 +305,11 @@ struct LetterEditView: View {
                 try await APIClient.shared.deleteLetter(token: token, petId: petId, letterId: letterId)
                 appState.letters.removeAll { $0.id == letterId }
                 isDeleting = false
-                isPresented = false
+                if let onDelete = onDelete {
+                    onDelete()
+                } else {
+                    isPresented = false
+                }
             } catch {
                 print("deleteLetter error: \(error)")
                 isDeleting = false

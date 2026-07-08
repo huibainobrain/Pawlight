@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SharePanelView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
     @Environment(\.dismiss) var dismiss
     @Environment(\.openURL) var openURL
     @State private var visibility: Share.Visibility = .link
@@ -12,7 +13,13 @@ struct SharePanelView: View {
     @State private var showSystemShare = false
     @State private var copied = false
 
+    private var s: Strings { ls.strings }
     private var shareURL: String { appState.share?.shareURL ?? "" }
+    private var localizedShareURL: String {
+        guard !shareURL.isEmpty else { return shareURL }
+        let lang = ls.language.rawValue
+        return shareURL.contains("?") ? "\(shareURL)&lang=\(lang)" : "\(shareURL)?lang=\(lang)"
+    }
 
     var body: some View {
         NavigationStack {
@@ -43,7 +50,7 @@ struct SharePanelView: View {
                                 copyLink()
                             }
                         } label: {
-                            Label(copied ? "已复制" : "复制链接", systemImage: copied ? "checkmark" : "link")
+                            Label(copied ? s.sharePanelCopiedBtn : s.sharePanelCopyBtn, systemImage: copied ? "checkmark" : "link")
                                 .font(AppFonts.body(15, weight: .medium))
                                 .foregroundColor(AppColors.white)
                                 .frame(maxWidth: .infinity)
@@ -53,8 +60,8 @@ struct SharePanelView: View {
                         }
 
                         if visibility == .link {
-                            ShareLink(item: URL(string: shareURL) ?? URL(string: "https://pet-memory-psi.vercel.app")!) {
-                                Label("分享给好友", systemImage: "paperplane")
+                            ShareLink(item: URL(string: localizedShareURL) ?? URL(string: "https://pet-memory-psi.vercel.app")!) {
+                                Label(s.sharePanelShareBtn, systemImage: "paperplane")
                                     .font(AppFonts.body(15, weight: .medium))
                                     .foregroundColor(AppColors.greenDeep)
                                     .frame(maxWidth: .infinity)
@@ -67,7 +74,7 @@ struct SharePanelView: View {
                                 pendingCopyOnConfirm = false
                                 showPrivacyConfirm = true
                             } label: {
-                                Label("分享给好友", systemImage: "paperplane")
+                                Label(s.sharePanelShareBtn, systemImage: "paperplane")
                                     .font(AppFonts.body(15, weight: .medium))
                                     .foregroundColor(AppColors.greenDeep)
                                     .frame(maxWidth: .infinity)
@@ -81,7 +88,7 @@ struct SharePanelView: View {
                     .padding(.top, 20)
 
                     #if DEBUG
-                    if !shareURL.isEmpty, let url = URL(string: shareURL) {
+                    if !localizedShareURL.isEmpty, let url = URL(string: localizedShareURL) {
                         Button {
                             openURL(url)
                         } label: {
@@ -96,21 +103,21 @@ struct SharePanelView: View {
                     Spacer()
                 }
             }
-            .navigationTitle("分享纪念页")
+            .navigationTitle(s.sharePanelNavTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("关闭") { dismiss() }.foregroundColor(AppColors.muted)
+                    Button(s.close) { dismiss() }.foregroundColor(AppColors.muted)
                 }
             }
             .onAppear {
                 visibility = appState.share?.visibility ?? .link
                 hugEnabled = appState.share?.hugEnabled ?? true
             }
-            .onChange(of: visibility) { _ in saveShare() }
-            .onChange(of: hugEnabled) { _ in saveShare() }
-            .alert("改为链接可见", isPresented: $showPrivacyConfirm) {
-                Button("确认改为链接可见") {
+            .onChange(of: visibility) { saveShare() }
+            .onChange(of: hugEnabled) { saveShare() }
+            .alert(s.sharePanelPrivacyAlertTitle, isPresented: $showPrivacyConfirm) {
+                Button(s.sharePanelPrivacyConfirmBtn) {
                     Task { @MainActor in
                         guard let token = KeychainHelper.loadToken(),
                               let petId = appState.currentPet?.id else { return }
@@ -125,17 +132,17 @@ struct SharePanelView: View {
                         }
                     }
                 }
-                Button("取消", role: .cancel) {}
+                Button(s.cancel, role: .cancel) {}
             } message: {
-                Text("当前设置为仅自己可见。分享前需要改为通过链接可见，确认吗？")
+                Text(s.sharePanelPrivacyAlertBody)
             }
-            .alert("设置失败", isPresented: $shareConfirmError) {
-                Button("好的", role: .cancel) {}
+            .alert(s.sharePanelSaveErrorTitle, isPresented: $shareConfirmError) {
+                Button(s.ok, role: .cancel) {}
             } message: {
-                Text("暂时没有改成功，请稍后再试。链接尚未送出。")
+                Text(s.sharePanelSaveErrorBody)
             }
             .sheet(isPresented: $showSystemShare) {
-                if let url = URL(string: shareURL), !shareURL.isEmpty {
+                if let url = URL(string: localizedShareURL), !localizedShareURL.isEmpty {
                     ShareSheet(url: url)
                 }
             }
@@ -143,7 +150,7 @@ struct SharePanelView: View {
     }
 
     private func copyLink() {
-        UIPasteboard.general.string = shareURL
+        UIPasteboard.general.string = localizedShareURL
         withAnimation { copied = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
     }
@@ -162,6 +169,7 @@ struct SharePanelView: View {
 
 struct SharePreviewCard: View {
     let petName: String
+    @EnvironmentObject var ls: LanguageStore
 
     var body: some View {
         HStack(spacing: 14) {
@@ -177,7 +185,7 @@ struct SharePreviewCard: View {
                 Text(petName)
                     .font(AppFonts.serif(17, weight: .medium))
                     .foregroundColor(AppColors.ink)
-                Text("的纪念星球")
+                Text(ls.strings.sharePanelPreviewSubtitle)
                     .font(AppFonts.body(13))
                     .foregroundColor(AppColors.muted)
             }
@@ -192,21 +200,22 @@ struct SharePreviewCard: View {
 
 struct VisibilityRow: View {
     @Binding var visibility: Share.Visibility
+    @EnvironmentObject var ls: LanguageStore
 
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 3) {
-                Text("谁可以看见TA")
+                Text(ls.strings.sharePanelVisibilityTitle)
                     .font(AppFonts.body(15))
                     .foregroundColor(AppColors.ink)
-                Text(visibility == .link ? "通过链接可见" : "仅自己可见")
+                Text(visibility == .link ? ls.strings.sharePanelVisibilityLink : ls.strings.sharePanelVisibilityPrivate)
                     .font(AppFonts.body(12))
                     .foregroundColor(AppColors.muted)
             }
             Spacer()
             Menu {
-                Button("通过链接可见") { visibility = .link }
-                Button("仅自己可见") { visibility = .private }
+                Button(ls.strings.sharePanelVisibilityLink) { visibility = .link }
+                Button(ls.strings.sharePanelVisibilityPrivate) { visibility = .private }
             } label: {
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.system(size: 13))
@@ -220,14 +229,15 @@ struct VisibilityRow: View {
 
 struct HugToggleRow: View {
     @Binding var hugEnabled: Bool
+    @EnvironmentObject var ls: LanguageStore
 
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 3) {
-                Text("允许访客抱抱TA")
+                Text(ls.strings.sharePanelHugTitle)
                     .font(AppFonts.body(15))
                     .foregroundColor(AppColors.ink)
-                Text("访客可以用抱抱表达心意")
+                Text(ls.strings.sharePanelHugSubtitle)
                     .font(AppFonts.body(12))
                     .foregroundColor(AppColors.muted)
             }

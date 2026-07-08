@@ -3,3 +3,9 @@ node_modules
 .env
 
 /generated/prisma
+
+# Compiled output of prisma/seed.ts left on disk by ts-node/tsc — seed.ts is the source of truth
+prisma/seed.js
+prisma/seed.js.map
+prisma/seed.d.ts
+*.tsbuildinfo

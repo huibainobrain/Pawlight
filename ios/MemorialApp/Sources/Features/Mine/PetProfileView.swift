@@ -2,36 +2,39 @@ import SwiftUI
 
 struct PetProfileView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
     @State private var name = ""
     @State private var petType: Pet.PetType = .cat
     @State private var isSaving = false
     @State private var saveError = false
 
+    private var s: Strings { ls.strings }
+
     var body: some View {
         ZStack {
             AppColors.paper.ignoresSafeArea()
             Form {
-                Section("基础信息") {
-                    TextField("名字", text: $name)
-                    Picker("类型", selection: $petType) {
+                Section(s.petProfileBasicSection) {
+                    TextField(s.petProfileNameField, text: $name)
+                    Picker(s.petProfileTypeField, selection: $petType) {
                         ForEach(Pet.PetType.allCases, id: \.self) { type in
-                            Text(type.displayName).tag(type)
+                            Text(s.petTypeName(type)).tag(type)
                         }
                     }
                 }
                 .listRowBackground(AppColors.white)
 
-                Section("日期（选填）") {
-                    DatePrecisionRow(label: "来到身边")
-                    DatePrecisionRow(label: "生日")
-                    DatePrecisionRow(label: "离开日期")
+                Section(s.petProfileDatesSection) {
+                    DatePrecisionRow(label: s.petProfileArrivalDate, notFilled: s.petProfileNotFilled)
+                    DatePrecisionRow(label: s.petProfileBirthDate, notFilled: s.petProfileNotFilled)
+                    DatePrecisionRow(label: s.petProfileLeftDate, notFilled: s.petProfileNotFilled)
                 }
                 .listRowBackground(AppColors.white)
             }
             .scrollContentBackground(.hidden)
             .background(AppColors.paper)
         }
-        .navigationTitle("宠物资料")
+        .navigationTitle(s.petProfileNavTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
@@ -42,7 +45,7 @@ struct PetProfileView: View {
                     if isSaving {
                         ProgressView().scaleEffect(0.8)
                     } else {
-                        Text("保存").foregroundColor(AppColors.greenDeep).fontWeight(.medium)
+                        Text(s.save).foregroundColor(AppColors.greenDeep).fontWeight(.medium)
                     }
                 }
                 .disabled(isSaving)
@@ -52,10 +55,10 @@ struct PetProfileView: View {
             name = appState.currentPet?.name ?? ""
             petType = appState.currentPet?.type ?? .cat
         }
-        .alert("保存失败", isPresented: $saveError) {
-            Button("好的", role: .cancel) {}
+        .alert(s.saveFailed, isPresented: $saveError) {
+            Button(s.ok, role: .cancel) {}
         } message: {
-            Text("宠物资料暂时没有保存成功，请稍后再试。")
+            Text(s.petProfileSaveError)
         }
     }
 
@@ -82,6 +85,7 @@ struct PetProfileView: View {
 
 struct DatePrecisionRow: View {
     let label: String
+    let notFilled: String
 
     var body: some View {
         HStack {
@@ -89,7 +93,7 @@ struct DatePrecisionRow: View {
                 .font(AppFonts.body(15))
                 .foregroundColor(AppColors.ink)
             Spacer()
-            Text("未填写")
+            Text(notFilled)
                 .font(AppFonts.body(14))
                 .foregroundColor(AppColors.muted)
         }

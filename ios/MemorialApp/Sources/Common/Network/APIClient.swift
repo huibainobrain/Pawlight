@@ -177,6 +177,17 @@ final class APIClient {
         let _: Empty = try await perform(req)
     }
 
+    // MARK: - Purchases
+
+    func verifyPurchase(token: String, jwsToken: String) async throws {
+        var req = URLRequest(url: url("/api/v1/purchases/verify"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["jws_token": jwsToken])
+        try await performVoid(req)
+    }
+
     // MARK: - Private
 
     private struct Empty: Decodable {}

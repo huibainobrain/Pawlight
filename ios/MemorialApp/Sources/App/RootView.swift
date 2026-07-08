@@ -5,7 +5,9 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if appState.hasPet {
+            if appState.isAuthChecking {
+                AppColors.paper.ignoresSafeArea()
+            } else if appState.hasPet {
                 MainTabView()
             } else if appState.hasSkippedOnboarding {
                 MainTabView()

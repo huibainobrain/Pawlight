@@ -2,15 +2,20 @@ import SwiftUI
 
 struct MineView: View {
     @EnvironmentObject var appState: AppState
-    @State private var showEntitlement = false
-    @State private var showPrivacy = false
-    @State private var showPetProfile = false
+    @EnvironmentObject var ls: LanguageStore
     @State private var showDeleteAlert = false
     @State private var showOnboarding = false
+    @State private var goPetProfile = false
+    @State private var goEntitlement = false
+    @State private var goPrivacySettings = false
     @Environment(\.openURL) var openURL
 
+    // 临时隐藏「开发调试」模块；需要恢复时改回 true 即可
+    private let showDevDebugSection = false
+
+    private var s: Strings { ls.strings }
     private let privacyURL = URL(string: "https://pet-memory-psi.vercel.app/privacy")!
-    private let feedbackEmail = URL(string: "mailto:ntuwangyiming@gmail.com?subject=星屿纪念反馈")!
+    private let feedbackEmail = URL(string: "mailto:ntuwangyiming@gmail.com?subject=Pawlight%20Feedback")!
 
     var body: some View {
         NavigationStack {
@@ -19,153 +24,264 @@ struct MineView: View {
                 if !appState.hasPet {
                     MineUnboardedView(showOnboarding: $showOnboarding)
                 }
-                if appState.hasPet { List {
-                    Section {
-                        AccountHeaderRow()
-                    }
-                    .listRowBackground(AppColors.white)
+                if appState.hasPet {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 0) {
 
-                    Section("我的宠物") {
-                        if appState.hasPet {
-                            NavigationLink(destination: PetProfileView()) {
-                                HStack(spacing: 12) {
-                                    ZStack {
-                                        Circle().fill(AppColors.green.opacity(0.12)).frame(width: 36, height: 36)
-                                        Image(systemName: "pawprint.fill")
-                                            .font(.system(size: 14))
-                                            .foregroundColor(AppColors.green)
-                                    }
-                                    Text(appState.currentPet?.name ?? "")
-                                        .font(AppFonts.body(15))
-                                        .foregroundColor(AppColors.ink)
-                                }
+                            HStack {
+                                Text(s.mineTitle)
+                                    .font(AppFonts.serif(28, weight: .medium))
+                                    .foregroundStyle(AppColors.ink)
+                                Spacer()
                             }
-                            Button {
-                                // Show unavailable alert
-                            } label: {
+                            .padding(.horizontal, 20)
+                            .padding(.top, 12)
+                            .padding(.bottom, 20)
+
+                            // 用户账号卡
+                            MineAccountCard()
+                                .padding(.horizontal, 20)
+
+                            MineSectionLabel(s.minePetSection)
+                            MineSectionCard {
+                                Button { goPetProfile = true } label: {
+                                    MineRowContent(
+                                        icon: "pawprint.fill",
+                                        iconBg: AppColors.green.opacity(0.12),
+                                        iconColor: AppColors.green,
+                                        label: appState.currentPet?.name ?? "",
+                                        showDivider: true
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
                                 HStack(spacing: 12) {
                                     ZStack {
-                                        Circle().fill(AppColors.line).frame(width: 36, height: 36)
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(AppColors.muted.opacity(0.07))
+                                            .frame(width: 32, height: 32)
                                         Image(systemName: "plus")
-                                            .font(.system(size: 14))
-                                            .foregroundColor(AppColors.muted)
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(AppColors.muted.opacity(0.36))
                                     }
-                                    Text("新增宠物")
+                                    Text(s.mineAddPet)
                                         .font(AppFonts.body(15))
-                                        .foregroundColor(AppColors.muted)
+                                        .foregroundStyle(AppColors.muted.opacity(0.48))
                                     Spacer()
-                                    Text("即将开放")
-                                        .font(AppFonts.body(12))
-                                        .foregroundColor(AppColors.muted)
+                                    Text(s.mineAddPetSoon)
+                                        .font(AppFonts.body(11))
+                                        .foregroundStyle(AppColors.muted.opacity(0.40))
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 3)
-                                        .background(AppColors.line)
-                                        .cornerRadius(4)
+                                        .background(AppColors.muted.opacity(0.07))
+                                        .clipShape(RoundedRectangle(cornerRadius: 5))
                                 }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 13)
                             }
-                        }
-                    }
-                    .listRowBackground(AppColors.white)
+                            .padding(.horizontal, 20)
 
-                    Section("纪念空间") {
-                        NavigationLink(destination: EntitlementView()) {
-                            HStack(spacing: 12) {
-                                Image(systemName: appState.isPaid ? "star.fill" : "star")
-                                    .foregroundColor(AppColors.gold)
-                                    .frame(width: 20)
-                                Text(appState.isPaid ? "完整纪念空间（已开通）" : "权益与升级")
-                                    .font(AppFonts.body(15))
-                                    .foregroundColor(AppColors.ink)
-                            }
-                        }
-                        NavigationLink(destination: PrivacySettingsView()) {
-                            HStack(spacing: 12) {
-                                Image(systemName: "lock.fill")
-                                    .foregroundColor(AppColors.muted)
-                                    .frame(width: 20)
-                                Text("权限设置")
-                                    .font(AppFonts.body(15))
-                                    .foregroundColor(AppColors.ink)
-                            }
-                        }
-                    }
-                    .listRowBackground(AppColors.white)
+                            MineSectionLabel(s.mineEntitlementSection)
+                            MineSectionCard {
+                                Button { goEntitlement = true } label: {
+                                    MineRowContent(
+                                        icon: appState.isPaid ? "star.fill" : "star",
+                                        iconBg: AppColors.gold.opacity(0.12),
+                                        iconColor: AppColors.gold,
+                                        label: appState.isPaid ? s.minePaidLabel : s.mineFreeLabel,
+                                        showDivider: true
+                                    )
+                                }
+                                .buttonStyle(.plain)
 
-                    #if DEBUG
-                    Section("开发调试") {
-                        Button {
-                            appState.entitlement = Entitlement(
-                                entitlementType: .paid, photoLimit: 50,
-                                mailboxEnabled: true, purchaseStatus: .paid)
-                            appState.ownerStage = .hasPetPaid
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "star.fill")
-                                    .foregroundColor(AppColors.gold)
-                                    .frame(width: 20)
-                                Text("切换：完整纪念空间（付费）")
-                                    .font(AppFonts.body(15))
-                                    .foregroundColor(AppColors.ink)
+                                Button { goPrivacySettings = true } label: {
+                                    MineRowContent(
+                                        icon: "lock.fill",
+                                        iconBg: AppColors.muted.opacity(0.09),
+                                        iconColor: AppColors.muted,
+                                        label: s.minePrivacyLabel,
+                                        showDivider: false
+                                    )
+                                }
+                                .buttonStyle(.plain)
                             }
-                        }
-                        Button {
-                            appState.entitlement = Entitlement(
-                                entitlementType: .free, photoLimit: 9,
-                                mailboxEnabled: false, purchaseStatus: .none)
-                            appState.ownerStage = .hasPetFree
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "star")
-                                    .foregroundColor(AppColors.muted)
-                                    .frame(width: 20)
-                                Text("切换：免费纪念空间")
-                                    .font(AppFonts.body(15))
-                                    .foregroundColor(AppColors.ink)
-                            }
-                        }
-                        Button {
-                            appState.resetAll()
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "arrow.counterclockwise")
-                                    .foregroundColor(AppColors.rose)
-                                    .frame(width: 20)
-                                Text("重置（回到注册流程）")
-                                    .font(AppFonts.body(15))
-                                    .foregroundColor(AppColors.rose)
-                            }
-                        }
-                    }
-                    .listRowBackground(AppColors.white)
-                    #endif
+                            .padding(.horizontal, 20)
 
-                    Section("支持") {
-                        MineSupportRow(icon: "questionmark.circle", label: "客服与反馈") { openURL(feedbackEmail) }
-                        MineSupportRow(icon: "doc.text", label: "用户协议") { openURL(privacyURL) }
-                        MineSupportRow(icon: "hand.raised", label: "隐私政策") { openURL(privacyURL) }
-                        MineSupportRow(icon: "trash", label: "注销账号", tint: AppColors.rose) { showDeleteAlert = true }
+                            // 开发调试（仅 DEBUG 编译时可见，且受 showDevDebugSection 开关控制）
+                            #if DEBUG
+                            if showDevDebugSection {
+                            MineSectionLabel("开发调试", isDebug: true)
+                            MineSectionCard(debugStyle: true) {
+                                Button {
+                                    appState.entitlement = Entitlement(
+                                        entitlementType: .paid, photoLimit: 50,
+                                        mailboxEnabled: true, purchaseStatus: .paid)
+                                    appState.ownerStage = .hasPetPaid
+                                } label: {
+                                    MineRowContent(
+                                        icon: "star.fill",
+                                        iconBg: AppColors.gold.opacity(0.10),
+                                        iconColor: AppColors.gold.opacity(0.68),
+                                        label: "切换：完整纪念空间（付费）",
+                                        showDivider: true
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
+                                Button {
+                                    appState.entitlement = Entitlement(
+                                        entitlementType: .free, photoLimit: 9,
+                                        mailboxEnabled: false, purchaseStatus: .none)
+                                    appState.ownerStage = .hasPetFree
+                                } label: {
+                                    MineRowContent(
+                                        icon: "star",
+                                        iconBg: AppColors.muted.opacity(0.08),
+                                        iconColor: AppColors.muted.opacity(0.52),
+                                        label: "切换：免费纪念空间",
+                                        showDivider: true
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
+                                Button {
+                                    let fakeHug = Hug(
+                                        id: "debug_hug_\(Date().timeIntervalSince1970)",
+                                        petId: appState.currentPet?.id ?? "pet_debug",
+                                        shareId: "share_debug",
+                                        visitorName: ["小明", "旧友", "陌生人", "TA的朋友"].randomElement(),
+                                        source: "share",
+                                        createdAt: Date()
+                                    )
+                                    appState.hugs.insert(fakeHug, at: 0)
+                                    appState.newHugCount += 1
+                                } label: {
+                                    MineRowContent(
+                                        icon: "heart.fill",
+                                        iconBg: AppColors.rose.opacity(0.10),
+                                        iconColor: AppColors.rose.opacity(0.68),
+                                        label: "模拟收到新抱抱",
+                                        showDivider: true
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
+                                Button { appState.resetAll() } label: {
+                                    MineRowContent(
+                                        icon: "arrow.counterclockwise",
+                                        iconBg: AppColors.rose.opacity(0.10),
+                                        iconColor: AppColors.rose,
+                                        label: "重置（回到注册流程）",
+                                        labelColor: AppColors.rose,
+                                        showDivider: false
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.horizontal, 20)
+                            }
+                            #endif
+
+                            MineSectionLabel(s.mineSupportSection)
+                            MineSectionCard {
+                                // Language toggle
+                                VStack(spacing: 0) {
+                                    HStack(spacing: 12) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(AppColors.green.opacity(0.10))
+                                                .frame(width: 32, height: 32)
+                                            Image(systemName: "globe")
+                                                .font(.system(size: 13))
+                                                .foregroundStyle(AppColors.green.opacity(0.65))
+                                        }
+                                        Text(s.mineLanguageSection)
+                                            .font(AppFonts.body(15))
+                                            .foregroundStyle(AppColors.ink)
+                                        Spacer()
+                                        HStack(spacing: 4) {
+                                            ForEach([AppLanguage.en, AppLanguage.zh], id: \.rawValue) { lang in
+                                                Button {
+                                                    ls.set(lang)
+                                                } label: {
+                                                    Text(lang.label)
+                                                        .font(AppFonts.body(12, weight: ls.language == lang ? .medium : .regular))
+                                                        .foregroundStyle(ls.language == lang ? AppColors.white : AppColors.muted)
+                                                        .padding(.horizontal, 10)
+                                                        .padding(.vertical, 5)
+                                                        .background(ls.language == lang ? AppColors.greenDeep : AppColors.muted.opacity(0.09))
+                                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 13)
+                                    Rectangle()
+                                        .fill(AppColors.line)
+                                        .frame(height: 0.5)
+                                        .padding(.leading, 58)
+                                }
+
+                                Button { openURL(feedbackEmail) } label: {
+                                    MineRowContent(icon: "questionmark.circle.fill", iconBg: AppColors.green.opacity(0.10), iconColor: AppColors.green.opacity(0.65), label: s.mineFeedbackLabel, showDivider: true)
+                                }
+                                .buttonStyle(.plain)
+
+                                Button { openURL(privacyURL) } label: {
+                                    MineRowContent(icon: "doc.text.fill", iconBg: AppColors.green.opacity(0.10), iconColor: AppColors.green.opacity(0.65), label: s.mineTermsLabel, showDivider: true)
+                                }
+                                .buttonStyle(.plain)
+
+                                Button { openURL(privacyURL) } label: {
+                                    MineRowContent(icon: "hand.raised.fill", iconBg: AppColors.green.opacity(0.10), iconColor: AppColors.green.opacity(0.65), label: s.minePrivacyPolicyLabel, showDivider: true)
+                                }
+                                .buttonStyle(.plain)
+
+                                Button { showDeleteAlert = true } label: {
+                                    MineRowContent(
+                                        icon: "trash.fill",
+                                        iconBg: AppColors.rose.opacity(0.10),
+                                        iconColor: AppColors.rose,
+                                        label: s.mineDeleteAccountLabel,
+                                        labelColor: AppColors.rose,
+                                        showDivider: false
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.horizontal, 20)
+
+                            // 底部氛围区
+                            MineBottomDecoration()
+
+                            Spacer(minLength: 80)
+                        }
+                        .navigationDestination(isPresented: $goPetProfile) { PetProfileView() }
+                        .navigationDestination(isPresented: $goEntitlement) { EntitlementView() }
+                        .navigationDestination(isPresented: $goPrivacySettings) { PrivacySettingsView() }
                     }
-                    .listRowBackground(AppColors.white)
                 }
-                .listStyle(.insetGrouped)
-                .scrollContentBackground(.hidden)
-                .background(AppColors.paper)
-                }  // if appState.hasPet
             }
-            .navigationTitle("我的")
-            .alert("注销账号", isPresented: $showDeleteAlert) {
-                Button("确认注销", role: .destructive) { appState.resetAll() }
-                Button("取消", role: .cancel) {}
+            .toolbar(.hidden, for: .navigationBar)
+            .alert(s.mineDeleteAlertTitle, isPresented: $showDeleteAlert) {
+                Button(s.mineDeleteConfirmBtn, role: .destructive) { appState.resetAll() }
+                Button(s.cancel, role: .cancel) {}
             } message: {
-                Text("注销后将退出登录并清除本地数据，账号内容仍保留在服务器。")
+                Text(s.mineDeleteAlertBody)
             }
         }
-        .fullScreenCover(isPresented: $showOnboarding) {
-            OnboardingStartView()
-        }
+        .fullScreenCover(isPresented: $showOnboarding) { OnboardingStartView() }
         .onChange(of: appState.hasPet) { _, hasPet in
             if hasPet { showOnboarding = false }
         }
+        .onChange(of: goPetProfile)      { _, _ in syncTabBar() }
+        .onChange(of: goEntitlement)     { _, _ in syncTabBar() }
+        .onChange(of: goPrivacySettings) { _, _ in syncTabBar() }
+    }
+
+    private func syncTabBar() {
+        appState.tabBarHidden = goPetProfile || goEntitlement || goPrivacySettings
     }
 }
 
@@ -173,6 +289,9 @@ struct MineView: View {
 
 struct MineUnboardedView: View {
     @Binding var showOnboarding: Bool
+    @EnvironmentObject var ls: LanguageStore
+
+    private var s: Strings { ls.strings }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -180,19 +299,19 @@ struct MineUnboardedView: View {
             VStack(spacing: 24) {
                 ZStack {
                     Circle()
-                        .fill(AppColors.green.opacity(0.1))
+                        .fill(AppColors.green.opacity(0.10))
                         .frame(width: 100, height: 100)
                     Image(systemName: "person.fill")
                         .font(.system(size: 38))
-                        .foregroundColor(AppColors.green.opacity(0.45))
+                        .foregroundStyle(AppColors.green.opacity(0.42))
                 }
                 VStack(spacing: 10) {
-                    Text("还没有创建TA的星球")
+                    Text(s.mineUnboardedTitle)
                         .font(AppFonts.serif(20, weight: .medium))
-                        .foregroundColor(AppColors.ink)
-                    Text("创建后，这里可以查看\n权益、账号和宠物设置。")
+                        .foregroundStyle(AppColors.ink)
+                    Text(s.mineUnboardedBody)
                         .font(AppFonts.body(14))
-                        .foregroundColor(AppColors.muted)
+                        .foregroundStyle(AppColors.muted)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                 }
@@ -201,13 +320,13 @@ struct MineUnboardedView: View {
             Button {
                 showOnboarding = true
             } label: {
-                Text("为TA创建星球")
+                Text(s.createKeepsake)
                     .font(AppFonts.body(16, weight: .medium))
-                    .foregroundColor(AppColors.white)
+                    .foregroundStyle(AppColors.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(AppColors.greenDeep)
-                    .cornerRadius(12)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 48)
@@ -215,52 +334,188 @@ struct MineUnboardedView: View {
     }
 }
 
-struct AccountHeaderRow: View {
+// MARK: - 用户账号卡
+
+private struct MineAccountCard: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
 
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(AppColors.green.opacity(0.15))
+                    .fill(AppColors.green.opacity(0.14))
                     .frame(width: 52, height: 52)
                 Image(systemName: "person.fill")
                     .font(.system(size: 22))
-                    .foregroundColor(AppColors.green)
+                    .foregroundStyle(AppColors.green.opacity(0.68))
             }
-            VStack(alignment: .leading, spacing: 3) {
-                Text(appState.currentUser?.nickname ?? "Apple 用户")
+            VStack(alignment: .leading, spacing: 4) {
+                Text(appState.currentUser?.nickname ?? "Apple User")
                     .font(AppFonts.body(16, weight: .medium))
-                    .foregroundColor(AppColors.ink)
-                Text("Apple 账号登录")
+                    .foregroundStyle(AppColors.ink)
+                Text(ls.strings.mineAppleLogin)
                     .font(AppFonts.body(12))
-                    .foregroundColor(AppColors.muted)
+                    .foregroundStyle(AppColors.muted)
             }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(AppColors.muted.opacity(0.35))
         }
-        .padding(.vertical, 4)
+        .padding(16)
+        .background(AppColors.white)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.line, lineWidth: 1))
     }
 }
 
-struct MineSupportRow: View {
-    let icon: String
-    let label: String
-    var tint: Color = AppColors.muted
-    var action: () -> Void = {}
+// MARK: - Section 标题
+
+private struct MineSectionLabel: View {
+    let title: String
+    var isDebug: Bool
+
+    init(_ title: String, isDebug: Bool = false) {
+        self.title = title
+        self.isDebug = isDebug
+    }
 
     var body: some View {
-        Button(action: action) {
+        HStack(spacing: 5) {
+            if isDebug {
+                Image(systemName: "wrench.adjustable.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(AppColors.muted.opacity(0.36))
+            }
+            Text(title)
+                .font(AppFonts.body(12))
+                .foregroundStyle(isDebug ? AppColors.muted.opacity(0.40) : AppColors.muted.opacity(0.68))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 24)
+        .padding(.top, 24)
+        .padding(.bottom, 8)
+    }
+}
+
+// MARK: - Section 卡片容器
+
+private struct MineSectionCard<Content: View>: View {
+    var debugStyle: Bool
+    let content: Content
+
+    init(debugStyle: Bool = false, @ViewBuilder content: () -> Content) {
+        self.debugStyle = debugStyle
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            content
+        }
+        .background(debugStyle ? AppColors.paperSoft : AppColors.white)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppColors.line, lineWidth: 1))
+    }
+}
+
+// MARK: - 行视图
+
+private struct MineRowContent: View {
+    let icon: String
+    let iconBg: Color
+    let iconColor: Color
+    let label: String
+    var labelColor: Color = AppColors.ink
+    var showDivider: Bool = true
+
+    var body: some View {
+        VStack(spacing: 0) {
             HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .foregroundColor(tint)
-                    .frame(width: 20)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(iconBg)
+                        .frame(width: 32, height: 32)
+                    Image(systemName: icon)
+                        .font(.system(size: 13))
+                        .foregroundStyle(iconColor)
+                }
                 Text(label)
                     .font(AppFonts.body(15))
-                    .foregroundColor(tint == AppColors.muted ? AppColors.ink : tint)
+                    .foregroundStyle(labelColor)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.muted)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(AppColors.muted.opacity(0.38))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 13)
+            .contentShape(Rectangle())
+
+            if showDivider {
+                Rectangle()
+                    .fill(AppColors.line)
+                    .frame(height: 0.5)
+                    .padding(.leading, 58)
             }
         }
+    }
+}
+
+// MARK: - 底部氛围区
+
+private struct MineBottomDecoration: View {
+    @EnvironmentObject var ls: LanguageStore
+
+    private var versionText: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        #if DEBUG
+        return ls.strings.mineVersionDebug(v)
+        #else
+        return ls.strings.mineVersion(v)
+        #endif
+    }
+
+    var body: some View {
+        VStack(spacing: 14) {
+            ZStack {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(AppColors.green.opacity(0.22))
+                    .rotationEffect(.degrees(-30))
+                    .offset(x: -38, y: 8)
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(AppColors.green.opacity(0.16))
+                    .rotationEffect(.degrees(40))
+                    .offset(x: 40, y: 10)
+                Image(systemName: "sparkle")
+                    .font(.system(size: 9, weight: .ultraLight))
+                    .foregroundStyle(AppColors.muted.opacity(0.20))
+                    .offset(x: -24, y: -22)
+                Image(systemName: "hare.fill")
+                    .font(.system(size: 52))
+                    .foregroundStyle(AppColors.muted.opacity(0.13))
+            }
+            .frame(height: 72)
+
+            VStack(spacing: 5) {
+                Text(ls.strings.mineBottomLine1)
+                    .font(AppFonts.body(13))
+                    .foregroundStyle(AppColors.muted.opacity(0.46))
+                Text(ls.strings.mineBottomLine2)
+                    .font(AppFonts.body(13))
+                    .foregroundStyle(AppColors.muted.opacity(0.46))
+            }
+
+            Text(versionText)
+                .font(AppFonts.body(11))
+                .foregroundStyle(AppColors.muted.opacity(0.28))
+        }
+        .padding(.top, 36)
+        .padding(.bottom, 16)
     }
 }

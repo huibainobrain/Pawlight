@@ -3,15 +3,19 @@ import PhotosUI
 
 private enum UploadBannerState: Equatable {
     case idle
-    case uploading(Int, Int)   // current index, total
-    case allSuccess(Int)       // count
-    case partial(Int, Int)     // succeeded, failed
+    case uploading(Int, Int)    // current index, total
+    case allSuccess(Int)        // count
+    case partial(Int, Int)      // succeeded, failed
     case allFailed
     case formatError
 }
 
 struct AlbumView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
+    @Environment(\.dismiss) var dismiss
+
+    private var s: Strings { ls.strings }
 
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var uploadState: UploadBannerState = .idle
@@ -36,41 +40,63 @@ struct AlbumView: View {
         if case .uploading = uploadState { return true }
         return false
     }
+    private var showNotification: Bool {
+        switch uploadState {
+        case .allSuccess, .partial, .allFailed, .formatError: return true
+        default: return false
+        }
+    }
 
     var body: some View {
         ZStack {
             AppColors.paper.ignoresSafeArea()
-            VStack(spacing: 0) {
-                if uploadState != .idle {
-                    uploadBanner
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                }
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        capacityRow
-                            .padding(.horizontal, 20)
-                            .padding(.top, 16)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
 
-                        if albumPhotos.isEmpty {
-                            emptyStateView
-                        } else {
-                            photoGridView
-                        }
-
-                        publicNotice
+                    // 轻量通知（上传完成 / 失败）
+                    if showNotification {
+                        notificationBanner
                             .padding(.horizontal, 20)
-                            .padding(.top, 20)
-                            .padding(.bottom, 40)
+                            .padding(.top, 14)
+                            .transition(.move(edge: .top).combined(with: .opacity))
                     }
+
+                    // 计数行
+                    capacityRow
+
+                    // 内容区
+                    if albumPhotos.isEmpty && !isUploading {
+                        emptyStateView
+                    } else {
+                        photoGrid
+                    }
+
+                    // 公开边界提示
+                    publicNotice
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
+                        .padding(.bottom, 40)
                 }
             }
         }
         .animation(.easeInOut(duration: 0.25), value: uploadState)
-        .navigationTitle("照片回忆")
+        .navigationTitle(s.albumNavTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(AppColors.ink)
+                        .padding(8)
+                        .background(AppColors.white.opacity(0.88))
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 1)
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
-                toolbarButton
+                toolbarAddButton
             }
         }
         .toolbar(.hidden, for: .tabBar)
@@ -87,112 +113,181 @@ struct AlbumView: View {
                 handleMultiUpload(items: items)
             }
         }
-        .alert("照片数量超出上限", isPresented: $showOverLimitAlert) {
-            Button("取消", role: .cancel) { pendingPartialItems = [] }
+        .alert(s.albumOverLimitTitle(overLimitSelected, overLimitAvailable), isPresented: $showOverLimitAlert) {
+            Button(s.cancel, role: .cancel) { pendingPartialItems = [] }
             if overLimitAvailable > 0 {
-                Button("仅上传前 \(overLimitAvailable) 张") {
+                Button(s.albumUploadPartialBtn(overLimitAvailable)) {
                     let items = pendingPartialItems
                     pendingPartialItems = []
                     handleMultiUpload(items: items)
                 }
             }
         } message: {
-            Text("你选择了 \(overLimitSelected) 张照片，但目前只能再保存 \(overLimitAvailable) 张。")
+            Text(s.albumOverLimitBody(overLimitSelected, overLimitAvailable))
         }
         .sheet(isPresented: $showLimitSheet, onDismiss: {
-            if wantsEntitlement {
-                wantsEntitlement = false
-                showEntitlement = true
-            }
+            if wantsEntitlement { wantsEntitlement = false; showEntitlement = true }
         }) {
             LimitSheet(isPaid: appState.isPaid, limit: limit, onUpgrade: {
-                wantsEntitlement = true
-                showLimitSheet = false
+                wantsEntitlement = true; showLimitSheet = false
             })
         }
-        .navigationDestination(isPresented: $showEntitlement) {
-            EntitlementView()
-        }
+        .navigationDestination(isPresented: $showEntitlement) { EntitlementView() }
         .fullScreenCover(item: $selectedPhoto) { photo in
             PhotoDetailView(photo: photo).environmentObject(appState)
         }
     }
 
-    // MARK: Toolbar
+    // MARK: - 顶部"添加照片"按钮
 
-    @ViewBuilder private var toolbarButton: some View {
+    @ViewBuilder private var toolbarAddButton: some View {
         if isUploading {
-            ProgressView().scaleEffect(0.8)
+            ProgressView().scaleEffect(0.78)
         } else if atLimit {
-            Button("添加照片") { showLimitSheet = true }
-                .foregroundColor(AppColors.muted)
+            Button { showLimitSheet = true } label: {
+                Text(s.albumAddPhotoBtn)
+                    .font(AppFonts.body(13, weight: .medium))
+                    .foregroundStyle(AppColors.muted)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(AppColors.muted.opacity(0.10))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
         } else {
             PhotosPicker(
                 selection: $selectedItems,
                 maxSelectionCount: remainingSlots,
                 matching: .images
             ) {
-                Text("添加照片")
-                    .font(AppFonts.body(14, weight: .medium))
-                    .foregroundColor(AppColors.greenDeep)
+                Text(s.albumAddPhotoBtn)
+                    .font(AppFonts.body(13, weight: .medium))
+                    .foregroundStyle(AppColors.greenDeep)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(AppColors.green.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
     }
 
-    // MARK: Capacity Row
+    // MARK: - 轻量通知（完成 / 失败）
 
-    @ViewBuilder private var capacityRow: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("已保存 \(count) / \(limit) 张")
+    @ViewBuilder private var notificationBanner: some View {
+        let (icon, iconColor, message) = notificationContent
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundStyle(iconColor)
+            Text(message)
                 .font(AppFonts.body(13))
-                .foregroundColor(AppColors.muted)
-            if atLimit {
-                Text(appState.isPaid ? "已到当前照片上限" : "已到免费照片上限")
-                    .font(AppFonts.body(12))
-                    .foregroundColor(AppColors.gold)
-            }
+                .foregroundStyle(AppColors.ink)
+                .lineLimit(2)
         }
-        .padding(.bottom, 12)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppColors.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.line, lineWidth: 1))
     }
 
-    // MARK: Empty State
+    private var notificationContent: (String, Color, String) {
+        switch uploadState {
+        case .allSuccess(let n):
+            return ("checkmark.circle.fill", AppColors.greenDeep, s.albumSuccessMsg(n))
+        case .partial(let ok, let fail):
+            return ("exclamationmark.circle.fill", AppColors.gold, s.albumPartialMsg(ok, fail))
+        case .allFailed:
+            return ("xmark.circle.fill", AppColors.rose, s.albumAllFailedMsg)
+        case .formatError:
+            return ("xmark.circle.fill", AppColors.rose, s.albumFormatErrorMsg)
+        default:
+            return ("", .clear, "")
+        }
+    }
 
-    @ViewBuilder private var emptyStateView: some View {
+    // MARK: - 计数行
+
+    private var capacityRow: some View {
+        HStack(spacing: 0) {
+            Text(s.albumCapacity(count, limit))
+                .font(AppFonts.body(13))
+                .foregroundStyle(atLimit ? AppColors.gold : AppColors.muted)
+            if atLimit {
+                Text("  ·  " + (appState.isPaid ? s.albumAtLimitPaid : s.albumAtLimitFree))
+                    .font(AppFonts.body(12))
+                    .foregroundStyle(AppColors.gold.opacity(0.78))
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 14)
+    }
+
+    // MARK: - 无照片空态
+
+    private var emptyStateView: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 52)
+            Spacer(minLength: 40)
             VStack(spacing: 20) {
-                Image(systemName: "photo.on.rectangle")
-                    .font(.system(size: 52))
-                    .foregroundColor(AppColors.green.opacity(0.35))
+                // 装饰插画
+                ZStack {
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 17))
+                        .foregroundStyle(AppColors.green.opacity(0.26))
+                        .rotationEffect(.degrees(-32))
+                        .offset(x: -54, y: 8)
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(AppColors.green.opacity(0.20))
+                        .rotationEffect(.degrees(44))
+                        .offset(x: 56, y: 18)
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 9))
+                        .foregroundStyle(AppColors.green.opacity(0.15))
+                        .rotationEffect(.degrees(-8))
+                        .offset(x: -40, y: -26)
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(AppColors.green.opacity(0.14))
+                        .rotationEffect(.degrees(62))
+                        .offset(x: 42, y: -22)
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 10, weight: .ultraLight))
+                        .foregroundStyle(AppColors.muted.opacity(0.22))
+                        .offset(x: 48, y: -28)
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 7, weight: .ultraLight))
+                        .foregroundStyle(AppColors.muted.opacity(0.17))
+                        .offset(x: -50, y: 30)
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.system(size: 58))
+                        .foregroundStyle(AppColors.muted.opacity(0.17))
+                }
+                .frame(height: 106)
 
                 VStack(spacing: 10) {
-                    Text("把和TA有关的瞬间\n慢慢放在这里")
+                    Text(s.albumEmptyTitle)
                         .font(AppFonts.serif(18, weight: .medium))
-                        .foregroundColor(AppColors.ink)
+                        .foregroundStyle(AppColors.ink)
                         .multilineTextAlignment(.center)
-                    Text("可以先从一张最想留下的照片开始。")
+                        .lineSpacing(4)
+                    Text(s.albumEmptyBody)
                         .font(AppFonts.body(14))
-                        .foregroundColor(AppColors.muted)
+                        .foregroundStyle(AppColors.muted)
                         .multilineTextAlignment(.center)
                 }
 
-                Text("主照片会陪TA出现在星球里。\n这里可以继续放下更多和TA有关的瞬间。")
-                    .font(AppFonts.body(12))
-                    .foregroundColor(AppColors.muted.opacity(0.65))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(3)
-                    .padding(.horizontal, 24)
-
                 if atLimit {
                     Button { showLimitSheet = true } label: {
-                        Text("添加第一张照片")
+                        Text(s.albumAddFirstBtn)
                             .font(AppFonts.body(15, weight: .medium))
-                            .foregroundColor(AppColors.muted)
+                            .foregroundStyle(AppColors.muted.opacity(0.65))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(AppColors.white)
-                            .cornerRadius(10)
-                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.line))
+                            .background(AppColors.muted.opacity(0.09))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .padding(.horizontal, 32)
                 } else {
@@ -201,116 +296,126 @@ struct AlbumView: View {
                         maxSelectionCount: remainingSlots,
                         matching: .images
                     ) {
-                        Text("添加第一张照片")
+                        Text(s.albumAddFirstBtn)
                             .font(AppFonts.body(15, weight: .medium))
-                            .foregroundColor(AppColors.white)
+                            .foregroundStyle(AppColors.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(AppColors.greenDeep)
-                            .cornerRadius(10)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .padding(.horizontal, 32)
                 }
+
+                Text(s.albumEmptyNote)
+                    .font(AppFonts.body(12))
+                    .foregroundStyle(AppColors.muted.opacity(0.55))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+                    .padding(.horizontal, 32)
             }
-            Spacer(minLength: 52)
+            Spacer(minLength: 40)
         }
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: Photo Grid
+    // MARK: - 照片网格
 
-    @ViewBuilder private var photoGridView: some View {
+    private var photoGrid: some View {
         LazyVGrid(
-            columns: [
-                GridItem(.flexible(), spacing: 2),
-                GridItem(.flexible(), spacing: 2),
-                GridItem(.flexible(), spacing: 2)
-            ],
-            spacing: 2
+            columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3),
+            spacing: 6
         ) {
+            // 已有照片
             ForEach(albumPhotos) { photo in
-                Button { selectedPhoto = photo } label: {
-                    AsyncImage(url: URL(string: photo.thumbnailURL)) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image.resizable().scaledToFill()
-                        case .failure:
-                            AppColors.line
-                                .overlay(
-                                    Image(systemName: "photo")
-                                        .font(.system(size: 18))
-                                        .foregroundColor(AppColors.muted.opacity(0.4))
-                                )
-                        default:
-                            AppColors.line
-                                .overlay(ProgressView().scaleEffect(0.7))
-                        }
-                    }
-                    .frame(height: 120)
-                    .clipped()
-                }
-                .buttonStyle(.plain)
+                AlbumPhotoCell(photo: photo)
+                    .onTapGesture { selectedPhoto = photo }
+            }
+
+            // 上传中占位卡片
+            if isUploading {
+                uploadingCell
+            }
+
+            // 继续添加卡片（未满且未上传时）
+            if !atLimit && !isUploading {
+                addMoreCell
             }
         }
-        .padding(.top, 2)
+        .padding(.horizontal, 20)
+        .padding(.top, 4)
     }
 
-    // MARK: Public Notice
+    // 上传中卡片
+    private var uploadingCell: some View {
+        Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .overlay(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(AppColors.white)
+                        .shadow(color: .black.opacity(0.03), radius: 4)
+                    VStack(spacing: 10) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                            .tint(AppColors.green)
+                        Text(s.albumUploadingLabel)
+                            .font(AppFonts.body(11))
+                            .foregroundStyle(AppColors.muted)
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(2)
+                    }
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
 
-    @ViewBuilder private var publicNotice: some View {
+    // 继续添加卡片
+    private var addMoreCell: some View {
+        Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .overlay(
+                PhotosPicker(
+                    selection: $selectedItems,
+                    maxSelectionCount: remainingSlots,
+                    matching: .images
+                ) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(AppColors.white.opacity(0.65))
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+                            .foregroundStyle(AppColors.muted.opacity(0.22))
+                        VStack(spacing: 7) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 18, weight: .light))
+                                .foregroundStyle(AppColors.muted.opacity(0.38))
+                            Text(s.albumAddMore)
+                                .font(AppFonts.body(11))
+                                .foregroundStyle(AppColors.muted.opacity(0.45))
+                        }
+                    }
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    // MARK: - 公开边界提示
+
+    private var publicNotice: some View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "globe")
                 .font(.system(size: 11))
-                .foregroundColor(AppColors.muted.opacity(0.5))
+                .foregroundStyle(AppColors.muted.opacity(0.44))
                 .padding(.top, 1)
-            Text("这些照片会出现在TA的纪念主页里。分享纪念页时，也记得TA的人可以看到。")
+            Text(s.albumPublicNotice)
                 .font(AppFonts.body(12))
-                .foregroundColor(AppColors.muted.opacity(0.5))
+                .foregroundStyle(AppColors.muted.opacity(0.50))
                 .lineSpacing(3)
         }
     }
 
-    // MARK: Upload Banner
-
-    @ViewBuilder private var uploadBanner: some View {
-        let (message, bg) = bannerContent
-        HStack(spacing: 8) {
-            if isUploading {
-                ProgressView()
-                    .scaleEffect(0.75)
-                    .tint(.white)
-            }
-            Text(message)
-                .font(AppFonts.body(13))
-                .foregroundColor(.white)
-                .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-        .background(bg)
-    }
-
-    private var bannerContent: (String, Color) {
-        switch uploadState {
-        case .uploading(let current, let total):
-            let msg = total == 1 ? "正在保存照片……" : "正在保存第 \(current) / \(total) 张……"
-            return (msg, AppColors.ink.opacity(0.85))
-        case .allSuccess(let n):
-            let msg = n == 1 ? "照片已放进回忆里。" : "\(n) 张照片已放进回忆里。"
-            return (msg, AppColors.greenDeep)
-        case .partial(let ok, let fail):
-            return ("保存了 \(ok) 张，\(fail) 张暂时没能保存。", AppColors.rose)
-        case .allFailed:
-            return ("照片暂时没能保存，请重新试一次。", AppColors.rose)
-        case .formatError:
-            return ("V1暂时只支持图片上传，视频回忆会在后续版本考虑。", AppColors.rose)
-        case .idle:
-            return ("", .clear)
-        }
-    }
-
-    // MARK: Upload Logic
+    // MARK: - 上传逻辑（不变）
 
     private func handleMultiUpload(items: [PhotosPickerItem]) {
         let total = items.count
@@ -377,6 +482,38 @@ struct AlbumView: View {
     }
 }
 
+// MARK: - 照片网格单元
+
+private struct AlbumPhotoCell: View {
+    let photo: Photo
+
+    var body: some View {
+        Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .overlay(
+                AsyncImage(url: URL(string: photo.thumbnailURL)) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    case .failure:
+                        AppColors.paperSoft
+                            .overlay(
+                                Image(systemName: "photo")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(AppColors.muted.opacity(0.35))
+                            )
+                    default:
+                        AppColors.paperSoft
+                            .overlay(ProgressView().scaleEffect(0.65))
+                    }
+                }
+                .clipped()
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipped()
+    }
+}
+
 // MARK: - 额度提示 Sheet
 
 private struct LimitSheet: View {
@@ -384,6 +521,7 @@ private struct LimitSheet: View {
     let limit: Int
     let onUpgrade: () -> Void
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var ls: LanguageStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -395,11 +533,9 @@ private struct LimitSheet: View {
                 .padding(.bottom, 24)
 
             VStack(alignment: .leading, spacing: 12) {
-                Text(isPaid
-                     ? "当前照片数量已达上限。"
-                     : "免费纪念空间最多可保存 \(limit) 张照片。\n如果还想继续留下更多瞬间，可以了解完整纪念空间。")
+                Text(ls.strings.limitSheetBody(isPaid, limit))
                     .font(AppFonts.body(15))
-                    .foregroundColor(AppColors.ink)
+                    .foregroundStyle(AppColors.ink)
                     .lineSpacing(5)
             }
             .padding(.horizontal, 24)
@@ -409,23 +545,23 @@ private struct LimitSheet: View {
             VStack(spacing: 10) {
                 if !isPaid {
                     Button { onUpgrade() } label: {
-                        Text("了解完整纪念空间")
+                        Text(ls.strings.explorePlan)
                             .font(AppFonts.body(15, weight: .medium))
-                            .foregroundColor(AppColors.white)
+                            .foregroundStyle(AppColors.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(AppColors.greenDeep)
-                            .cornerRadius(10)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                 }
                 Button { dismiss() } label: {
-                    Text("知道了")
+                    Text(ls.strings.limitSheetGotIt)
                         .font(AppFonts.body(15))
-                        .foregroundColor(AppColors.muted)
+                        .foregroundStyle(AppColors.muted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .background(AppColors.white)
-                        .cornerRadius(10)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(AppColors.line))
                 }
             }

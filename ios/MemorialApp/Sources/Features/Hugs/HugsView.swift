@@ -2,6 +2,9 @@ import SwiftUI
 
 struct HugsView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
+
+    private var s: Strings { ls.strings }
 
     var body: some View {
         ZStack {
@@ -11,10 +14,10 @@ struct HugsView: View {
                     Image(systemName: "heart")
                         .font(.system(size: 40))
                         .foregroundColor(AppColors.rose.opacity(0.4))
-                    Text("还没有抱抱记录")
+                    Text(s.hugsEmptyTitle)
                         .font(AppFonts.body(16))
                         .foregroundColor(AppColors.ink)
-                    Text("把纪念页分享给也记得TA的人，\n他们可以轻轻抱抱TA。")
+                    Text(s.hugsEmptyBody)
                         .font(AppFonts.body(14))
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
@@ -24,7 +27,7 @@ struct HugsView: View {
             } else {
                 List {
                     Section {
-                        Text("共 \(appState.hugs.count) 个抱抱")
+                        Text(s.hugsCount(appState.hugs.count))
                             .font(AppFonts.body(13))
                             .foregroundColor(AppColors.muted)
                             .listRowBackground(AppColors.paper)
@@ -39,7 +42,7 @@ struct HugsView: View {
                 .background(AppColors.paper)
             }
         }
-        .navigationTitle("抱抱记录")
+        .navigationTitle(s.hugsNavTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
@@ -50,8 +53,10 @@ struct HugsView: View {
 
 struct HugRow: View {
     let hug: Hug
+    @EnvironmentObject var ls: LanguageStore
 
     var body: some View {
+        let s = ls.strings
         HStack(spacing: 12) {
             ZStack {
                 Circle()
@@ -62,10 +67,10 @@ struct HugRow: View {
                     .foregroundColor(AppColors.rose)
             }
             VStack(alignment: .leading, spacing: 3) {
-                Text(hug.visitorName ?? "匿名访客")
+                Text(hug.visitorName ?? s.hugsAnonymous)
                     .font(AppFonts.body(14, weight: .medium))
                     .foregroundColor(AppColors.ink)
-                Text("轻轻抱了抱TA")
+                Text(s.hugsAction)
                     .font(AppFonts.body(12))
                     .foregroundColor(AppColors.muted)
             }

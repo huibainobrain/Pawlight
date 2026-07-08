@@ -3,8 +3,11 @@ import AuthenticationServices
 
 struct LoginView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
     @State private var navigateToPetInfo = false
     @State private var errorMessage: String?
+
+    private var s: Strings { ls.strings }
 
     var body: some View {
         ZStack {
@@ -16,10 +19,10 @@ struct LoginView: View {
                         .font(.system(size: 44))
                         .foregroundColor(AppColors.green)
                     VStack(spacing: 8) {
-                        Text("登录以保存TA的星球")
+                        Text(s.loginTitle)
                             .font(AppFonts.serif(22, weight: .medium))
                             .foregroundColor(AppColors.ink)
-                        Text("账号让你可以随时回来，也让权益和\n纪念内容长期绑定。")
+                        Text(s.loginBody)
                             .font(AppFonts.body(14))
                             .foregroundColor(AppColors.muted)
                             .multilineTextAlignment(.center)
@@ -44,7 +47,7 @@ struct LoginView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    Text("继续即表示同意《用户协议》和《隐私政策》")
+                    Text(s.loginTerms)
                         .font(AppFonts.body(12))
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
@@ -87,7 +90,7 @@ struct LoginView: View {
             guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
                   let tokenData = credential.identityToken,
                   let identityToken = String(data: tokenData, encoding: .utf8) else {
-                errorMessage = "无法获取登录凭证"
+                errorMessage = s.loginError
                 return
             }
             Task { @MainActor in
@@ -96,14 +99,13 @@ struct LoginView: View {
                     if appState.ownerStage == .loggedInNoPet {
                         navigateToPetInfo = true
                     }
-                    // hasPetFree/hasPetPaid: RootView auto-switches to MainTabView
                 } catch {
-                    errorMessage = "登录遇到问题，请再试一次"
+                    errorMessage = s.loginErrorGeneral
                     print("Login error: \(error)")
                 }
             }
         case .failure(let error):
-            errorMessage = "登录遇到问题，请再试一次"
+            errorMessage = s.loginErrorGeneral
             print("Apple Sign In error: \(error)")
         }
     }

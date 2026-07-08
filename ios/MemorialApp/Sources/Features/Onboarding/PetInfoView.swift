@@ -4,6 +4,7 @@ import SwiftUI
 
 struct PetInfoView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
     @Environment(\.dismiss) var dismiss
     @State private var name = ""
     @State private var selectedType: Pet.PetType?
@@ -13,6 +14,8 @@ struct PetInfoView: View {
     @State private var createError: String?
     @State private var showExitAlert = false
     @FocusState private var nameFocused: Bool
+
+    private var s: Strings { ls.strings }
 
     private var canContinue: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && selectedType != nil && !isCreating
@@ -43,15 +46,15 @@ struct PetInfoView: View {
 
                             // Step info and title
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("1 / 3  基础信息")
+                                Text(s.petInfoStep)
                                     .font(AppFonts.body(12))
                                     .foregroundColor(AppColors.green)
 
-                                Text("TA叫什么名字？")
+                                Text(s.petInfoTitle)
                                     .font(AppFonts.serif(26, weight: .medium))
                                     .foregroundColor(AppColors.ink)
 
-                                Text("先给TA取个名字，以后在这里\n我们就一起记住TA。")
+                                Text(s.petInfoBody)
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                                     .lineSpacing(4)
@@ -62,12 +65,12 @@ struct PetInfoView: View {
 
                         // Name input
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("名字")
+                            Text(s.petInfoNameLabel)
                                 .font(AppFonts.body(14, weight: .medium))
                                 .foregroundColor(AppColors.ink)
 
                             VStack(alignment: .leading, spacing: 0) {
-                                TextField("TA的名字", text: $name)
+                                TextField(s.petInfoNamePlaceholder, text: $name)
                                     .font(AppFonts.body(16))
                                     .foregroundColor(AppColors.ink)
                                     .padding(.horizontal, 18)
@@ -98,7 +101,7 @@ struct PetInfoView: View {
 
                         // Pet type selection
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("TA是")
+                            Text(s.petInfoTypeLabel)
                                 .font(AppFonts.body(14, weight: .medium))
                                 .foregroundColor(AppColors.ink)
 
@@ -132,7 +135,7 @@ struct PetInfoView: View {
                             if isCreating {
                                 ProgressView().tint(canContinue ? AppColors.white : AppColors.muted)
                             }
-                            Text(isCreating ? "创建中..." : "下一步")
+                            Text(isCreating ? s.creating : s.next)
                                 .font(AppFonts.body(16, weight: .medium))
                                 .foregroundColor(canContinue ? AppColors.white : AppColors.muted)
                         }
@@ -154,7 +157,7 @@ struct PetInfoView: View {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 9))
                             .foregroundColor(AppColors.muted.opacity(0.38))
-                        Text("创建后你可以随时修改")
+                        Text(s.petInfoCanChange)
                             .font(AppFonts.body(12))
                             .foregroundColor(AppColors.muted.opacity(0.52))
                         Image(systemName: "sparkle")
@@ -191,14 +194,14 @@ struct PetInfoView: View {
                 }
             }
         }
-        .alert("暂时离开？", isPresented: $showExitAlert) {
-            Button("继续创建", role: .cancel) {}
-            Button("先离开", role: .destructive) { dismiss() }
+        .alert(s.petInfoExitTitle, isPresented: $showExitAlert) {
+            Button(s.petInfoContinue, role: .cancel) {}
+            Button(s.leaveBtn, role: .destructive) { dismiss() }
         } message: {
-            Text("现在离开的话，本次填写的内容不会保存。")
+            Text(s.petInfoExitBody)
         }
         .onAppear { nameFocused = true }
-        .onChange(of: name) { newValue in
+        .onChange(of: name) { _, newValue in
             if newValue.count > 20 { name = String(newValue.prefix(20)) }
         }
         .navigationDestination(isPresented: $navigateToPhoto) {
@@ -213,12 +216,22 @@ struct PetInfoView: View {
         createError = nil
         Task { @MainActor in
             do {
-                let petId = try await appState.createPet(name: name, type: selectedType!)
-                createdPetId = petId
+                if let petId = createdPetId {
+                    // Already created earlier in this session — user came back to edit
+                    // name/type. Update the existing pet instead of creating a new one
+                    // (V1 backend enforces one pet per user).
+                    guard let token = KeychainHelper.loadToken() else { throw APIError.noToken }
+                    try await APIClient.shared.updatePet(token: token, petId: petId, body: [
+                        "name": name,
+                        "type": selectedType!.rawValue.uppercased(),
+                    ])
+                } else {
+                    createdPetId = try await appState.createPet(name: name, type: selectedType!)
+                }
                 navigateToPhoto = true
             } catch {
-                createError = "创建失败，请重试"
-                print("createPet error: \(error)")
+                createError = s.petInfoCreateError
+                print("createPet/updatePet error: \(error)")
             }
             isCreating = false
         }
@@ -303,6 +316,7 @@ struct PetTypeButton: View {
     let type: Pet.PetType
     let isSelected: Bool
     let action: () -> Void
+    @EnvironmentObject var ls: LanguageStore
 
     private var iconName: String {
         switch type {
@@ -318,7 +332,7 @@ struct PetTypeButton: View {
                 Image(systemName: iconName)
                     .font(.system(size: 26))
                     .foregroundColor(isSelected ? AppColors.greenDeep : AppColors.muted.opacity(0.60))
-                Text(type.displayName)
+                Text(ls.strings.petTypeName(type))
                     .font(AppFonts.body(13, weight: isSelected ? .medium : .regular))
                     .foregroundColor(isSelected ? AppColors.greenDeep : AppColors.muted)
             }

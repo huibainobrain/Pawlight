@@ -3,16 +3,20 @@ import SwiftUI
 struct PhotoDetailView: View {
     let photo: Photo
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
     @Environment(\.dismiss) var dismiss
 
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
     @State private var showDeleteError = false
 
+    private var s: Strings { ls.strings }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.black.ignoresSafeArea()
+
                 AsyncImage(url: URL(string: photo.url)) { phase in
                     switch phase {
                     case .success(let image):
@@ -23,10 +27,10 @@ struct PhotoDetailView: View {
                         VStack(spacing: 12) {
                             Image(systemName: "photo")
                                 .font(.system(size: 36))
-                                .foregroundColor(.white.opacity(0.4))
-                            Text("这张照片暂时没有加载出来")
+                                .foregroundColor(.white.opacity(0.35))
+                            Text(s.photoLoadError)
                                 .font(AppFonts.body(14))
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(.white.opacity(0.35))
                         }
                     default:
                         ProgressView().tint(.white)
@@ -42,36 +46,39 @@ struct PhotoDetailView: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white)
-                            .padding(8)
-                            .background(.white.opacity(0.15))
+                            .frame(width: 36, height: 36)
+                            .background(.white.opacity(0.18))
                             .clipShape(Circle())
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showDeleteConfirm = true
-                    } label: {
+                    Button { showDeleteConfirm = true } label: {
                         if isDeleting {
                             ProgressView().tint(.white).scaleEffect(0.8)
+                                .frame(width: 36, height: 36)
                         } else {
                             Image(systemName: "trash")
+                                .font(.system(size: 15))
                                 .foregroundColor(AppColors.rose)
+                                .frame(width: 36, height: 36)
+                                .background(.white.opacity(0.12))
+                                .clipShape(Circle())
                         }
                     }
                     .disabled(isDeleting)
                 }
             }
         }
-        .alert("要删除这张照片吗？", isPresented: $showDeleteConfirm) {
-            Button("取消", role: .cancel) {}
-            Button("删除", role: .destructive) { performDelete() }
+        .alert(s.photoDeleteTitle, isPresented: $showDeleteConfirm) {
+            Button(s.cancel, role: .cancel) {}
+            Button(s.delete, role: .destructive) { performDelete() }
         } message: {
-            Text("删除后，这张照片将不再出现在TA的照片回忆和分享出去的纪念页中。")
+            Text(s.photoDeleteBody)
         }
-        .alert("删除失败", isPresented: $showDeleteError) {
-            Button("好的", role: .cancel) {}
+        .alert(s.photoDeleteErrorTitle, isPresented: $showDeleteError) {
+            Button(s.ok, role: .cancel) {}
         } message: {
-            Text("这张照片暂时没能删除，请稍后再试。")
+            Text(s.photoDeleteErrorBody)
         }
     }
 

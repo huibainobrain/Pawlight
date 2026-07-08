@@ -12,6 +12,10 @@ enum OwnerStage {
 @MainActor
 class AppState: ObservableObject {
     @Published var ownerStage: OwnerStage = .unauthenticated
+    // True while checkAuthAndLoad() is running — prevents RootView from flashing
+    // OnboardingStartView before the async token check completes.
+    // Initialised to true only when a Keychain token exists (user is probably logged in).
+    @Published var isAuthChecking: Bool = KeychainHelper.loadToken() != nil
     @Published var hasSkippedOnboarding: Bool = false  // in-memory only; resets on every app launch
     @Published var selectedTab: Int = 0
     @Published var currentUser: User?
@@ -25,6 +29,8 @@ class AppState: ObservableObject {
     @Published var newHugCount: Int = 0
     @Published var tabBarHidden: Bool = false
 
+    static let seenHugCountKey = "seen_hug_count"
+
     var isLoggedIn: Bool { currentUser != nil }
     var hasPet: Bool { currentPet != nil }
     var isPaid: Bool { entitlement?.isPaid == true }
@@ -36,6 +42,7 @@ class AppState: ObservableObject {
     // MARK: - Launch Auth Check
 
     func checkAuthAndLoad() async {
+        defer { isAuthChecking = false }
         guard let token = KeychainHelper.loadToken(),
               let userId = KeychainHelper.loadUserId() else {
             ownerStage = .unauthenticated
@@ -100,7 +107,8 @@ class AppState: ObservableObject {
                 Hug(id: h.id, petId: petId, shareId: h.shareId,
                     visitorName: h.visitorName, source: "share", createdAt: h.createdAt)
             }
-            newHugCount = apiHugs.count
+            let lastSeen = UserDefaults.standard.integer(forKey: AppState.seenHugCountKey)
+            newHugCount = max(0, apiHugs.count - lastSeen)
         }
     }
 
@@ -184,11 +192,19 @@ class AppState: ObservableObject {
         }
     }
 
+    // MARK: - Hugs
+
+    func markHugsSeen() {
+        UserDefaults.standard.set(hugs.count, forKey: AppState.seenHugCountKey)
+        newHugCount = 0
+    }
+
     // MARK: - Debug
 
     #if DEBUG
     func resetAll() {
         KeychainHelper.deleteToken()
+        UserDefaults.standard.removeObject(forKey: AppState.seenHugCountKey)
         currentUser = nil
         currentPet = nil
         entitlement = nil
@@ -199,6 +215,7 @@ class AppState: ObservableObject {
         share = nil
         newHugCount = 0
         ownerStage = .unauthenticated
+        isAuthChecking = false
         hasSkippedOnboarding = false
         selectedTab = 0
     }
@@ -222,6 +239,7 @@ class AppState: ObservableObject {
             hugs = []
             share = nil
             newHugCount = 0
+            UserDefaults.standard.removeObject(forKey: AppState.seenHugCountKey)
             ownerStage = .loggedInNoPet
         } catch {
             print("debugLogin error: \(error)")

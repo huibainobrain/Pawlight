@@ -7,6 +7,7 @@ struct MainPhotoView: View {
     let petType: Pet.PetType
 
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
     @Environment(\.dismiss) var dismiss
     @State private var selectedItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
@@ -14,6 +15,8 @@ struct MainPhotoView: View {
     @State private var uploadError: String?
     @State private var navigateToTier = false
     @State private var showExitAlert = false
+
+    private var s: Strings { ls.strings }
 
     private var canContinue: Bool { selectedImage != nil && !isUploading }
 
@@ -39,15 +42,15 @@ struct MainPhotoView: View {
                             .allowsHitTesting(false)
 
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("2 / 3  主照片")
+                                Text(s.mainPhotoStep)
                                     .font(AppFonts.body(12))
                                     .foregroundColor(AppColors.green)
 
-                                Text("选一张最想看到TA的照片")
+                                Text(s.mainPhotoTitle)
                                     .font(AppFonts.serif(26, weight: .medium))
                                     .foregroundColor(AppColors.ink)
 
-                                Text("主照片会显示在首页、回忆页和分享页，\n是\(petName)的视觉锚点。")
+                                Text(s.mainPhotoBody(petName))
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                                     .lineSpacing(4)
@@ -79,7 +82,7 @@ struct MainPhotoView: View {
                             if isUploading {
                                 ProgressView().tint(canContinue ? AppColors.white : AppColors.muted)
                             }
-                            Text(isUploading ? "上传中..." : "下一步")
+                            Text(isUploading ? s.uploading : s.next)
                                 .font(AppFonts.body(16, weight: .medium))
                                 .foregroundColor(canContinue ? AppColors.white : AppColors.muted)
                         }
@@ -123,11 +126,11 @@ struct MainPhotoView: View {
                 }
             }
         }
-        .alert("暂时离开？", isPresented: $showExitAlert) {
-            Button("继续上传", role: .cancel) {}
-            Button("先离开", role: .destructive) { dismiss() }
+        .alert(s.mainPhotoExitTitle, isPresented: $showExitAlert) {
+            Button(s.mainPhotoContinueUpload, role: .cancel) {}
+            Button(s.leaveBtn, role: .destructive) { dismiss() }
         } message: {
-            Text("TA的星球已创建，但主照片还没有上传。可以稍后在回忆页继续补充。")
+            Text(s.mainPhotoExitBody)
         }
         .navigationDestination(isPresented: $navigateToTier) {
             TierSelectView(petName: petName, petType: petType)
@@ -152,7 +155,7 @@ struct MainPhotoView: View {
                         HStack(spacing: 5) {
                             Image(systemName: "arrow.triangle.2.circlepath")
                                 .font(.system(size: 12, weight: .medium))
-                            Text("更换照片")
+                            Text(s.mainPhotoChange)
                                 .font(AppFonts.body(13, weight: .medium))
                         }
                         .foregroundColor(.white)
@@ -184,7 +187,7 @@ struct MainPhotoView: View {
                                     .font(.system(size: 26))
                                     .foregroundColor(AppColors.green.opacity(0.65))
                             }
-                            Text("点击选择照片")
+                            Text(s.mainPhotoPickLabel)
                                 .font(AppFonts.body(15))
                                 .foregroundColor(AppColors.muted.opacity(0.75))
                         }
@@ -206,7 +209,7 @@ struct MainPhotoView: View {
     private func uploadPhoto() {
         guard let image = selectedImage else { return }
         guard let imageData = image.jpegData(compressionQuality: 0.85) else {
-            uploadError = "图片处理失败"
+            uploadError = s.mainPhotoProcessError
             return
         }
         isUploading = true
@@ -216,7 +219,7 @@ struct MainPhotoView: View {
                 try await appState.uploadMainPhoto(petId: petId, imageData: imageData)
                 navigateToTier = true
             } catch {
-                uploadError = "上传失败，请重试"
+                uploadError = s.mainPhotoUploadError
                 print("uploadPhoto error: \(error)")
             }
             isUploading = false

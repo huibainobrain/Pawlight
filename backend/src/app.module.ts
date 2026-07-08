@@ -8,6 +8,7 @@ import { PhotosModule } from './photos/photos.module';
 import { SharesModule } from './shares/shares.module';
 import { HugsModule } from './hugs/hugs.module';
 import { LettersModule } from './letters/letters.module';
+import { PurchasesModule } from './purchases/purchases.module';
 
 @Module({
   controllers: [AppController],
@@ -20,6 +21,7 @@ import { LettersModule } from './letters/letters.module';
     SharesModule,
     HugsModule,
     LettersModule,
+    PurchasesModule,
   ],
 })
 export class AppModule {}

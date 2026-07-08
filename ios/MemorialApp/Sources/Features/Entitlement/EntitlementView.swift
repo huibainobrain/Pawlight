@@ -2,6 +2,17 @@ import SwiftUI
 
 struct EntitlementView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var purchaseManager: PurchaseManager
+    @EnvironmentObject var ls: LanguageStore
+
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
+
+    private var s: Strings { ls.strings }
+
+    private var priceLabel: String {
+        purchaseManager.product?.displayPrice ?? "¥29.9"
+    }
 
     var body: some View {
         ZStack {
@@ -12,7 +23,7 @@ struct EntitlementView: View {
                         PaidBadgeView()
                             .padding(.top, 24)
                     } else {
-                        Text("选择适合TA的纪念空间")
+                        Text(s.entitlementSelectTitle)
                             .font(AppFonts.serif(22, weight: .medium))
                             .foregroundColor(AppColors.ink)
                             .padding(.top, 24)
@@ -22,46 +33,69 @@ struct EntitlementView: View {
                         .padding(.horizontal, 20)
 
                     if !appState.isPaid {
-                        Button {} label: {
-                            VStack(spacing: 4) {
-                                Text("开启完整纪念空间")
-                                    .font(AppFonts.body(16, weight: .medium))
-                                    .foregroundColor(AppColors.white)
-                                HStack(spacing: 8) {
-                                    Text("¥29.9")
-                                        .font(AppFonts.body(14, weight: .semibold))
-                                        .foregroundColor(AppColors.white)
-                                    Text("¥59.9")
-                                        .font(AppFonts.body(12))
-                                        .foregroundColor(AppColors.white.opacity(0.6))
-                                        .strikethrough()
+                        Button {
+                            Task { await purchaseManager.purchase(appState: appState) }
+                        } label: {
+                            ZStack {
+                                if purchaseManager.state == .loading {
+                                    ProgressView().tint(AppColors.white)
+                                } else {
+                                    VStack(spacing: 4) {
+                                        Text(s.entitlementBuyBtn)
+                                            .font(AppFonts.body(16, weight: .medium))
+                                            .foregroundColor(AppColors.white)
+                                        Text(priceLabel)
+                                            .font(AppFonts.body(13, weight: .semibold))
+                                            .foregroundColor(AppColors.white.opacity(0.85))
+                                    }
                                 }
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
+                            .frame(height: 58)
                             .background(AppColors.greenDeep)
                             .cornerRadius(12)
                         }
+                        .disabled(purchaseManager.state == .loading)
                         .padding(.horizontal, 20)
 
-                        Button {} label: {
-                            Text("恢复购买")
+                        Button {
+                            Task { await purchaseManager.restorePurchases(appState: appState) }
+                        } label: {
+                            Text(s.entitlementRestoreBtn)
                                 .font(AppFonts.body(13))
                                 .foregroundColor(AppColors.muted)
                         }
+                        .disabled(purchaseManager.state == .loading)
                     }
 
                     Spacer(minLength: 40)
                 }
             }
         }
-        .navigationTitle("纪念空间")
+        .navigationTitle(s.entitlementNavTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
+        .task { await purchaseManager.loadProduct() }
+        .onChange(of: purchaseManager.state) { _, newState in
+            if case .failed(let msg) = newState {
+                errorMessage = msg
+                showErrorAlert = true
+            }
+        }
+        .alert(s.entitlementErrorTitle, isPresented: $showErrorAlert) {
+            Button(s.ok, role: .cancel) { purchaseManager.resetState() }
+        } message: {
+            Text(errorMessage)
+        }
+        .onDisappear {
+            if purchaseManager.state != .success { purchaseManager.resetState() }
+        }
     }
 }
 
 struct PaidBadgeView: View {
+    @EnvironmentObject var ls: LanguageStore
+
     var body: some View {
         VStack(spacing: 12) {
             ZStack {
@@ -70,7 +104,7 @@ struct PaidBadgeView: View {
                     .font(.system(size: 32))
                     .foregroundColor(AppColors.gold)
             }
-            Text("完整纪念空间已开启")
+            Text(ls.strings.entitlementPaidTitle)
                 .font(AppFonts.serif(20, weight: .medium))
                 .foregroundColor(AppColors.ink)
         }
@@ -78,14 +112,17 @@ struct PaidBadgeView: View {
 }
 
 struct EntitlementCompareView: View {
+    @EnvironmentObject var ls: LanguageStore
+
     var body: some View {
+        let s = ls.strings
         VStack(spacing: 0) {
-            EntitlementRow(feature: "主照片 + 首页星球观察窗", freeAvail: true, paidAvail: true)
-            EntitlementRow(feature: "TA的故事", freeAvail: true, paidAvail: true)
-            EntitlementRow(feature: "相册照片", freeDetail: "最多 9 张", paidDetail: "最多 50 张")
-            EntitlementRow(feature: "H5 分享 + 访客抱抱", freeAvail: true, paidAvail: true)
-            EntitlementRow(feature: "抱抱记录", freeAvail: true, paidAvail: true)
-            EntitlementRow(feature: "天堂信箱", freeAvail: false, paidAvail: true)
+            EntitlementRow(feature: s.entitlementFeatureMainPhoto, freeAvail: true, paidAvail: true)
+            EntitlementRow(feature: s.entitlementFeatureStory, freeAvail: true, paidAvail: true)
+            EntitlementRow(feature: s.entitlementFeaturePhotos, freeDetail: s.entitlementFeaturePhotosFree, paidDetail: s.entitlementFeaturePhotosPaid)
+            EntitlementRow(feature: s.entitlementFeatureShare, freeAvail: true, paidAvail: true)
+            EntitlementRow(feature: s.entitlementFeatureHugRecord, freeAvail: true, paidAvail: true)
+            EntitlementRow(feature: s.entitlementFeatureMailbox, freeAvail: false, paidAvail: true)
         }
         .background(AppColors.white)
         .cornerRadius(12)

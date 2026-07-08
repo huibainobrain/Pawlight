@@ -2,29 +2,32 @@ import SwiftUI
 
 struct PrivacySettingsView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var ls: LanguageStore
     @State private var visibility: Share.Visibility = .link
     @State private var hugEnabled = true
     @State private var isSaving = false
     @State private var saveError = false
 
+    private var s: Strings { ls.strings }
+
     var body: some View {
         ZStack {
             AppColors.paper.ignoresSafeArea()
             Form {
-                Section("谁可以看见TA") {
-                    Picker("可见范围", selection: $visibility) {
-                        Text("通过链接可见").tag(Share.Visibility.link)
-                        Text("仅自己可见").tag(Share.Visibility.private)
+                Section(s.privacyVisibilitySection) {
+                    Picker(s.privacyVisibilityLabel, selection: $visibility) {
+                        Text(s.privacyVisibilityLink).tag(Share.Visibility.link)
+                        Text(s.privacyVisibilityPrivate).tag(Share.Visibility.private)
                     }
                     .pickerStyle(.inline)
                 }
                 .listRowBackground(AppColors.white)
 
                 Section {
-                    Toggle("允许访客抱抱TA", isOn: $hugEnabled)
+                    Toggle(s.privacyHugToggle, isOn: $hugEnabled)
                         .tint(AppColors.green)
                 } footer: {
-                    Text("关闭后，H5 页面仍可访问，但访客无法发起抱抱。")
+                    Text(s.privacyHugFooter)
                         .font(AppFonts.body(12))
                         .foregroundColor(AppColors.muted)
                 }
@@ -33,7 +36,7 @@ struct PrivacySettingsView: View {
             .scrollContentBackground(.hidden)
             .background(AppColors.paper)
         }
-        .navigationTitle("权限设置")
+        .navigationTitle(s.privacyNavTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
@@ -42,7 +45,7 @@ struct PrivacySettingsView: View {
                     if isSaving {
                         ProgressView().scaleEffect(0.8)
                     } else {
-                        Text("保存")
+                        Text(s.save)
                             .foregroundColor(AppColors.greenDeep)
                             .fontWeight(.medium)
                     }
@@ -54,10 +57,10 @@ struct PrivacySettingsView: View {
             visibility = appState.share?.visibility ?? .link
             hugEnabled = appState.share?.hugEnabled ?? true
         }
-        .alert("保存失败", isPresented: $saveError) {
-            Button("好的", role: .cancel) {}
+        .alert(s.saveFailed, isPresented: $saveError) {
+            Button(s.ok, role: .cancel) {}
         } message: {
-            Text("权限设置暂时没有保存成功，请稍后再试。")
+            Text(s.privacySaveError)
         }
     }
 
