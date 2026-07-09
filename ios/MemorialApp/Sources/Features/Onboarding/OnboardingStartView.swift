@@ -26,6 +26,8 @@ struct OnboardingStartView: View {
                         Text(s.onboardingTitle)
                             .font(AppFonts.serif(28, weight: .medium))
                             .foregroundStyle(AppColors.ink)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                             .overlay(alignment: .topTrailing) {
                                 Image(systemName: "sparkle")
                                     .font(.system(size: 9, weight: .light))
@@ -39,6 +41,7 @@ struct OnboardingStartView: View {
                             .foregroundStyle(AppColors.muted)
                             .multilineTextAlignment(.center)
                             .lineSpacing(5)
+                            .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, 14)
 
                         HStack(spacing: 0) {
