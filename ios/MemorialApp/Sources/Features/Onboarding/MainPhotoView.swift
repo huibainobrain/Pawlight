@@ -38,6 +38,7 @@ struct MainPhotoView: View {
                                 Spacer()
                                 MainPhotoAmbientElement()
                                     .padding(.trailing, -36)
+                                    .padding(.top, 85)
                             }
                             .allowsHitTesting(false)
 
