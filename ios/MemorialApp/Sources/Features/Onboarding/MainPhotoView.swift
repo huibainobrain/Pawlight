@@ -49,12 +49,14 @@ struct MainPhotoView: View {
                                 Text(s.mainPhotoTitle)
                                     .font(AppFonts.serif(26, weight: .medium))
                                     .foregroundColor(AppColors.ink)
+                                    .fixedSize(horizontal: false, vertical: true)
 
                                 Text(s.mainPhotoBody(petName))
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                                     .lineSpacing(4)
                                     .padding(.trailing, 100)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                         .padding(.top, 24)
@@ -103,6 +105,7 @@ struct MainPhotoView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .disableSwipeBack()
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

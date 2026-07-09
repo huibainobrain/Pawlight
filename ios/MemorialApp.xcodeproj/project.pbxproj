@@ -33,6 +33,7 @@
 		8F7F6014ACD7577531F7DE5B /* EntitlementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DA614CCC0D6060777285F4 /* EntitlementView.swift */; };
 		B1C2D3E4F5A607182930BBCC /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */; };
 		BB22CC33DD44EE55FF6611AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */; };
+		1A2B3C4D5E6F708192A0AA11 /* DisableSwipeBack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F708192A0AA22BB /* DisableSwipeBack.swift */; };
 		CC112233445566778899AABB /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD112233445566778899AABB /* PhotoDetailView.swift */; };
 		D1E2F3A4B5C607182930DDEE /* LanguageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */; };
 		D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */; };
@@ -58,6 +59,7 @@
 		516B0249E76335F20828B276 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		565836C1AD9D7A2ACE578D16 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B4E6B181B4B945D33D6A95C /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		2B3C4D5E6F708192A0AA22BB /* DisableSwipeBack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisableSwipeBack.swift; sourceTree = "<group>"; };
 		64245C6BF899F9C1142F86E0 /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		73DA614CCC0D6060777285F4 /* EntitlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementView.swift; sourceTree = "<group>"; };
 		793C643D0522E264F127E573 /* MailboxLockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxLockedView.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 			isa = PBXGroup;
 			children = (
 				5B4E6B181B4B945D33D6A95C /* AppColors.swift */,
+				2B3C4D5E6F708192A0AA22BB /* DisableSwipeBack.swift */,
 				E1F2A3B4C5D607182930EEFF /* Strings.swift */,
 			);
 			path = Utils;
@@ -363,6 +366,7 @@
 				F7998E3E4B140A831D629C74 /* AlbumView.swift in Sources */,
 				CC112233445566778899AABB /* PhotoDetailView.swift in Sources */,
 				627E73C0956B550C457A44BE /* AppColors.swift in Sources */,
+				1A2B3C4D5E6F708192A0AA11 /* DisableSwipeBack.swift in Sources */,
 				237503EEAB4CA1CA32FD985F /* AppState.swift in Sources */,
 				5137174C420982AA770504D8 /* CreateSuccessView.swift in Sources */,
 				8F7F6014ACD7577531F7DE5B /* EntitlementView.swift in Sources */,

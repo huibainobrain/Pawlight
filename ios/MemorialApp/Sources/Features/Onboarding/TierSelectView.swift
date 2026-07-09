@@ -44,12 +44,14 @@ struct TierSelectView: View {
                                 Text(s.tierTitle(petName))
                                     .font(AppFonts.serif(26, weight: .medium))
                                     .foregroundColor(AppColors.ink)
+                                    .fixedSize(horizontal: false, vertical: true)
 
                                 Text(s.tierBody)
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                                     .lineSpacing(4)
                                     .padding(.trailing, 100)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                         .padding(.top, 24)
@@ -147,6 +149,7 @@ struct TierSelectView: View {
             Text(purchaseErrorMessage)
         }
         .navigationBarBackButtonHidden(true)
+        .disableSwipeBack()
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

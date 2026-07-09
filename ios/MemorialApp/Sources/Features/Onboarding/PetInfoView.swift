@@ -53,12 +53,14 @@ struct PetInfoView: View {
                                 Text(s.petInfoTitle)
                                     .font(AppFonts.serif(26, weight: .medium))
                                     .foregroundColor(AppColors.ink)
+                                    .fixedSize(horizontal: false, vertical: true)
 
                                 Text(s.petInfoBody)
                                     .font(AppFonts.body(14))
                                     .foregroundColor(AppColors.muted)
                                     .lineSpacing(4)
                                     .padding(.trailing, 108)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                         .padding(.top, 24)
@@ -171,6 +173,7 @@ struct PetInfoView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .disableSwipeBack()
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
