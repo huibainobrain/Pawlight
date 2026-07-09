@@ -37,7 +37,7 @@ struct MainPhotoView: View {
                             HStack(spacing: 0) {
                                 Spacer()
                                 MainPhotoAmbientElement()
-                                    .padding(.trailing, -24)
+                                    .padding(.trailing, -12)
                                     .padding(.top, 72)
                             }
                             .allowsHitTesting(false)
