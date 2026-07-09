@@ -10,7 +10,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 
 // Must match exactly what you created in App Store Connect.
-const EXPECTED_PRODUCT_ID = 'REPLACE_WITH_YOUR_PRODUCT_ID';
+const EXPECTED_PRODUCT_ID = 'com.pawlight.full_memorial_space';
 const BUNDLE_ID = process.env.APPLE_BUNDLE_ID ?? 'com.pawlight.app';
 
 @Injectable()

@@ -4,8 +4,7 @@ import SwiftUI
 @MainActor
 final class PurchaseManager: ObservableObject {
 
-    // Replace with the exact Product ID from App Store Connect.
-    static let productId = "REPLACE_WITH_YOUR_PRODUCT_ID"
+    static let productId = "com.pawlight.full_memorial_space"
 
     @Published var product: Product?
     @Published var state: PurchaseState = .idle

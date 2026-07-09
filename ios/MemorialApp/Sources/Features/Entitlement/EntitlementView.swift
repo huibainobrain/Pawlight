@@ -10,8 +10,10 @@ struct EntitlementView: View {
 
     private var s: Strings { ls.strings }
 
-    private var priceLabel: String {
-        purchaseManager.product?.displayPrice ?? "¥29.9"
+    // nil while the region-priced Product is still loading from StoreKit — deliberately
+    // no hardcoded currency fallback, since a guessed number could show the wrong currency.
+    private var priceLabel: String? {
+        purchaseManager.product?.displayPrice
     }
 
     var body: some View {
@@ -44,9 +46,11 @@ struct EntitlementView: View {
                                         Text(s.entitlementBuyBtn)
                                             .font(AppFonts.body(16, weight: .medium))
                                             .foregroundColor(AppColors.white)
-                                        Text(priceLabel)
-                                            .font(AppFonts.body(13, weight: .semibold))
-                                            .foregroundColor(AppColors.white.opacity(0.85))
+                                        if let priceLabel {
+                                            Text(priceLabel)
+                                                .font(AppFonts.body(13, weight: .semibold))
+                                                .foregroundColor(AppColors.white.opacity(0.85))
+                                        }
                                     }
                                 }
                             }

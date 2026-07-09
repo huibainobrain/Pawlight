@@ -173,7 +173,9 @@ struct TierSelectView: View {
         switch selectedTier {
         case .free: return s.tierFreeBtnTitle
         case .paid:
-            let price = purchaseManager.product?.displayPrice ?? "¥29.9"
+            // No hardcoded currency fallback — while the region-priced Product is still
+            // loading from StoreKit, show the plan name alone rather than guess a price.
+            guard let price = purchaseManager.product?.displayPrice else { return s.tierPaidTitle }
             return s.tierPaidBtnTitle(price)
         default: return s.tierSelectPrompt
         }
