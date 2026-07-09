@@ -21,12 +21,14 @@ struct CreateSuccessView: View {
                         .font(AppFonts.serif(26, weight: .medium))
                         .foregroundColor(AppColors.ink)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     Text(appState.isPaid ? s.successBodyPaid : s.successBodyFree)
                         .font(AppFonts.body(15))
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
                         .lineSpacing(5)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.horizontal, 36)
 

@@ -22,11 +22,14 @@ struct LoginView: View {
                         Text(s.loginTitle)
                             .font(AppFonts.serif(22, weight: .medium))
                             .foregroundColor(AppColors.ink)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(s.loginBody)
                             .font(AppFonts.body(14))
                             .foregroundColor(AppColors.muted)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 Spacer()
@@ -51,6 +54,7 @@ struct LoginView: View {
                         .font(AppFonts.body(12))
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     #if DEBUG
                     VStack(spacing: 8) {
