@@ -72,6 +72,12 @@ struct MainPhotoView: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 20)
+                    // Forces a fresh layout pass when the PhotosPicker selection changes.
+                    // The system picker sheet's dismissal has been seen to leave this
+                    // ScrollView's content geometry (padding/safe-area resolution) stuck
+                    // from before the sheet was presented — giving this subtree a new
+                    // identity discards that stale state instead of reusing it.
+                    .id(selectedImage == nil)
                 }
 
                 // 底部按钮
