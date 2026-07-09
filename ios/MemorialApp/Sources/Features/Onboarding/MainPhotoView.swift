@@ -72,12 +72,6 @@ struct MainPhotoView: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 20)
-                    // Forces a fresh layout pass when the PhotosPicker selection changes.
-                    // The system picker sheet's dismissal has been seen to leave this
-                    // ScrollView's content geometry (padding/safe-area resolution) stuck
-                    // from before the sheet was presented — giving this subtree a new
-                    // identity discards that stale state instead of reusing it.
-                    .id(selectedImage == nil)
                 }
 
                 // 底部按钮
@@ -154,12 +148,21 @@ struct MainPhotoView: View {
                 if let image = selectedImage {
                     // 已选择状态：大图预览 + 更换入口
                     ZStack(alignment: .bottom) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 300)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                        // GeometryReader measures the actual proposed width instead of
+                        // asking for .frame(maxWidth: .infinity). That flexible/unbounded
+                        // request, made from inside a PhotosPicker's button label, was
+                        // reporting an oversized "ideal width" that leaked into the
+                        // containing VStack's own width — which every sibling (including
+                        // the header text above) then got sized against, well past the
+                        // screen edge.
+                        GeometryReader { geo in
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geo.size.width, height: 300)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                        }
+                        .frame(height: 300)
 
                         HStack(spacing: 5) {
                             Image(systemName: "arrow.triangle.2.circlepath")
