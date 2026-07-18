@@ -4,6 +4,8 @@ struct MineView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var ls: LanguageStore
     @State private var showDeleteAlert = false
+    @State private var isDeletingAccount = false
+    @State private var showDeleteError = false
     @State private var showOnboarding = false
     @State private var goPetProfile = false
     @State private var goEntitlement = false
@@ -239,16 +241,26 @@ struct MineView: View {
                                 .buttonStyle(.plain)
 
                                 Button { showDeleteAlert = true } label: {
-                                    MineRowContent(
-                                        icon: "trash.fill",
-                                        iconBg: AppColors.rose.opacity(0.10),
-                                        iconColor: AppColors.rose,
-                                        label: s.mineDeleteAccountLabel,
-                                        labelColor: AppColors.rose,
-                                        showDivider: false
-                                    )
+                                    if isDeletingAccount {
+                                        HStack {
+                                            ProgressView().tint(AppColors.rose).scaleEffect(0.8)
+                                            Spacer()
+                                        }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 13)
+                                    } else {
+                                        MineRowContent(
+                                            icon: "trash.fill",
+                                            iconBg: AppColors.rose.opacity(0.10),
+                                            iconColor: AppColors.rose,
+                                            label: s.mineDeleteAccountLabel,
+                                            labelColor: AppColors.rose,
+                                            showDivider: false
+                                        )
+                                    }
                                 }
                                 .buttonStyle(.plain)
+                                .disabled(isDeletingAccount)
                             }
                             .padding(.horizontal, 20)
 
@@ -265,10 +277,15 @@ struct MineView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .alert(s.mineDeleteAlertTitle, isPresented: $showDeleteAlert) {
-                Button(s.mineDeleteConfirmBtn, role: .destructive) { appState.resetAll() }
+                Button(s.mineDeleteConfirmBtn, role: .destructive) { performDeleteAccount() }
                 Button(s.cancel, role: .cancel) {}
             } message: {
                 Text(s.mineDeleteAlertBody)
+            }
+            .alert(s.mineDeleteErrorTitle, isPresented: $showDeleteError) {
+                Button(s.ok, role: .cancel) {}
+            } message: {
+                Text(s.mineDeleteErrorBody)
             }
         }
         .fullScreenCover(isPresented: $showOnboarding) { OnboardingStartView() }
@@ -282,6 +299,19 @@ struct MineView: View {
 
     private func syncTabBar() {
         appState.tabBarHidden = goPetProfile || goEntitlement || goPrivacySettings
+    }
+
+    private func performDeleteAccount() {
+        isDeletingAccount = true
+        Task { @MainActor in
+            do {
+                try await appState.deleteAccount()
+            } catch {
+                print("deleteAccount error: \(error)")
+                isDeletingAccount = false
+                showDeleteError = true
+            }
+        }
     }
 }
 

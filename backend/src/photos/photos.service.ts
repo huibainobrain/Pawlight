@@ -122,19 +122,31 @@ export class PhotosService {
       });
     }
 
-    // R2 deletion is best-effort: a failed object delete must not block removing
-    // the DB record (and freeing quota).
-    try {
-      await this.s3.send(
-        new DeleteObjectCommand({ Bucket: this.bucket, Key: photo.r2Key }),
-      );
-    } catch (err) {
-      this.logger.warn(
-        `Best-effort R2 delete failed for ${photo.r2Key}: ${String(err)}`,
-      );
-    }
-
+    await this.deleteFromR2(photo.r2Key);
     await this.prisma.photo.delete({ where: { id: photoId } });
     return { status: 'success', id: photoId };
+  }
+
+  // Used by account deletion: removes every R2 object owned by this user's
+  // pet(s). The DB rows are left to the Pet -> User cascade delete — this
+  // only has to clean up storage, which Postgres can't do for us.
+  async deleteAllForUser(userId: string) {
+    const photos = await this.prisma.photo.findMany({
+      where: { pet: { userId } },
+      select: { r2Key: true },
+    });
+    await Promise.all(photos.map((photo) => this.deleteFromR2(photo.r2Key)));
+  }
+
+  // R2 deletion is best-effort: a failed object delete must not block removing
+  // the DB record (and freeing quota).
+  private async deleteFromR2(key: string) {
+    try {
+      await this.s3.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+      );
+    } catch (err) {
+      this.logger.warn(`Best-effort R2 delete failed for ${key}: ${String(err)}`);
+    }
   }
 }

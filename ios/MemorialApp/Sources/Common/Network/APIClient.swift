@@ -58,6 +58,13 @@ final class APIClient {
     }
     #endif
 
+    func deleteAccount(token: String) async throws {
+        var req = URLRequest(url: url("/api/v1/auth/me"))
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        try await performVoid(req)
+    }
+
     // MARK: - Pets
 
     func fetchMyPets(token: String) async throws -> [ApiPet] {

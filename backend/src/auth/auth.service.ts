@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { PhotosService } from '../photos/photos.service';
 import appleSignin from 'apple-signin-auth';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private photosService: PhotosService,
   ) {}
 
   async loginWithApple(identityToken: string) {
@@ -64,6 +66,15 @@ export class AuthService {
 
     const token = this.jwt.sign({ sub: user.id });
     return { access_token: token, user };
+  }
+
+  // Required for App Store review (Guideline 5.1.1(v)): apps that support
+  // account creation must let users delete their account in-app. R2 objects
+  // have to be removed explicitly first — Postgres cascade only reaches the
+  // DB rows (Pet -> Photo/Share/Letter -> Hug, and Entitlement directly).
+  async deleteAccount(userId: string) {
+    await this.photosService.deleteAllForUser(userId);
+    await this.prisma.user.delete({ where: { id: userId } });
   }
 
   // Entitlement is account-level: every user gets a FREE entitlement on first

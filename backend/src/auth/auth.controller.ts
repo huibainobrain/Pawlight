@@ -1,6 +1,15 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Headers,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { IsString } from 'class-validator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 class LoginDto {
   @IsString()
@@ -19,5 +28,12 @@ export class AuthController {
   @Post('debug-login')
   debugLogin(@Headers('x-debug-secret') secret: string) {
     return this.authService.debugLogin(secret);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
+  async deleteMe(@CurrentUser() user: { id: string }) {
+    await this.authService.deleteAccount(user.id);
+    return { status: 'success' };
   }
 }

@@ -394,10 +394,12 @@ struct Strings {
     var mineFeedbackLabel: String  { t("客服与反馈", "Support & Feedback") }
     var mineTermsLabel: String     { t("用户协议", "Terms of Service") }
     var minePrivacyPolicyLabel: String { t("隐私政策", "Privacy Policy") }
-    var mineDeleteAccountLabel: String { t("注销账号", "Sign out") }
-    var mineDeleteAlertTitle: String   { t("注销账号", "Sign out") }
-    var mineDeleteAlertBody: String    { t("注销后将退出登录并清除本地数据，账号内容仍保留在服务器。", "This will sign you out and clear local data. Your account content will remain on the server.") }
-    var mineDeleteConfirmBtn: String   { t("确认注销", "Confirm sign out") }
+    var mineDeleteAccountLabel: String { t("删除账号", "Delete Account") }
+    var mineDeleteAlertTitle: String   { t("删除账号", "Delete Account") }
+    var mineDeleteAlertBody: String    { t("删除账号将永久清除TA的纪念空间、照片、信件和抱抱记录，且无法恢复。", "Deleting your account will permanently erase your pet's memorial space, photos, letters, and hugs. This cannot be undone.") }
+    var mineDeleteConfirmBtn: String   { t("确认删除", "Delete") }
+    var mineDeleteErrorTitle: String   { t("删除失败", "Delete failed") }
+    var mineDeleteErrorBody: String    { t("账号暂时没能删除，请检查网络后重试。", "Your account couldn't be deleted — please check your connection and try again.") }
     var mineUnboardedTitle: String     { t("还没有创建TA的星球", "No little planet yet") }
     var mineUnboardedBody: String      { t("创建后，这里可以查看\n权益、账号和宠物设置。", "Once you create one, you can manage\nyour plan, account, and pet settings here.") }
     var mineAppleLogin: String         { t("Apple 账号登录", "Signed in with Apple") }

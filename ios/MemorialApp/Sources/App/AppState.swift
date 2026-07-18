@@ -199,10 +199,19 @@ class AppState: ObservableObject {
         newHugCount = 0
     }
 
-    // MARK: - Debug
+    // MARK: - Account
 
-    #if DEBUG
-    func resetAll() {
+    // Required for App Store review (Guideline 5.1.1(v)): the app must let
+    // users delete their account, not just sign out locally. The server call
+    // must succeed before we clear local state — otherwise a network failure
+    // would look like a successful deletion while the account still exists.
+    func deleteAccount() async throws {
+        guard let token = KeychainHelper.loadToken() else { throw APIError.noToken }
+        try await APIClient.shared.deleteAccount(token: token)
+        clearLocalSession()
+    }
+
+    private func clearLocalSession() {
         KeychainHelper.deleteToken()
         UserDefaults.standard.removeObject(forKey: AppState.seenHugCountKey)
         currentUser = nil
@@ -218,6 +227,13 @@ class AppState: ObservableObject {
         isAuthChecking = false
         hasSkippedOnboarding = false
         selectedTab = 0
+    }
+
+    // MARK: - Debug
+
+    #if DEBUG
+    func resetAll() {
+        clearLocalSession()
     }
 
     func debugLoginAndStart() async {
