@@ -7,7 +7,14 @@ final class PurchaseManager: ObservableObject {
     static let productId = "com.pawlight.full_memorial_space"
 
     @Published var product: Product?
+    @Published var productLoadState: ProductLoadState = .loading
     @Published var state: PurchaseState = .idle
+
+    enum ProductLoadState: Equatable {
+        case loading
+        case loaded
+        case failed
+    }
 
     enum PurchaseState: Equatable {
         case idle
@@ -18,11 +25,18 @@ final class PurchaseManager: ObservableObject {
 
     func loadProduct() async {
         guard product == nil else { return }
+        productLoadState = .loading
         do {
             let products = try await Product.products(for: [Self.productId])
-            product = products.first
+            if let first = products.first {
+                product = first
+                productLoadState = .loaded
+            } else {
+                productLoadState = .failed
+            }
         } catch {
             print("[PurchaseManager] loadProduct: \(error)")
+            productLoadState = .failed
         }
     }
 

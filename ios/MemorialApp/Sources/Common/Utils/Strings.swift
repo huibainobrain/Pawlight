@@ -106,17 +106,22 @@ struct Strings {
     var tierBody: String { t("不同方案，陪伴的方式不同。\n为TA选择一个最合适的家吧。", "Different plans, different ways to remember.\nFind the one that fits best.") }
     var tierFreeTitle: String    { t("免费纪念空间", "Free Plan") }
     var tierFreeSubtitle: String { t("先为TA留下一颗星球", "Start with a gentle keepsake") }
-    var tierFreeBtnTitle: String { t("免费创建", "Create for free") }
+    var tierFreeBtnTitle: String { t("免费创建", "Start for free") }
     var tierPaidTitle: String    { t("完整纪念空间", "Full Plan") }
     var tierPaidSubtitle: String { t("更多照片，更完整的陪伴", "More photos, a fuller memorial") }
     var tierPaidBadge: String    { t("推荐", "Recommended") }
+    var tierPaidLaunchPrice: String         { t("首发价格", "Launch price") }
+    var tierPaidOneTimeUnlock: String       { t("一次性解锁", "One-time unlock") }
+    var tierPaidPriceLoading: String        { t("价格加载中...", "Loading price...") }
+    var tierPaidPriceUnavailable: String    { t("价格暂不可用", "Price unavailable") }
+    var tierPaidPurchaseUnavailable: String { t("暂时无法购买", "Purchase unavailable") }
     var tierFutureTitle: String  { t("未来纪念形态", "More to come") }
     var tierFutureSubtitle: String { t("更多纪念可能，即将开放", "More memorial features, coming soon") }
     var tierFutureBadge: String  { t("暂未开放", "Coming soon") }
     var tierSelectPrompt: String { t("请选择一个方案", "Choose a plan") }
     var tierPurchaseErrorTitle: String { t("购买未完成", "Purchase not completed") }
     func tierPaidBtnTitle(_ price: String) -> String {
-        t("\(price) 完整创建", "Full plan · \(price)")
+        t("开启完整纪念空间 · \(price)", "Unlock Full Plan · \(price)")
     }
 
     var tierFreeFeatures: [String] {

@@ -62,7 +62,7 @@ struct TierSelectView: View {
                             title: s.tierFreeTitle,
                             subtitle: s.tierFreeSubtitle,
                             features: s.tierFreeFeatures,
-                            price: nil,
+                            priceDisplay: nil,
                             badgeText: nil,
                             badgeStyle: .none,
                             titleIcon: "leaf.fill",
@@ -76,7 +76,11 @@ struct TierSelectView: View {
                             title: s.tierPaidTitle,
                             subtitle: s.tierPaidSubtitle,
                             features: s.tierPaidFeatures,
-                            price: TierPrice(current: "¥29.9", original: "¥59.9"),
+                            priceDisplay: TierPriceDisplay(
+                                launchLabel: s.tierPaidLaunchPrice,
+                                state: paidPriceState,
+                                unlockLabel: s.tierPaidOneTimeUnlock
+                            ),
                             badgeText: s.tierPaidBadge,
                             badgeStyle: .recommend,
                             titleIcon: "crown.fill",
@@ -90,7 +94,7 @@ struct TierSelectView: View {
                             title: s.tierFutureTitle,
                             subtitle: s.tierFutureSubtitle,
                             features: s.tierFutureFeatures,
-                            price: nil,
+                            priceDisplay: nil,
                             badgeText: s.tierFutureBadge,
                             badgeStyle: .locked,
                             titleIcon: nil,
@@ -113,22 +117,22 @@ struct TierSelectView: View {
                         } else {
                             Text(buttonTitle)
                                 .font(AppFonts.body(16, weight: .medium))
-                                .foregroundColor(selectedTier != nil ? AppColors.white : AppColors.muted)
+                                .foregroundColor(isButtonActionable ? AppColors.white : AppColors.muted)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(selectedTier != nil ? AppColors.greenDeep.opacity(0.86) : AppColors.line)
+                    .background(isButtonActionable ? AppColors.greenDeep.opacity(0.86) : AppColors.line)
                     .cornerRadius(14)
                     .shadow(
-                        color: selectedTier != nil ? AppColors.greenDeep.opacity(0.10) : .clear,
+                        color: isButtonActionable ? AppColors.greenDeep.opacity(0.10) : .clear,
                         radius: 8, x: 0, y: 3
                     )
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 12)
                 .padding(.bottom, 40)
-                .disabled(selectedTier == nil || purchaseManager.state == .loading)
+                .disabled(!isButtonActionable || purchaseManager.state == .loading)
             }
         }
         .task { await purchaseManager.loadProduct() }
@@ -172,15 +176,53 @@ struct TierSelectView: View {
         }
     }
 
+    // The paid card's price block and the bottom CTA both derive from StoreKit's
+    // own load state — never a guessed/hardcoded price. `nil` displayPrice while
+    // `.loaded` is treated as unavailable rather than silently falling through.
+    private var paidPriceState: TierPriceState {
+        switch purchaseManager.productLoadState {
+        case .loading:
+            return .loading
+        case .failed:
+            return .unavailable(s.tierPaidPurchaseUnavailable)
+        case .loaded:
+            if let price = purchaseManager.product?.displayPrice {
+                return .loaded(price)
+            }
+            return .unavailable(s.tierPaidPurchaseUnavailable)
+        }
+    }
+
+    private var isPaidPriceReady: Bool {
+        purchaseManager.productLoadState == .loaded && purchaseManager.product?.displayPrice != nil
+    }
+
+    private var isButtonActionable: Bool {
+        switch selectedTier {
+        case .free: return true
+        case .paid: return isPaidPriceReady
+        default: return false
+        }
+    }
+
     private var buttonTitle: String {
         switch selectedTier {
-        case .free: return s.tierFreeBtnTitle
+        case .free:
+            return s.tierFreeBtnTitle
         case .paid:
-            // No hardcoded currency fallback — while the region-priced Product is still
-            // loading from StoreKit, show the plan name alone rather than guess a price.
-            guard let price = purchaseManager.product?.displayPrice else { return s.tierPaidTitle }
-            return s.tierPaidBtnTitle(price)
-        default: return s.tierSelectPrompt
+            switch purchaseManager.productLoadState {
+            case .loading:
+                return s.tierPaidPriceLoading
+            case .failed:
+                return s.tierPaidPriceUnavailable
+            case .loaded:
+                guard let price = purchaseManager.product?.displayPrice else {
+                    return s.tierPaidPriceUnavailable
+                }
+                return s.tierPaidBtnTitle(price)
+            }
+        default:
+            return s.tierSelectPrompt
         }
     }
 
@@ -357,16 +399,26 @@ enum TierBadgeStyle {
 
 // MARK: - 方案卡片
 
-struct TierPrice {
-    let current: String
-    let original: String
+// Launch-price display for the paid card. No struck-through "original" price and
+// no hardcoded currency — the middle line reflects StoreKit's own load state so we
+// never show a guessed number while the region-priced Product is still loading.
+enum TierPriceState {
+    case loading
+    case loaded(String)
+    case unavailable(String)
+}
+
+struct TierPriceDisplay {
+    let launchLabel: String
+    let state: TierPriceState
+    let unlockLabel: String
 }
 
 struct TierCard: View {
     let title: String
     let subtitle: String
     let features: [String]
-    let price: TierPrice?
+    let priceDisplay: TierPriceDisplay?
     let badgeText: String?
     let badgeStyle: TierBadgeStyle
     let titleIcon: String?
@@ -424,15 +476,31 @@ struct TierCard: View {
                         Spacer(minLength: 12)
 
                         // 价格（付费方案）or 插画（免费/未来方案）
-                        if let price = price {
+                        if let priceDisplay = priceDisplay {
                             VStack(alignment: .trailing, spacing: 3) {
-                                Text(price.current)
-                                    .font(AppFonts.body(19, weight: .semibold))
-                                    .foregroundColor(AppColors.greenDeep)
-                                Text(price.original)
-                                    .font(AppFonts.body(12))
-                                    .foregroundColor(AppColors.muted.opacity(0.50))
-                                    .strikethrough(color: AppColors.muted.opacity(0.38))
+                                Text(priceDisplay.launchLabel)
+                                    .font(AppFonts.body(10, weight: .medium))
+                                    .foregroundColor(AppColors.greenDeep.opacity(0.75))
+
+                                switch priceDisplay.state {
+                                case .loading:
+                                    ProgressView()
+                                        .scaleEffect(0.65)
+                                        .tint(AppColors.greenDeep.opacity(0.55))
+                                        .frame(height: 20)
+                                case .loaded(let price):
+                                    Text(price)
+                                        .font(AppFonts.body(19, weight: .semibold))
+                                        .foregroundColor(AppColors.greenDeep)
+                                case .unavailable(let label):
+                                    Text(label)
+                                        .font(AppFonts.body(13, weight: .medium))
+                                        .foregroundColor(AppColors.muted)
+                                }
+
+                                Text(priceDisplay.unlockLabel)
+                                    .font(AppFonts.body(11))
+                                    .foregroundColor(AppColors.muted.opacity(0.55))
                             }
                             .padding(.top, 2)
                             .padding(.trailing, badgeStyle == .recommend ? 28 : 0)
@@ -475,7 +543,7 @@ struct TierCard: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                         // 付费方案：插画在权益列表右侧
-                        if price != nil {
+                        if priceDisplay != nil {
                             decoration
                                 .padding(.leading, 8)
                         }
