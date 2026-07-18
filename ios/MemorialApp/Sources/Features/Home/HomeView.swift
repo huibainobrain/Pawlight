@@ -159,10 +159,12 @@ struct LearnMoreItem: View {
                 Text(title)
                     .font(AppFonts.body(15, weight: .medium))
                     .foregroundColor(AppColors.ink)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(detail)
                     .font(AppFonts.body(14))
                     .foregroundColor(AppColors.muted)
                     .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }

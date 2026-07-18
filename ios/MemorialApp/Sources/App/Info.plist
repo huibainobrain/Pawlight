@@ -29,6 +29,8 @@
 	<string>Access your photo library to save shared images.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Access your photo library to upload photos of your pet.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
