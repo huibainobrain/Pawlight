@@ -12,3 +12,4 @@ DerivedData/
 .next/
 dist/
 build/
+.claude/
