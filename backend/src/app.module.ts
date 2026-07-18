@@ -9,6 +9,9 @@ import { SharesModule } from './shares/shares.module';
 import { HugsModule } from './hugs/hugs.module';
 import { LettersModule } from './letters/letters.module';
 import { PurchasesModule } from './purchases/purchases.module';
+import { validateRequiredEnv } from './config/env.validation';
+
+validateRequiredEnv();
 
 @Module({
   controllers: [AppController],

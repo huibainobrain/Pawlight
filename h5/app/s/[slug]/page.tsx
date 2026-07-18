@@ -2,8 +2,7 @@ import Image from "next/image";
 import HugSection from "./HugButton";
 import PhotoSection from "./PhotoGrid";
 import ShareButton from "./ShareButton";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { API_URL } from "@/lib/config";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,7 +41,7 @@ type Lang = "en" | "zh";
 
 async function fetchShare(slug: string): Promise<FetchResult> {
   try {
-    const res = await fetch(`${API}/api/v1/shares/${slug}`, {
+    const res = await fetch(`${API_URL}/api/v1/shares/${slug}`, {
       next: { revalidate: 60 },
     });
     if (res.status === 403) return { type: "private" };

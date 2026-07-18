@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { API_URL } from "@/lib/config";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
 const FINGERPRINT_KEY = "sf_visitor_id";
 const huggedKey = (slug: string) => `sf_hug:${slug}`;
 
@@ -13,6 +13,22 @@ function getOrCreateFingerprint(): string {
     localStorage.setItem(FINGERPRINT_KEY, fp);
   }
   return fp;
+}
+
+// localStorage is a client-only external store: reading it during the render
+// body (instead of in an effect) keeps this in sync with `slug` changes
+// without an extra render, and getServerHuggedSnapshot keeps SSR/hydration
+// consistent (server always renders the not-yet-hugged state).
+const huggedListeners = new Set<() => void>();
+function subscribeHugged(callback: () => void) {
+  huggedListeners.add(callback);
+  return () => huggedListeners.delete(callback);
+}
+function notifyHuggedChanged() {
+  huggedListeners.forEach((callback) => callback());
+}
+function getServerHuggedSnapshot() {
+  return false;
 }
 
 type HugState = "idle" | "submitting" | "error";
@@ -36,22 +52,20 @@ export default function HugSection({
   hugEnabled: boolean;
   lang?: Lang;
 }) {
-  const [hasHugged, setHasHugged] = useState(false);
+  const hasHugged = useSyncExternalStore(
+    subscribeHugged,
+    () => localStorage.getItem(huggedKey(slug)) !== null,
+    getServerHuggedSnapshot,
+  );
   const [hugCount, setHugCount] = useState(initialHugCount);
   const [state, setState] = useState<HugState>("idle");
-
-  useEffect(() => {
-    if (localStorage.getItem(huggedKey(slug))) {
-      setHasHugged(true);
-    }
-  }, [slug]);
 
   async function sendHug() {
     if (hasHugged || state === "submitting") return;
     setState("submitting");
     const fingerprint = getOrCreateFingerprint();
     try {
-      const res = await fetch(`${API}/api/v1/shares/${slug}/hugs`, {
+      const res = await fetch(`${API_URL}/api/v1/shares/${slug}/hugs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ visitorFingerprint: fingerprint }),
@@ -59,12 +73,12 @@ export default function HugSection({
       const data = (await res.json()) as { status: string };
       if (data.status === "success") {
         localStorage.setItem(huggedKey(slug), "true");
-        setHasHugged(true);
+        notifyHuggedChanged();
         setHugCount((c) => c + 1);
         setState("idle");
       } else if (data.status === "already_hugged") {
         localStorage.setItem(huggedKey(slug), "true");
-        setHasHugged(true);
+        notifyHuggedChanged();
         setState("idle");
       } else {
         setState("error");

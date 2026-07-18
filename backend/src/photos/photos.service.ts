@@ -14,21 +14,22 @@ import {
 import { randomBytes } from 'crypto';
 import { PhotoType } from '@prisma/client';
 import { albumPhotoLimit } from '../common/entitlement.util';
+import { requireEnv } from '../config/env.validation';
 
 @Injectable()
 export class PhotosService {
   private readonly logger = new Logger(PhotosService.name);
   private s3: S3Client;
-  private bucket = process.env.R2_BUCKET!;
-  private publicUrl = process.env.R2_PUBLIC_URL!;
+  private bucket = requireEnv('R2_BUCKET');
+  private publicUrl = requireEnv('R2_PUBLIC_URL');
 
   constructor(private prisma: PrismaService) {
     this.s3 = new S3Client({
       region: 'auto',
-      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      endpoint: `https://${requireEnv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
       credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+        accessKeyId: requireEnv('R2_ACCESS_KEY_ID'),
+        secretAccessKey: requireEnv('R2_SECRET_ACCESS_KEY'),
       },
     });
   }

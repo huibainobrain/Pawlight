@@ -13,3 +13,4 @@ DerivedData/
 dist/
 build/
 .claude/
+*.tsbuildinfo
