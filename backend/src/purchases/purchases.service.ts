@@ -8,10 +8,14 @@ import {
   VerificationException,
 } from '@apple/app-store-server-library';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  EXPECTED_APPLE_BUNDLE_ID,
+  getAppleAppAppleId,
+} from '../config/env.validation';
 
 // Must match exactly what you created in App Store Connect.
 const EXPECTED_PRODUCT_ID = 'com.pawlight.full_memorial_space';
-const BUNDLE_ID = process.env.APPLE_BUNDLE_ID ?? 'com.pawlight.app';
+const BUNDLE_ID = process.env.APPLE_BUNDLE_ID ?? EXPECTED_APPLE_BUNDLE_ID;
 
 @Injectable()
 export class PurchasesService {
@@ -32,9 +36,7 @@ export class PurchasesService {
       BUNDLE_ID,
     );
 
-    const appAppleId = process.env.APPLE_APP_APPLE_ID
-      ? Number(process.env.APPLE_APP_APPLE_ID)
-      : undefined;
+    const appAppleId = getAppleAppAppleId();
     if (appAppleId) {
       this.productionVerifier = new SignedDataVerifier(
         [rootCA],
