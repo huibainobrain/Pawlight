@@ -10,10 +10,26 @@ struct EntitlementView: View {
 
     private var s: Strings { ls.strings }
 
-    // nil while the region-priced Product is still loading from StoreKit — deliberately
-    // no hardcoded currency fallback, since a guessed number could show the wrong currency.
-    private var priceLabel: String? {
-        purchaseManager.product?.displayPrice
+    // Mirrors TierSelectView's price-state handling: the buy button is the only
+    // purchase entry point on this screen, so its failure text is "Purchase
+    // unavailable" (the CTA-context string), not "Price unavailable" (which is
+    // reserved for a card's own price display area).
+    private var isPurchaseReady: Bool {
+        purchaseManager.productLoadState == .loaded && purchaseManager.product?.displayPrice != nil
+    }
+
+    private var buyButtonTitle: String {
+        switch purchaseManager.productLoadState {
+        case .loading:
+            return s.tierPaidPriceLoading
+        case .failed:
+            return s.tierPaidPurchaseUnavailable
+        case .loaded:
+            guard let price = purchaseManager.product?.displayPrice else {
+                return s.tierPaidPurchaseUnavailable
+            }
+            return s.tierPaidBtnTitle(price)
+        }
     }
 
     var body: some View {
@@ -42,24 +58,17 @@ struct EntitlementView: View {
                                 if purchaseManager.state == .loading {
                                     ProgressView().tint(AppColors.white)
                                 } else {
-                                    VStack(spacing: 4) {
-                                        Text(s.entitlementBuyBtn)
-                                            .font(AppFonts.body(16, weight: .medium))
-                                            .foregroundColor(AppColors.white)
-                                        if let priceLabel {
-                                            Text(priceLabel)
-                                                .font(AppFonts.body(13, weight: .semibold))
-                                                .foregroundColor(AppColors.white.opacity(0.85))
-                                        }
-                                    }
+                                    Text(buyButtonTitle)
+                                        .font(AppFonts.body(16, weight: .medium))
+                                        .foregroundColor(isPurchaseReady ? AppColors.white : AppColors.muted)
                                 }
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 58)
-                            .background(AppColors.greenDeep)
+                            .background(isPurchaseReady ? AppColors.greenDeep : AppColors.line)
                             .cornerRadius(12)
                         }
-                        .disabled(purchaseManager.state == .loading)
+                        .disabled(!isPurchaseReady || purchaseManager.state == .loading)
                         .padding(.horizontal, 20)
 
                         Button {

@@ -436,7 +436,6 @@ struct Strings {
     var entitlementNavTitle: String    { t("纪念空间", "Memorial Space") }
     var entitlementSelectTitle: String { t("选择适合TA的纪念空间", "Choose a plan for them") }
     var entitlementPaidTitle: String   { t("完整纪念空间已开启", "Full Memorial Space is active") }
-    var entitlementBuyBtn: String      { t("开启完整纪念空间", "Unlock Full Memorial Space") }
     var entitlementRestoreBtn: String  { t("恢复购买", "Restore purchase") }
     var entitlementErrorTitle: String  { t("购买未完成", "Purchase not completed") }
     var entitlementFeatureMainPhoto: String  { t("主照片 + 首页星球观察窗", "Main photo + home planet window") }

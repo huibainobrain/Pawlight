@@ -179,17 +179,19 @@ struct TierSelectView: View {
     // The paid card's price block and the bottom CTA both derive from StoreKit's
     // own load state — never a guessed/hardcoded price. `nil` displayPrice while
     // `.loaded` is treated as unavailable rather than silently falling through.
+    // Card price area uses "Price unavailable"; the bottom CTA (below) uses
+    // "Purchase unavailable" — the two failure strings are not interchangeable.
     private var paidPriceState: TierPriceState {
         switch purchaseManager.productLoadState {
         case .loading:
             return .loading
         case .failed:
-            return .unavailable(s.tierPaidPurchaseUnavailable)
+            return .unavailable(s.tierPaidPriceUnavailable)
         case .loaded:
             if let price = purchaseManager.product?.displayPrice {
                 return .loaded(price)
             }
-            return .unavailable(s.tierPaidPurchaseUnavailable)
+            return .unavailable(s.tierPaidPriceUnavailable)
         }
     }
 
@@ -214,10 +216,10 @@ struct TierSelectView: View {
             case .loading:
                 return s.tierPaidPriceLoading
             case .failed:
-                return s.tierPaidPriceUnavailable
+                return s.tierPaidPurchaseUnavailable
             case .loaded:
                 guard let price = purchaseManager.product?.displayPrice else {
-                    return s.tierPaidPriceUnavailable
+                    return s.tierPaidPurchaseUnavailable
                 }
                 return s.tierPaidBtnTitle(price)
             }
