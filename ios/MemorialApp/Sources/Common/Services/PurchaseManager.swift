@@ -16,11 +16,21 @@ final class PurchaseManager: ObservableObject {
         case failed
     }
 
+    // Bilingual text lives in Strings.swift (purchaseErrorMessage(_:)) — PurchaseManager
+    // stays UI/localization-agnostic and just reports what happened.
+    enum PurchaseError: Equatable {
+        case productLoadFailed
+        case notSignedIn
+        case verificationFailed
+        case purchaseFailed
+        case noValidPurchase
+    }
+
     enum PurchaseState: Equatable {
         case idle
         case loading
         case success
-        case failed(String)
+        case failed(PurchaseError)
     }
 
     func loadProduct() async {
@@ -42,11 +52,11 @@ final class PurchaseManager: ObservableObject {
 
     func purchase(appState: AppState) async {
         guard let product else {
-            state = .failed("产品信息加载失败，请稍后再试。")
+            state = .failed(.productLoadFailed)
             return
         }
         guard let token = KeychainHelper.loadToken() else {
-            state = .failed("请先登录。")
+            state = .failed(.notSignedIn)
             return
         }
         state = .loading
@@ -55,7 +65,7 @@ final class PurchaseManager: ObservableObject {
             switch result {
             case .success(let verification):
                 guard case .verified(let transaction) = verification else {
-                    state = .failed("购买验证未通过，请联系客服。")
+                    state = .failed(.verificationFailed)
                     return
                 }
                 try await APIClient.shared.verifyPurchase(
@@ -77,7 +87,7 @@ final class PurchaseManager: ObservableObject {
                 state = .idle
             }
         } catch {
-            state = .failed("购买未能完成，请稍后重试。")
+            state = .failed(.purchaseFailed)
         }
     }
 
@@ -100,7 +110,7 @@ final class PurchaseManager: ObservableObject {
             await appState.loadCurrentPet()
             state = .success
         } else {
-            state = .failed("未找到有效的购买记录。")
+            state = .failed(.noValidPurchase)
         }
     }
 

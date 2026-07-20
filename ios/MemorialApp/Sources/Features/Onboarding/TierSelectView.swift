@@ -140,8 +140,8 @@ struct TierSelectView: View {
             switch newState {
             case .success:
                 navigateToSuccess = true
-            case .failed(let msg):
-                purchaseErrorMessage = msg
+            case .failed(let error):
+                purchaseErrorMessage = s.purchaseErrorMessage(error)
                 showPurchaseError = true
             default:
                 break

@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 struct KeychainHelper {
-    private static let service = "com.musayang.memorial"
+    private static let service = "com.pawlight.app"
     private static let tokenKey = "jwt_token"
     private static let userIdDefaultsKey = "userId"
 

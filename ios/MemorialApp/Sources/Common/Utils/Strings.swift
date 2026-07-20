@@ -137,6 +137,23 @@ struct Strings {
           ["Video memories", "Anniversary reminders", "Premium visuals"])
     }
 
+    // MARK: - Purchase Errors (PurchaseManager.PurchaseError)
+
+    func purchaseErrorMessage(_ error: PurchaseManager.PurchaseError) -> String {
+        switch error {
+        case .productLoadFailed:
+            return t("产品信息加载失败，请稍后再试。", "Product information couldn't load. Please try again later.")
+        case .notSignedIn:
+            return t("请先登录。", "Please sign in first.")
+        case .verificationFailed:
+            return t("购买验证未通过，请联系客服。", "Purchase verification failed. Please contact support.")
+        case .purchaseFailed:
+            return t("购买未能完成，请稍后重试。", "The purchase couldn't be completed. Please try again later.")
+        case .noValidPurchase:
+            return t("未找到有效的购买记录。", "No valid purchase was found.")
+        }
+    }
+
     // MARK: - Create Success
 
     var successTitle: String { t("星球已经为TA准备好了", "Their little planet is ready") }
@@ -209,7 +226,7 @@ struct Strings {
     var memoryWriteStory: String    { t("写下TA的故事", "Write their story") }
     var memoryPhotosEmpty: String   { t("还没有添加照片。\n可以先放一张和TA有关的瞬间。", "No photos yet.\nStart with a photo you'd love to keep.") }
     var memoryAddPhotos: String     { t("添加照片", "Add photos") }
-    func memoryPhotoCount(_ n: Int, _ limit: Int) -> String { t("共 \(n) 封信", "\(n) / \(limit) photos") }
+    func memoryPhotoCount(_ n: Int, _ limit: Int) -> String { t("已保存 \(n) / \(limit) 张", "\(n) / \(limit) photos") }
     var memoryMailboxEmpty: String  { t("想说的话，可以慢慢写在这里。\n这些信只给主人自己看。", "You can write whatever's on your mind here.\nThese letters are just for you.") }
     var memoryMailboxLocked: String { t("有些话，不一定要放在纪念页里。\n开启完整纪念空间后，可以把想对TA说的话留在这里，只有你自己可以看到。", "Some things don't need to be on the memorial page.\nWith Full Memorial Space, you can leave private letters here — just for you.") }
     var memoryHugsEmpty: String     { t("还没有收到抱抱。\n分享给也记得TA的人，他们可以轻轻抱抱TA。", "No hugs yet.\nShare with people who remember them — they can send a gentle hug.") }

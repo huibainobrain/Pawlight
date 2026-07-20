@@ -90,8 +90,8 @@ struct EntitlementView: View {
         .toolbar(.hidden, for: .tabBar)
         .task { await purchaseManager.loadProduct() }
         .onChange(of: purchaseManager.state) { _, newState in
-            if case .failed(let msg) = newState {
-                errorMessage = msg
+            if case .failed(let error) = newState {
+                errorMessage = s.purchaseErrorMessage(error)
                 showErrorAlert = true
             }
         }
