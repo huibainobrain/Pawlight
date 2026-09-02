@@ -236,30 +236,26 @@ class AppState: ObservableObject {
         clearLocalSession()
     }
 
-    func debugLoginAndStart() async {
-        do {
-            let response = try await APIClient.shared.debugLogin()
-            KeychainHelper.saveToken(response.accessToken)
-            KeychainHelper.saveUserId(response.user.id)
-            currentUser = User(id: response.user.id, loginStatus: .loggedIn,
-                               loginProvider: "debug", nickname: nil, avatarURL: nil,
-                               createdAt: response.user.createdAt)
-            // Backend deletes all pets on debug login — clear local pet state so
-            // stale currentPet/entitlement don't let the user reach mailbox with a
-            // deleted petId and get a silent save failure.
-            currentPet = nil
-            entitlement = nil
-            photos = []
-            story = nil
-            letters = []
-            hugs = []
-            share = nil
-            newHugCount = 0
-            UserDefaults.standard.removeObject(forKey: AppState.seenHugCountKey)
-            ownerStage = .loggedInNoPet
-        } catch {
-            print("debugLogin error: \(error)")
-        }
+    func debugLoginAndStart() async throws {
+        let response = try await APIClient.shared.debugLogin()
+        KeychainHelper.saveToken(response.accessToken)
+        KeychainHelper.saveUserId(response.user.id)
+        currentUser = User(id: response.user.id, loginStatus: .loggedIn,
+                           loginProvider: "debug", nickname: nil, avatarURL: nil,
+                           createdAt: response.user.createdAt)
+        // Backend deletes all pets on debug login — clear local pet state so
+        // stale currentPet/entitlement don't let the user reach mailbox with a
+        // deleted petId and get a silent save failure.
+        currentPet = nil
+        entitlement = nil
+        photos = []
+        story = nil
+        letters = []
+        hugs = []
+        share = nil
+        newHugCount = 0
+        UserDefaults.standard.removeObject(forKey: AppState.seenHugCountKey)
+        ownerStage = .loggedInNoPet
     }
     #endif
 

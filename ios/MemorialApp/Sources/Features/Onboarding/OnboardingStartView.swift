@@ -8,6 +8,7 @@ struct OnboardingStartView: View {
     @Environment(\.dismiss) var dismiss
     @State private var navigateToLogin = false
     @State private var navigateToPetInfo = false
+    @State private var debugErrorMessage: String?
 
     var onSkip: (() -> Void)? = nil
 
@@ -106,9 +107,15 @@ struct OnboardingStartView: View {
                             Divider().opacity(0.4).padding(.vertical, 4)
                             Button("🧪 真实API登录 → 创建流程") {
                                 Task { @MainActor in
-                                    await appState.debugLoginAndStart()
-                                    if appState.ownerStage == .loggedInNoPet {
-                                        navigateToPetInfo = true
+                                    do {
+                                        debugErrorMessage = nil
+                                        try await appState.debugLoginAndStart()
+                                        if appState.ownerStage == .loggedInNoPet {
+                                            navigateToPetInfo = true
+                                        }
+                                    } catch {
+                                        debugErrorMessage = "调试登录失败：\(error.localizedDescription)"
+                                        print("debugLogin error: \(error)")
                                     }
                                 }
                             }
@@ -119,6 +126,12 @@ struct OnboardingStartView: View {
                             }
                             .font(AppFonts.body(11))
                             .foregroundStyle(AppColors.muted.opacity(0.55))
+                            if let debugErrorMessage {
+                                Text(debugErrorMessage)
+                                    .font(AppFonts.body(11))
+                                    .foregroundStyle(AppColors.rose)
+                                    .multilineTextAlignment(.center)
+                            }
                         }
                         #endif
                     }

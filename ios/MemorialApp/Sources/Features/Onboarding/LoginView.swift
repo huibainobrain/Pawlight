@@ -60,9 +60,15 @@ struct LoginView: View {
                     VStack(spacing: 8) {
                         Button("跳过登录 → 创建流程（真实API）") {
                             Task { @MainActor in
-                                await appState.debugLoginAndStart()
-                                if appState.ownerStage == .loggedInNoPet {
-                                    navigateToPetInfo = true
+                                do {
+                                    errorMessage = nil
+                                    try await appState.debugLoginAndStart()
+                                    if appState.ownerStage == .loggedInNoPet {
+                                        navigateToPetInfo = true
+                                    }
+                                } catch {
+                                    errorMessage = "调试登录失败：\(error.localizedDescription)"
+                                    print("debugLogin error: \(error)")
                                 }
                             }
                         }
