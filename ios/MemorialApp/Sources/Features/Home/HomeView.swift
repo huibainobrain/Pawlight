@@ -14,6 +14,7 @@ struct HomeView: View {
                     HomeUnboardedView(showOnboarding: $showOnboarding)
                 }
             }
+            .promoDemoOverlay()
         }
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingStartView()
@@ -218,6 +219,7 @@ struct HomeCreatedView: View {
 struct PlanetWindowView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var ls: LanguageStore
+    @EnvironmentObject var promoDemo: PromoDemoController
 
     private var s: Strings { ls.strings }
 
@@ -297,7 +299,14 @@ struct PlanetWindowView: View {
                         .frame(width: 210, height: 210)
 
                     // 用户上传主照片
-                    if let photo = appState.currentPet?.mainPhoto {
+                    if promoDemo.isArmed {
+                        PromoObservationContent(
+                            stage: promoDemo.stage,
+                            candidateIndex: promoDemo.candidateIndex
+                        )
+                        .frame(width: 206, height: 206)
+                        .clipShape(Circle())
+                    } else if let photo = appState.currentPet?.mainPhoto {
                         AsyncImage(url: URL(string: photo.url)) { phase in
                             switch phase {
                             case .success(let image):
@@ -340,7 +349,15 @@ struct PlanetWindowView: View {
                         .scaleEffect(x: -1, y: 1)
                 }
 
-                if let sentence = appState.currentPet?.memorialSentence, !sentence.isEmpty {
+                if promoDemo.isArmed, promoDemo.stage.isGenerating {
+                    Text(promoDemo.stage == .generatingImage
+                         ? "正在为 TA 生成画像…"
+                         : "正在让 TA 在画面里动起来…")
+                        .font(AppFonts.body(15))
+                        .foregroundColor(AppColors.muted)
+                        .multilineTextAlignment(.center)
+                        .transition(.opacity)
+                } else if let sentence = appState.currentPet?.memorialSentence, !sentence.isEmpty {
                     Text(sentence)
                         .font(AppFonts.body(15))
                         .foregroundColor(AppColors.muted)

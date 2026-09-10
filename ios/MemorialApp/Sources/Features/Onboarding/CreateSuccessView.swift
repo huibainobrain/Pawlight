@@ -37,6 +37,9 @@ struct CreateSuccessView: View {
                 VStack(spacing: 12) {
                     // 主按钮：继续补充回忆
                     Button {
+                        #if DEBUG
+                        if appState.isPromoDemoArmed { appState.promoDemoEnterHome(); return }
+                        #endif
                         appState.selectedTab = 1
                         Task { await appState.loadCurrentPet() }
                     } label: {
@@ -52,6 +55,9 @@ struct CreateSuccessView: View {
 
                     // 次按钮：去看看TA
                     Button {
+                        #if DEBUG
+                        if appState.isPromoDemoArmed { appState.promoDemoEnterHome(); return }
+                        #endif
                         appState.selectedTab = 0
                         Task { await appState.loadCurrentPet() }
                     } label: {

@@ -31,6 +31,13 @@ class AppState: ObservableObject {
 
     static let seenHugCountKey = "seen_hug_count"
 
+    // Promo-demo scaffold (see PromoDemo.swift). Wired in MemorialApp.swift; never
+    // armed in Release, so every promo branch below is dead code there.
+    weak var promoDemo: PromoDemoController?
+    var isPromoDemoArmed: Bool { promoDemo?.isArmed == true }
+    private var promoDemoPetName: String?
+    private var promoDemoPetType: Pet.PetType?
+
     var isLoggedIn: Bool { currentUser != nil }
     var hasPet: Bool { currentPet != nil }
     var isPaid: Bool { entitlement?.isPaid == true }
@@ -43,6 +50,9 @@ class AppState: ObservableObject {
 
     func checkAuthAndLoad() async {
         defer { isAuthChecking = false }
+        #if DEBUG
+        if promoDemo?.needsPetRestore == true { return }   // promo demo owns the session
+        #endif
         guard let token = KeychainHelper.loadToken(),
               let userId = KeychainHelper.loadUserId() else {
             ownerStage = .unauthenticated
@@ -113,12 +123,22 @@ class AppState: ObservableObject {
     }
 
     func createPet(name: String, type: Pet.PetType) async throws -> String {
+        #if DEBUG
+        if isPromoDemoArmed {
+            promoDemoPetName = name
+            promoDemoPetType = type
+            return "promo-pet"
+        }
+        #endif
         guard let token = KeychainHelper.loadToken() else { throw APIError.noToken }
         let pet = try await APIClient.shared.createPet(token: token, name: name, type: type)
         return pet.id
     }
 
     func uploadMainPhoto(petId: String, imageData: Data) async throws {
+        #if DEBUG
+        if isPromoDemoArmed { return }   // the "photo" is the bundled promo asset
+        #endif
         guard let token = KeychainHelper.loadToken() else { throw APIError.noToken }
         let photo = try await APIClient.shared.uploadPhoto(token: token, petId: petId, imageData: imageData, type: "MAIN")
         try await APIClient.shared.updatePet(token: token, petId: petId, body: ["mainPhotoId": photo.id])
@@ -233,7 +253,50 @@ class AppState: ObservableObject {
 
     #if DEBUG
     func resetAll() {
+        promoDemo?.reset()
+        promoDemoPetName = nil
+        promoDemoPetType = nil
         clearLocalSession()
+    }
+
+    // MARK: Promo demo (see PromoDemo.swift)
+
+    /// Launch-screen button: arm the demo, then walk the real creation flow with the
+    /// API calls stubbed out (createPet / uploadMainPhoto above).
+    func startPromoDemoFlow() {
+        promoDemoPetName = nil
+        promoDemoPetType = nil
+        promoDemo?.arm()
+    }
+
+    /// TierSelect "buy" in demo mode — mark paid without StoreKit or backend.
+    /// currentPet stays nil so RootView keeps the onboarding stack through CreateSuccess.
+    func promoDemoMarkPaid() {
+        entitlement = Entitlement(entitlementType: .paid, photoLimit: 50, mailboxEnabled: true, purchaseStatus: .paid)
+    }
+
+    /// CreateSuccess in demo mode — build the local pet so Home renders and the
+    /// observation-window flow can start.
+    func promoDemoEnterHome() {
+        let now = Date()
+        let photo = Photo(
+            id: "promo-photo", petId: "promo-pet", userId: "promo-user",
+            type: .main, url: "promo://uploaded", thumbnailURL: "promo://uploaded",
+            uploadStatus: .success, isMain: true, sortOrder: nil, createdAt: now
+        )
+        currentPet = Pet(
+            id: "promo-pet", ownerUserId: "promo-user",
+            name: promoDemoPetName ?? "TA", type: promoDemoPetType ?? .cat,
+            mainPhotoId: photo.id, mainPhoto: photo, memorialSentence: nil,
+            metOrAdoptionDate: nil, birthDate: nil, passedAwayDate: nil,
+            status: .active, createdAt: now
+        )
+        if entitlement?.isPaid != true {
+            entitlement = Entitlement(entitlementType: .paid, photoLimit: 50, mailboxEnabled: true, purchaseStatus: .paid)
+        }
+        ownerStage = .hasPetPaid
+        selectedTab = 0
+        isAuthChecking = false
     }
 
     func debugLoginAndStart() async throws {
