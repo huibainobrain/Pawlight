@@ -53,7 +53,7 @@ final class APIClient {
         let url = url("/api/v1/auth/debug-login")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
-        req.setValue("musayang-debug-2024", forHTTPHeaderField: "X-Debug-Secret")
+        req.setValue("pawlight-debug-2024", forHTTPHeaderField: "X-Debug-Secret")
         return try await perform(req)
     }
     #endif
