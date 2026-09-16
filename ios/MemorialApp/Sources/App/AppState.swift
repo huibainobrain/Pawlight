@@ -171,6 +171,7 @@ class AppState: ObservableObject {
             mainPhotoId: api.mainPhotoId,
             mainPhoto: mainDomainPhoto,
             memorialSentence: api.memorialSentence,
+            observationVideoUrl: api.observationVideoUrl,
             metOrAdoptionDate: api.arrivedOn.map { PartialDate(precision: .day, value: $0) },
             birthDate: api.bornOn.map { PartialDate(precision: .day, value: $0) },
             passedAwayDate: api.leftOn.map { PartialDate(precision: .day, value: $0) },

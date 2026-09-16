@@ -184,6 +184,39 @@ final class APIClient {
         let _: Empty = try await perform(req)
     }
 
+    // MARK: - Scene Portraits (AI 场景画像/动态观察窗, 付费功能)
+
+    func startScenePortrait(token: String, petId: String, sceneText: String) async throws -> ApiScenePortraitJob {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/scene-portraits"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["sceneText": sceneText])
+        return try await perform(req)
+    }
+
+    func fetchScenePortraitJob(token: String, jobId: String) async throws -> ApiScenePortraitJob {
+        var req = URLRequest(url: url("/api/v1/scene-portraits/\(jobId)"))
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    func selectScenePortraitCandidate(token: String, jobId: String, candidateId: String) async throws -> ApiScenePortraitJob {
+        var req = URLRequest(url: url("/api/v1/scene-portraits/\(jobId)/select"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["candidateId": candidateId])
+        return try await perform(req)
+    }
+
+    func revertObservationWindow(token: String, petId: String) async throws {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/observation-window/revert"))
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        try await performVoid(req)
+    }
+
     // MARK: - Purchases
 
     func verifyPurchase(token: String, jwsToken: String) async throws {

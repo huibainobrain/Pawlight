@@ -3,36 +3,19 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from '@aws-sdk/client-s3';
 import { randomBytes } from 'crypto';
 import { PhotoType } from '@prisma/client';
 import { albumPhotoLimit } from '../common/entitlement.util';
-import { requireEnv } from '../config/env.validation';
+import { R2StorageService } from '../storage/r2-storage.service';
 
 @Injectable()
 export class PhotosService {
-  private readonly logger = new Logger(PhotosService.name);
-  private s3: S3Client;
-  private bucket = requireEnv('R2_BUCKET');
-  private publicUrl = requireEnv('R2_PUBLIC_URL');
-
-  constructor(private prisma: PrismaService) {
-    this.s3 = new S3Client({
-      region: 'auto',
-      endpoint: `https://${requireEnv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: requireEnv('R2_ACCESS_KEY_ID'),
-        secretAccessKey: requireEnv('R2_SECRET_ACCESS_KEY'),
-      },
-    });
-  }
+  constructor(
+    private prisma: PrismaService,
+    private storage: R2StorageService,
+  ) {}
 
   async upload(
     userId: string,
@@ -68,16 +51,12 @@ export class PhotosService {
     const ext = file.originalname.split('.').pop() ?? 'jpg';
     const key = `pets/${petId}/${randomBytes(8).toString('hex')}.${ext}`;
 
-    await this.s3.send(
-      new PutObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      }),
-    );
+    const { url: r2Url } = await this.storage.upload({
+      key,
+      buffer: file.buffer,
+      contentType: file.mimetype,
+    });
 
-    const r2Url = `${this.publicUrl}/${key}`;
     const photo = await this.prisma.photo.create({
       data: { petId, r2Key: key, r2Url, type },
     });
@@ -123,7 +102,7 @@ export class PhotosService {
       });
     }
 
-    await this.deleteFromR2(photo.r2Key);
+    await this.storage.delete(photo.r2Key);
     await this.prisma.photo.delete({ where: { id: photoId } });
     return { status: 'success', id: photoId };
   }
@@ -136,18 +115,6 @@ export class PhotosService {
       where: { pet: { userId } },
       select: { r2Key: true },
     });
-    await Promise.all(photos.map((photo) => this.deleteFromR2(photo.r2Key)));
-  }
-
-  // R2 deletion is best-effort: a failed object delete must not block removing
-  // the DB record (and freeing quota).
-  private async deleteFromR2(key: string) {
-    try {
-      await this.s3.send(
-        new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
-      );
-    } catch (err) {
-      this.logger.warn(`Best-effort R2 delete failed for ${key}: ${String(err)}`);
-    }
+    await Promise.all(photos.map((photo) => this.storage.delete(photo.r2Key)));
   }
 }

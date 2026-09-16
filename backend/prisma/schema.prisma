@@ -21,23 +21,30 @@ model User {
 }
 
 model Pet {
-  id               String      @id @default(cuid())
-  userId           String
-  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name             String
-  type             PetType     @default(CAT)
-  arrivedOn        String?
-  bornOn           String?
-  leftOn           String?
-  mainPhotoId      String?
-  story            String?
-  memorialSentence String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id                    String      @id @default(cuid())
+  userId                String
+  user                  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                  String
+  type                  PetType     @default(CAT)
+  arrivedOn             String?
+  bornOn                String?
+  leftOn                String?
+  mainPhotoId           String?
+  story                 String?
+  memorialSentence      String?
+  // Observation-window scene video (V2, paid-only). Independent from
+  // mainPhotoId so the static photo always stays available as a fallback —
+  // null observationVideoUrl means "show the static main photo".
+  observationVideoJobId String?
+  observationVideoKey   String?
+  observationVideoUrl   String?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 
-  photos      Photo[]
-  share       Share?
-  letters     Letter[]
+  photos            Photo[]
+  share             Share?
+  letters           Letter[]
+  scenePortraitJobs ScenePortraitJob[]
 }
 
 enum PetType {
@@ -80,6 +87,47 @@ model Photo {
   createdAt DateTime  @default(now())
 
   @@index([petId, type])
+}
+
+enum ScenePortraitJobStatus {
+  QUEUED
+  GENERATING_IMAGE
+  CANDIDATES_READY
+  GENERATING_VIDEO
+  DONE
+  FAILED
+}
+
+// One "describe a scene -> pick a candidate -> get a looping video" attempt.
+model ScenePortraitJob {
+  id                  String                 @id @default(cuid())
+  petId               String
+  pet                 Pet                    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  sceneText           String
+  status              ScenePortraitJobStatus @default(QUEUED)
+  selectedCandidateId String?
+  videoR2Key          String?
+  videoR2Url          String?
+  errorCode           String?
+  errorMessage        String?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  candidates ScenePortraitCandidate[]
+
+  @@index([petId, createdAt])
+}
+
+model ScenePortraitCandidate {
+  id        String           @id @default(cuid())
+  jobId     String
+  job       ScenePortraitJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  r2Key     String
+  r2Url     String
+  sortOrder Int              @default(0)
+  createdAt DateTime         @default(now())
+
+  @@index([jobId])
 }
 
 model Share {

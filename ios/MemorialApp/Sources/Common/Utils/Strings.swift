@@ -212,6 +212,20 @@ struct Strings {
     var freeUpgradePhotoFullBody: String  { t("完整纪念空间可以保存更多和TA有关的瞬间。", "Full Memorial Space lets you keep more moments with them.") }
     var freeUpgradeMoreBody: String       { t("完整纪念空间可以留下更多照片，\n也可以使用天堂信箱。", "Full Memorial Space includes more photos\nand Letters to Them.") }
 
+    // MARK: - Scene Portrait (AI 场景画像/动态观察窗, 付费功能)
+
+    var scenePortraitEntryBtn: String     { t("为TA画一个场景", "Paint a scene for them") }
+    var scenePortraitRevertBtn: String    { t("↺ 切回照片", "↺ Back to photo") }
+    var scenePortraitReverting: String    { t("切回中…", "Switching back…") }
+    var scenePortraitInputTitle: String   { t("想看到 TA 在什么样的地方？", "Where would you love to see them?") }
+    var scenePortraitInputBody: String    { t("写下一个场景，我们把 TA 画进去", "Describe a scene, and we'll paint them into it") }
+    var scenePortraitInputPlaceholder: String { t("比如：在洒满阳光的窗台上打盹", "e.g. dozing on a sunlit windowsill") }
+    var scenePortraitGenerateBtn: String  { t("生成画像", "Paint their portrait") }
+    var scenePortraitPickTitle: String    { t("选一张最像 TA 的", "Choose the one that looks most like them") }
+    var scenePortraitPickBody: String     { t("轻点一张，把它带进星球观察窗", "Tap one to bring it into the planet window") }
+    var scenePortraitGeneratingImage: String { t("正在为 TA 绘制画像…", "Painting their portrait…") }
+    var scenePortraitGeneratingVideo: String { t("画面正在慢慢成形…", "The scene is gently taking shape…") }
+
     // MARK: - Memory View
 
     var memoryUnboardedTitle: String    { t("还没有为TA创建星球", "No little planet yet") }

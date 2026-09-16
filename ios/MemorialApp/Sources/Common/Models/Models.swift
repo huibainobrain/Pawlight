@@ -27,6 +27,9 @@ struct Pet: Identifiable, Codable {
     var mainPhotoId: String?
     var mainPhoto: Photo?
     var memorialSentence: String?
+    // V2 scene portrait (paid-only): nil means the observation window shows
+    // the static mainPhoto; non-nil is a looping video URL to play instead.
+    var observationVideoUrl: String? = nil
     var metOrAdoptionDate: PartialDate?
     var birthDate: PartialDate?
     var passedAwayDate: PartialDate?

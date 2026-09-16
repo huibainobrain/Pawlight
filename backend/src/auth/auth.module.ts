@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { PhotosModule } from '../photos/photos.module';
+import { ScenePortraitsModule } from '../scene-portraits/scene-portraits.module';
 import { requireEnv } from '../config/env.validation';
 
 @Module({
@@ -15,6 +16,7 @@ import { requireEnv } from '../config/env.validation';
       signOptions: { expiresIn: '365d' },
     }),
     PhotosModule,
+    ScenePortraitsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

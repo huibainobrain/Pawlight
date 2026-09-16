@@ -42,6 +42,8 @@ struct ApiPet: Decodable {
     let mailboxEnabled: Bool?
     let share: ApiShare?
     let photos: [ApiPhoto]?
+    // V2 scene portrait: null means "show the static main photo".
+    let observationVideoUrl: String?
 
     enum ApiPetType: String, Decodable {
         case CAT, DOG, OTHER
@@ -74,13 +76,14 @@ struct ApiPet: Decodable {
         mailboxEnabled = try c.decodeIfPresent(Bool.self, forKey: .mailboxEnabled)
         share = try c.decodeIfPresent(ApiShare.self, forKey: .share)
         photos = try c.decodeIfPresent([ApiPhoto].self, forKey: .photos)
+        observationVideoUrl = try c.decodeIfPresent(String.self, forKey: .observationVideoUrl)
     }
 
     enum CodingKeys: String, CodingKey {
         case id, userId, name, type, mainPhotoId, story, memorialSentence
         case arrivedOn, bornOn, leftOn, createdAt
         case albumPhotoCount, albumPhotoLimit, mailboxEnabled
-        case share, photos
+        case share, photos, observationVideoUrl
     }
 }
 
@@ -133,4 +136,35 @@ struct ApiHug: Decodable {
     let visitorName: String?
     let message: String?
     let createdAt: Date
+}
+
+// MARK: - Scene Portrait (AI 场景画像/动态观察窗, 付费功能)
+
+struct ApiScenePortraitCandidate: Decodable {
+    let id: String
+    let r2Url: String
+    let sortOrder: Int
+}
+
+struct ApiScenePortraitJob: Decodable {
+    enum Status: String, Decodable {
+        case queued = "QUEUED"
+        case generatingImage = "GENERATING_IMAGE"
+        case candidatesReady = "CANDIDATES_READY"
+        case generatingVideo = "GENERATING_VIDEO"
+        case done = "DONE"
+        case failed = "FAILED"
+    }
+
+    let id: String
+    let petId: String
+    let status: Status
+    let sceneText: String
+    let candidates: [ApiScenePortraitCandidate]
+    let selectedCandidateId: String?
+    let videoR2Url: String?
+    let errorCode: String?
+    let errorMessage: String?
+    let createdAt: Date
+    let updatedAt: Date
 }

@@ -15,6 +15,7 @@ struct HomeView: View {
                 }
             }
             .promoDemoOverlay()
+            .scenePortraitOverlay()
         }
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingStartView()
@@ -220,6 +221,7 @@ struct PlanetWindowView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var ls: LanguageStore
     @EnvironmentObject var promoDemo: PromoDemoController
+    @EnvironmentObject var scenePortrait: ScenePortraitController
 
     private var s: Strings { ls.strings }
 
@@ -306,6 +308,14 @@ struct PlanetWindowView: View {
                         )
                         .frame(width: 206, height: 206)
                         .clipShape(Circle())
+                    } else if appState.isPaid,
+                              scenePortrait.stage.isActive || appState.currentPet?.observationVideoUrl != nil {
+                        ScenePortraitObservationContent(
+                            stage: scenePortrait.stage,
+                            videoUrl: appState.currentPet?.observationVideoUrl
+                        )
+                        .frame(width: 206, height: 206)
+                        .clipShape(Circle())
                     } else if let photo = appState.currentPet?.mainPhoto {
                         AsyncImage(url: URL(string: photo.url)) { phase in
                             switch phase {
@@ -357,6 +367,14 @@ struct PlanetWindowView: View {
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
                         .transition(.opacity)
+                } else if scenePortrait.stage.isGenerating {
+                    Text(scenePortrait.stage == .generatingImage
+                         ? s.scenePortraitGeneratingImage
+                         : s.scenePortraitGeneratingVideo)
+                        .font(AppFonts.body(15))
+                        .foregroundColor(AppColors.muted)
+                        .multilineTextAlignment(.center)
+                        .transition(.opacity)
                 } else if let sentence = appState.currentPet?.memorialSentence, !sentence.isEmpty {
                     Text(sentence)
                         .font(AppFonts.body(15))
@@ -369,7 +387,14 @@ struct PlanetWindowView: View {
                         .foregroundColor(AppColors.muted.opacity(0.46))
                 }
 
-
+                if !promoDemo.isArmed, appState.isPaid, appState.currentPet?.mainPhoto != nil,
+                   scenePortrait.stage == .idle {
+                    if appState.currentPet?.observationVideoUrl != nil {
+                        ScenePortraitRevertButton()
+                    } else {
+                        ScenePortraitEntryButton()
+                    }
+                }
             }
         }
     }

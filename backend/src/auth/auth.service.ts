@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { PhotosService } from '../photos/photos.service';
+import { ScenePortraitsService } from '../scene-portraits/scene-portraits.service';
 import appleSignin from 'apple-signin-auth';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private photosService: PhotosService,
+    private scenePortraitsService: ScenePortraitsService,
   ) {}
 
   async loginWithApple(identityToken: string) {
@@ -72,8 +74,12 @@ export class AuthService {
   // account creation must let users delete their account in-app. R2 objects
   // have to be removed explicitly first — Postgres cascade only reaches the
   // DB rows (Pet -> Photo/Share/Letter -> Hug, and Entitlement directly).
+  // Scene-portrait candidates/videos are R2 objects too (Pet -> ScenePortraitJob
+  // -> Candidate cascades in the DB but not in R2), so they need the same
+  // explicit cleanup as photos.
   async deleteAccount(userId: string) {
     await this.photosService.deleteAllForUser(userId);
+    await this.scenePortraitsService.deleteAllForUser(userId);
     await this.prisma.user.delete({ where: { id: userId } });
   }
 
