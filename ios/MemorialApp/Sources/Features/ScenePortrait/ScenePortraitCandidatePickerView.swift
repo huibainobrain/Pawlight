@@ -1,6 +1,5 @@
 import SwiftUI
 
-// Real counterpart to PromoDemo.swift's private PromoCandidatePickerView.
 // Cells are boxed to a 1:1 ratio (the backend requests square candidates —
 // see backend/src/scene-portraits/scene-portraits.constants.ts IMAGE_SIZE —
 // chosen to fit the circular observation window's bounding box), using the

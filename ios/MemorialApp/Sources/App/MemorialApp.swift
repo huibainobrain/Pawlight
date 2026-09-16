@@ -5,7 +5,6 @@ struct MemorialApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var purchaseManager = PurchaseManager()
     @StateObject private var languageStore = LanguageStore()
-    @StateObject private var promoDemo = PromoDemoController()
     @StateObject private var scenePortrait = ScenePortraitController()
 
     var body: some Scene {
@@ -14,14 +13,7 @@ struct MemorialApp: App {
                 .environmentObject(appState)
                 .environmentObject(purchaseManager)
                 .environmentObject(languageStore)
-                .environmentObject(promoDemo)
                 .environmentObject(scenePortrait)
-                .onAppear {
-                    appState.promoDemo = promoDemo
-                    if promoDemo.needsPetRestore, !appState.hasPet {
-                        appState.promoDemoEnterHome()
-                    }
-                }
         }
     }
 }

@@ -1,9 +1,8 @@
 import Foundation
 
-// Real (non-demo) counterpart to PromoDemoController: drives "describe a scene
-// -> pick a candidate -> observation window becomes a looping video" against
-// the actual backend, polling GET /scene-portraits/:jobId instead of a local
-// fake timer. Deliberately holds no reference to AppState — callers pass a
+// Drives "describe a scene -> pick a candidate -> observation window becomes
+// a looping video" against the real backend, polling GET /scene-portraits/:jobId
+// for status. Deliberately holds no reference to AppState — callers pass a
 // completion closure so AppState refresh stays the caller's responsibility.
 @MainActor
 final class ScenePortraitController: ObservableObject {

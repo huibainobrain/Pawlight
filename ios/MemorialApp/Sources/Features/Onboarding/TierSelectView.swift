@@ -182,9 +182,6 @@ struct TierSelectView: View {
     // Card price area uses "Price unavailable"; the bottom CTA (below) uses
     // "Purchase unavailable" — the two failure strings are not interchangeable.
     private var paidPriceState: TierPriceState {
-        #if DEBUG
-        if appState.isPromoDemoArmed { return .loaded("¥29.9") }
-        #endif
         switch purchaseManager.productLoadState {
         case .loading:
             return .loading
@@ -206,9 +203,6 @@ struct TierSelectView: View {
         switch selectedTier {
         case .free: return true
         case .paid:
-            #if DEBUG
-            if appState.isPromoDemoArmed { return true }
-            #endif
             return isPaidPriceReady
         default: return false
         }
@@ -219,9 +213,6 @@ struct TierSelectView: View {
         case .free:
             return s.tierFreeBtnTitle
         case .paid:
-            #if DEBUG
-            if appState.isPromoDemoArmed { return s.tierPaidBtnTitle("¥29.9") }
-            #endif
             switch purchaseManager.productLoadState {
             case .loading:
                 return s.tierPaidPriceLoading
@@ -244,13 +235,6 @@ struct TierSelectView: View {
         case .free:
             navigateToSuccess = true
         case .paid:
-            #if DEBUG
-            if appState.isPromoDemoArmed {
-                appState.promoDemoMarkPaid()
-                navigateToSuccess = true
-                return
-            }
-            #endif
             Task { await purchaseManager.purchase(appState: appState) }
         case .future:
             break

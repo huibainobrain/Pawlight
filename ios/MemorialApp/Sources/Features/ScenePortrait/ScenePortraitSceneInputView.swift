@@ -1,8 +1,7 @@
 import SwiftUI
 
-// Real counterpart to PromoDemo.swift's private PromoSceneInputView — same
-// visual template, wired to the real ScenePortraitController/backend instead
-// of a fixed countdown.
+// Scene-description input card shown before generation starts, wired to the
+// real ScenePortraitController/backend.
 struct ScenePortraitSceneInputView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var scenePortrait: ScenePortraitController

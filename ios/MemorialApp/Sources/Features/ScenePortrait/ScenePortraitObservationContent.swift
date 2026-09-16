@@ -2,10 +2,9 @@ import SwiftUI
 import AVFoundation
 import UIKit
 
-// Real counterpart to PromoDemo.swift's PromoObservationContent/PromoLoopingVideo.
-// Those types are `private` to PromoDemo.swift, so this is an independent (if
-// structurally similar) implementation — plays a remote R2 URL directly
-// instead of materializing a bundled NSDataAsset to a temp file.
+// Loading/looping-video content for the observation window. Plays a remote
+// R2 URL directly via AVQueuePlayer + AVPlayerLooper (no local temp-file
+// materialization needed, since the source is already a URL).
 struct ScenePortraitObservationContent: View {
     let stage: ScenePortraitController.Stage
     let videoUrl: String?

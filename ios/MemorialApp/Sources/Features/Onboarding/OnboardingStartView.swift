@@ -121,17 +121,6 @@ struct OnboardingStartView: View {
                             }
                             .font(AppFonts.body(11))
                             .foregroundStyle(AppColors.muted.opacity(0.55))
-                            Button("🧪 Mock数据 → 直接进主界面") {
-                                appState.loadMockData()
-                            }
-                            .font(AppFonts.body(11))
-                            .foregroundStyle(AppColors.muted.opacity(0.55))
-                            Button("🎬 Mock数据 → 进注册流程（宣传片）") {
-                                appState.startPromoDemoFlow()
-                                navigateToPetInfo = true
-                            }
-                            .font(AppFonts.body(11))
-                            .foregroundStyle(AppColors.muted.opacity(0.55))
                             if let debugErrorMessage {
                                 Text(debugErrorMessage)
                                     .font(AppFonts.body(11))

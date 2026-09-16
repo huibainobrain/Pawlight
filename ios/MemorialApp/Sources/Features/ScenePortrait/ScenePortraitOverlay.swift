@@ -1,8 +1,7 @@
 import SwiftUI
 
-// Real counterpart to PromoDemo.swift's promoDemoOverlay() — drives the two
-// modal steps (scene input / candidate pick) and a failure alert. Attach once
-// on Home, alongside .promoDemoOverlay().
+// Drives the two modal steps (scene input / candidate pick) and a failure
+// alert. Attach once, on Home.
 extension View {
     func scenePortraitOverlay() -> some View { modifier(ScenePortraitOverlayModifier()) }
 }

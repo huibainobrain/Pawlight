@@ -139,13 +139,6 @@ struct MainPhotoView: View {
         .navigationDestination(isPresented: $navigateToTier) {
             TierSelectView(petName: petName, petType: petType)
         }
-        #if DEBUG
-        .onAppear {
-            if appState.isPromoDemoArmed, selectedImage == nil {
-                selectedImage = UIImage(named: PromoDemoConfig.uploadedPhotoAsset)
-            }
-        }
-        #endif
     }
 
     // Inlined to avoid Swift 6 @Binding isolation issue across struct boundary

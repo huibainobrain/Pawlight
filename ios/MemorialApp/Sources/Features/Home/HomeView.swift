@@ -14,7 +14,6 @@ struct HomeView: View {
                     HomeUnboardedView(showOnboarding: $showOnboarding)
                 }
             }
-            .promoDemoOverlay()
             .scenePortraitOverlay()
         }
         .fullScreenCover(isPresented: $showOnboarding) {
@@ -220,7 +219,6 @@ struct HomeCreatedView: View {
 struct PlanetWindowView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var ls: LanguageStore
-    @EnvironmentObject var promoDemo: PromoDemoController
     @EnvironmentObject var scenePortrait: ScenePortraitController
 
     private var s: Strings { ls.strings }
@@ -301,15 +299,8 @@ struct PlanetWindowView: View {
                         .frame(width: 210, height: 210)
 
                     // 用户上传主照片
-                    if promoDemo.isArmed {
-                        PromoObservationContent(
-                            stage: promoDemo.stage,
-                            candidateIndex: promoDemo.candidateIndex
-                        )
-                        .frame(width: 206, height: 206)
-                        .clipShape(Circle())
-                    } else if appState.isPaid,
-                              scenePortrait.stage.isActive || appState.currentPet?.observationVideoUrl != nil {
+                    if appState.isPaid,
+                       scenePortrait.stage.isActive || appState.currentPet?.observationVideoUrl != nil {
                         ScenePortraitObservationContent(
                             stage: scenePortrait.stage,
                             videoUrl: appState.currentPet?.observationVideoUrl
@@ -359,15 +350,7 @@ struct PlanetWindowView: View {
                         .scaleEffect(x: -1, y: 1)
                 }
 
-                if promoDemo.isArmed, promoDemo.stage.isGenerating {
-                    Text(promoDemo.stage == .generatingImage
-                         ? "正在为 TA 生成画像…"
-                         : "正在让 TA 在画面里动起来…")
-                        .font(AppFonts.body(15))
-                        .foregroundColor(AppColors.muted)
-                        .multilineTextAlignment(.center)
-                        .transition(.opacity)
-                } else if scenePortrait.stage.isGenerating {
+                if scenePortrait.stage.isGenerating {
                     Text(scenePortrait.stage == .generatingImage
                          ? s.scenePortraitGeneratingImage
                          : s.scenePortraitGeneratingVideo)
@@ -387,7 +370,7 @@ struct PlanetWindowView: View {
                         .foregroundColor(AppColors.muted.opacity(0.46))
                 }
 
-                if !promoDemo.isArmed, appState.isPaid, appState.currentPet?.mainPhoto != nil,
+                if appState.isPaid, appState.currentPet?.mainPhoto != nil,
                    scenePortrait.stage == .idle {
                     if appState.currentPet?.observationVideoUrl != nil {
                         ScenePortraitRevertButton()
