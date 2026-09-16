@@ -54,6 +54,10 @@ Pawlight 不是宠物社区、相册工具、AI 复活服务，也不是殡葬�
 
 <img src="docs/screenshots/07-memory-tab.png" width="230"><br><sub>回忆 Tab：纪念主页总览</sub>
 
+
+https://github.com/user-attachments/assets/ab1f85e2-550b-4e4f-902e-23963e52cc92
+
+
 ### 4. TA的故事
 
 一段自由书写的文字，配了四个话题引导（第一次见到TA / TA的小习惯 / 最想念的一件事 / TA陪伴我的一天），降低"不知道从哪写起"的门槛。这段故事会出现在纪念主页，分享出去后访客也能看到。
