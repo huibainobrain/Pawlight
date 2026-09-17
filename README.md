@@ -23,24 +23,54 @@ Pawlight 是我独立推进的一款宠物纪念产品，已完成海外 App Sto
 ---
 
 ## 30 秒看产品
-<img width="734" height="1556" alt="01-onboarding" src="https://github.com/user-attachments/assets/9a736528-35e3-4b44-a664-90bbdcfb9be1" />
-<img width="363" height="765" alt="02-pet-info" src="https://github.com/user-attachments/assets/9f6227b6-1496-4a90-b4b4-8618b63402db" />
-<img width="750" height="1548" alt="03-main-photo" src="https://github.com/user-attachments/assets/c7cd1435-3d45-4428-9ae5-2c1f52bb6260" />
-<img width="376" height="772" alt="04-tier-select" src="https://github.com/user-attachments/assets/7a70bf7e-fa8c-4d10-a84b-f28520b0ac1d" />
-<img width="375" height="770" alt="05-scene-input" src="https://github.com/user-attachments/assets/8b4512db-c107-4fe5-aaef-bdf83d16df12" />
-<img width="728" height="1552" alt="06-candidates" src="https://github.com/user-attachments/assets/c1656543-9ec5-44a1-8ce0-d2acba251963" />
 
+### 创建纪念星球
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9a736528-35e3-4b44-a664-90bbdcfb9be1" width="240" alt="01-onboarding" />
+  <img src="https://github.com/user-attachments/assets/9f6227b6-1496-4a90-b4b4-8618b63402db" width="240" alt="02-pet-info" />
+  <img src="https://github.com/user-attachments/assets/c7cd1435-3d45-4428-9ae5-2c1f52bb6260" width="240" alt="03-main-photo" />
+</p>
+
+### AI 场景画像
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7a70bf7e-fa8c-4d10-a84b-f28520b0ac1d" width="240" alt="04-tier-select" />
+  <img src="https://github.com/user-attachments/assets/8b4512db-c107-4fe5-aaef-bdf83d16df12" width="240" alt="05-scene-input" />
+  <img src="https://github.com/user-attachments/assets/c1656543-9ec5-44a1-8ce0-d2acba251963" width="240" alt="06-candidates" />
+</p>
+
+**AI 场景生成与星球观察窗效果：**
 
 https://github.com/user-attachments/assets/97a828cd-6919-4d33-a49e-28a9532b5648
 
+### 保存与回看回忆
 
-<img width="361" height="768" alt="07-memory-tab" src="https://github.com/user-attachments/assets/380e96d6-14f7-490f-8125-d3f20aee96de" />
-<img width="364" height="771" alt="08-story-edit" src="https://github.com/user-attachments/assets/6b0e2c4a-5090-497e-890d-e6a5d23a96a6" />
-<img width="360" height="775" alt="09-album" src="https://github.com/user-attachments/assets/48324681-7c82-4f91-b7b6-d73f6442c3e7" />
-<img width="358" height="777" alt="10-mailbox" src="https://github.com/user-attachments/assets/c8dfe93c-f871-48e2-99c7-3d2544e828fe" />
-<img width="363" height="770" alt="11-hugs" src="https://github.com/user-attachments/assets/7d9d20e1-7d0d-4d4a-a868-d444fae40461" />
-<img width="780" height="4016" alt="12-h5-share" src="https://github.com/user-attachments/assets/1e93fc8e-2cef-498a-a2be-5654743d55ae" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/380e96d6-14f7-490f-8125-d3f20aee96de" width="240" alt="07-memory-tab" />
+  <img src="https://github.com/user-attachments/assets/6b0e2c4a-5090-497e-890d-e6a5d23a96a6" width="240" alt="08-story-edit" />
+  <img src="https://github.com/user-attachments/assets/48324681-7c82-4f91-b7b6-d73f6442c3e7" width="240" alt="09-album" />
+</p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c8dfe93c-f871-48e2-99c7-3d2544e828fe" width="240" alt="10-mailbox" />
+  <img src="https://github.com/user-attachments/assets/7d9d20e1-7d0d-4d4a-a868-d444fae40461" width="240" alt="11-hugs" />
+</p>
+
+### H5 亲友纪念页
+
+亲友无需安装 App 或登录，即可通过分享链接查看纪念内容并「轻轻抱抱 TA」。
+
+<details>
+<summary>展开查看完整 H5 分享页</summary>
+
+<br>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1e93fc8e-2cef-498a-a2be-5654743d55ae" width="420" alt="12-h5-share" />
+</p>
+
+</details>
 
 
 
