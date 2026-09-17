@@ -19,19 +19,26 @@ const PENDING_POLLS_BEFORE_DONE = 2;
 export class FakeVideoGenProvider implements VideoGenProvider {
   private pollCounts = new Map<string, number>();
 
-  async submitImageToVideo(_input: SubmitImageToVideoInput): Promise<{ providerTaskId: string }> {
+  submitImageToVideo(
+    _input: SubmitImageToVideoInput,
+  ): Promise<{ providerTaskId: string }> {
     const providerTaskId = randomUUID();
     this.pollCounts.set(providerTaskId, 0);
-    return { providerTaskId };
+    return Promise.resolve({ providerTaskId });
   }
 
-  async pollTask(providerTaskId: string): Promise<VideoGenTaskResult> {
+  pollTask(providerTaskId: string): Promise<VideoGenTaskResult> {
     const count = (this.pollCounts.get(providerTaskId) ?? 0) + 1;
     this.pollCounts.set(providerTaskId, count);
     if (count < PENDING_POLLS_BEFORE_DONE) {
-      return { status: 'pending' };
+      return Promise.resolve({ status: 'pending' });
     }
-    const buffer = readFileSync(join(__dirname, 'fixtures', 'fake-observation-loop.mp4'));
-    return { status: 'succeeded', video: { buffer, contentType: 'video/mp4' } };
+    const buffer = readFileSync(
+      join(__dirname, 'fixtures', 'fake-observation-loop.mp4'),
+    );
+    return Promise.resolve({
+      status: 'succeeded',
+      video: { buffer, contentType: 'video/mp4' },
+    });
   }
 }

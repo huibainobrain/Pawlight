@@ -1,110 +1,207 @@
-<div align="center">
+# Pawlight
 
-# 🌱 Pawlight（留光）
+> 为离开的宠物留下一颗温柔、私密、可以反复回看的纪念星球。
 
-一个安静的地方，为离开的宠物留一颗可以反复回看的星球。
+Pawlight 是我独立推进的一款宠物纪念产品，已完成海外 App Store 上线并获得 **50+ 付费用户**。
 
-</div>
+产品以真实照片、故事与亲友纪念为基础，并在 V2 中引入生成式 AI：主人可以描述一个想看到 TA 所在的场景，由模型生成候选画像，再由主人选择最像 TA 的结果并生成轻动态视频，最终展示在「星球观察窗」中。
 
-## 产品定位
+我在项目中负责从**产品定义、AI 模型评测与选型、交互设计，到 iOS / H5 / Backend 的独立开发与上线验证**。工程实现大量借助 Claude / Codex 等 AI Coding 工具完成。
 
-Pawlight 不是宠物社区、相册工具、AI 复活服务，也不是殡葬或心理治疗产品。它只做一件事：**帮丧宠主人为TA创建一个私密、温柔的纪念空间**，把名字、照片、故事和信件慢慢留下来，也可以分享给同样记得TA的人，接收他们的"抱抱"。
+## 项目概览
 
-- **主端**：iOS App（Swift + SwiftUI），主人在这里创建、维护纪念空间
-- **访客端**：H5 分享页（Next.js），访客无需登录即可查看、送出抱抱
-- **后端**：NestJS + PostgreSQL，图片存储 Cloudflare R2，内购走 App Store StoreKit 2
-
-一次性付费解锁"完整纪念空间"（首发价 ¥29.9），免费档已经能跑通"创建 → 分享 → 抱抱 → 回访"的完整闭环，付费只增强容量和信箱，不阻断基础体验。
-
----
-
-## 功能模块
-
-### 1. 新手引导 · 创建TA的星球
-
-三步走完创建：起名字 → 选主照片 → 选纪念空间方案。全程克制、不追问，"创建后你可以随时修改"。
-
-<table>
-<tr>
-<td><img src="docs/screenshots/01-onboarding.webp" width="230"><br><sub>开屏：为TA留下一颗星球</sub></td>
-<td><img src="docs/screenshots/02-pet-info.png" width="230"><br><sub>第 1 步：取名字、选类型</sub></td>
-<td><img src="docs/screenshots/03-main-photo.webp" width="230"><br><sub>第 2 步：选一张主照片</sub></td>
-<td><img src="docs/screenshots/04-tier-select.png" width="230"><br><sub>第 3 步：选纪念空间方案</sub></td>
-</tr>
-</table>
-
-免费纪念空间已包含主照片、首页星球观察窗、TA的故事、9 张相册、H5 分享、访客抱抱、抱抱记录——完整的基础闭环，不设付费墙。完整纪念空间在此之上把相册扩到 50 张，并解锁天堂信箱，一次性 ¥29.9 解锁，不做订阅。
-
-### 2. 首页星球观察窗 · AI 场景画像
-
-首页的核心是一颗圆形"星球观察窗"，主人打开 App 第一眼看到的就是TA。V2 在这个观察窗上叠加了一层新能力：主人用一句自然语言描述一个想看到TA所在的场景，系统据此生成TA的动漫风格画像，并进一步做成一段星球观察窗里的循环动态画面——让"回来看看TA"这件事本身变得更值得期待。
-
-<table>
-<tr>
-<td><img src="docs/screenshots/05-scene-input.png" width="230"><br><sub>描述一个想看到TA的场景</sub></td>
-<td><img src="docs/screenshots/06-candidates.webp" width="230"><br><sub>从生成的画像里选一张最像TA的</sub></td>
-</tr>
-</table>
-
-这个功能的设计前提是**身份保持优先于生成花哨程度**——花色、体型、五官特征必须让主人一眼认出"这就是TA"，所以流程上刻意保留了"多候选 + 主人挑选"这一步，而不是直接把结果塞给用户。
-
-### 3. 回忆 · 纪念主页
-
-主人日常补充内容的地方，把"TA的故事""照片回忆""天堂信箱""抱抱记录"收在同一个页面里，未创建内容时也有柔和的引导文案，不会让页面显得空。
-
-<img src="docs/screenshots/07-memory-tab.png" width="230"><br><sub>回忆 Tab：纪念主页总览</sub>
-
-
-https://github.com/user-attachments/assets/ab1f85e2-550b-4e4f-902e-23963e52cc92
-
-
-### 4. TA的故事
-
-一段自由书写的文字，配了四个话题引导（第一次见到TA / TA的小习惯 / 最想念的一件事 / TA陪伴我的一天），降低"不知道从哪写起"的门槛。这段故事会出现在纪念主页，分享出去后访客也能看到。
-
-<img src="docs/screenshots/08-story-edit.png" width="230"><br><sub>写下TA的故事，最多 1000 字</sub>
-
-### 5. 照片回忆
-
-相册容量按纪念空间方案区分（免费 9 张 / 完整 50 张），空状态文案是"把和TA有关的瞬间慢慢放在这里"——不催促、不要求一次性传满。
-
-<img src="docs/screenshots/09-album.png" width="230"><br><sub>照片回忆：已保存 0 / 50 张</sub>
-
-### 6. 天堂信箱（付费权益）
-
-一个只有主人自己能看到的私密写信空间，用来安放那些"不一定要放在纪念页里"的话。这是完整纪念空间的核心付费权益之一。
-
-<img src="docs/screenshots/10-mailbox.png" width="230"><br><sub>天堂信箱：思念会变成风，轻轻地陪伴着你</sub>
-
-### 7. 抱抱记录
-
-主人分享纪念页给亲友后，访客可以在 H5 页面轻轻"抱抱"TA，这些抱抱会同步记录在这里，是主人和分享出去的人之间唯一的互动痕迹——不做评论、不做留言，只有这一个轻量、克制的动作。
-
-<img src="docs/screenshots/11-hugs.png" width="230"><br><sub>抱抱记录：来自记得TA的人</sub>
-
-### 8. H5 分享页（访客视角）
-
-主人把纪念页分享出去后，访客打开的就是这个页面——不需要登录，也看不到天堂信箱这类私密内容（信件按设计只留给主人自己）。首屏是TA的照片、名字、在世区间和纪念语，配一个"轻轻抱抱TA"的按钮；往下滚是TA的故事和照片回忆，多于 6 张会折叠成"+N"；页面结尾引导访客把纪念页分享给更多记得TA的人。
-
-<img src="docs/screenshots/12-h5-share.png" width="260"><br><sub>H5 分享页：从首屏到故事、照片、结尾引导的完整滚动</sub>
+|       |                                                           |
+| ----- | --------------------------------------------------------- |
+| 角色    | 产品经理｜独立开发（AI Coding）                                      |
+| 产品形态  | iOS App + H5 分享页                                          |
+| 商业验证  | 海外 App Store 上线，50+ 付费用户                                  |
+| AI 应用 | 参考图生成 → 4 张候选 → 主人选择 → 图生视频                               |
+| 模型能力  | Seedream / Seedance 等真实 API 链路已跑通                         |
+| 产品边界  | AI 增强纪念表达，不模拟宠物人格                                         |
+| 工程形态  | SwiftUI / Next.js / NestJS / PostgreSQL / R2 / StoreKit 2 |
 
 ---
 
-## 技术栈
+## 30 秒看产品
 
-| 层 | 技术 |
-| --- | --- |
-| iOS App | Swift + SwiftUI，iOS 17+ |
-| H5 访客页 | Next.js（App Router）+ Tailwind CSS，部署于 Vercel |
-| 后端 | NestJS + Prisma，部署于 Railway |
-| 数据库 | PostgreSQL |
-| 图片存储 | Cloudflare R2 |
-| 支付 | StoreKit 2 + 后端 App Store Server API 校验 |
+---
 
+## 我解决的核心问题
+
+宠物离世后，照片和故事通常散落在相册、聊天记录和社交平台中。
+
+我希望做的不是另一个“宠物内容产品”，而是一个：
+
+> **可以安静保存回忆、偶尔回来看看，也允许亲近的人轻轻表达关心的地方。**
+
+因此 Pawlight 的核心闭环很简单：
+
+```text
+创建 TA 的纪念星球
+→ 保存照片与故事
+→ 分享给亲友
+→ 亲友无需登录打开 H5
+→ 轻轻抱抱 TA
+→ 主人在 App 内看到抱抱
+→ 再次回来看看 TA
 ```
-.
-├── ios/       # iOS App（Swift + SwiftUI）
-├── backend/   # NestJS 后端
-├── h5/        # 访客分享页（Next.js）
-└── docs/      # 产品与技术文档
+
+免费用户也能完整经历这条闭环。
+
+---
+
+## AI 为什么这样做
+
+在宠物纪念场景中，模型最严重的错误不是“画得不好看”，而是：
+
+> **主人觉得这已经不是自己的宠物。**
+
+因此我把模型评测中的“身份保持”放在画面美感之前。
+
+产品也没有采用：
+
+```text
+照片 → AI → 自动替换最终结果
 ```
+
+而是：
+
+```text
+主照片 + 场景描述
+→ 生成 4 张候选
+→ 主人选择最像 TA 的一张
+→ 图生视频
+→ 星球观察窗
+```
+
+这里模型负责扩大候选空间，主人保留最终身份判断权。
+
+同时，真实主照片始终保留，AI 内容可以随时撤销。
+
+更完整的模型评测和选型过程见：
+
+[**AI 模型评测与选型**](docs/portfolio/ai-model-evaluation.md)
+
+---
+
+## 我刻意没有做什么
+
+Pawlight 使用 AI，但不做：
+
+- AI 替宠物回复主人；
+- 模拟宠物长期人格；
+- AI 陪聊；
+- “TA 回来了”式复活叙事；
+- 宠物社区、排行榜、公共 Feed；
+- 任务、签到和游戏化养成。
+
+AI 在这里负责的是：
+
+> **纪念表达。**
+
+而不是：
+
+> **人格代理。**
+
+关键产品取舍见：
+
+[**产品决策复盘**](docs/portfolio/product-decisions.md)
+
+---
+
+## 从产品方案到真实系统
+
+Pawlight 不是单页 Demo。
+
+当前包含：
+
+```text
+iOS / SwiftUI
+        │
+        ▼
+NestJS Backend ── PostgreSQL
+      │
+      ├──────── Cloudflare R2
+      ├──────── StoreKit / Apple Verification
+      └──────── Image / Video Provider
+
+H5 / Next.js
+      │
+      └──────── Public Memorial / Hug
+```
+
+已经实现：
+
+- Sign in with Apple；
+- StoreKit 2 与服务端支付验证；
+- H5 分享和隐私权限；
+- Hug 去重与并发保护；
+- 图片 / AI 视频对象存储；
+- AI 异步任务状态机；
+- 图像 / 视频 Provider 抽象；
+- 删除账号时的数据与对象存储清理。
+
+我大量使用 AI Coding 提高开发效率，但产品规则、数据边界、模型方案、验收标准和最终 Review 由我负责。
+
+完整过程见：
+
+[**独立开发 Case Study**](docs/portfolio/independent-build.md)
+
+---
+
+## 工程质量
+
+当前 Backend 已建立核心业务自动化测试：
+
+```text
+Lint                  0 error / 0 warning
+Unit / Contract       92 tests passed
+E2E                    8 tests passed
+Backend build          passed
+H5 lint / build        passed
+iOS simulator build    passed
+```
+
+真实生成模型不在 CI 中反复调用，而通过独立 Live Smoke Test 验证。
+
+技术细节：
+
+- [Architecture](docs/reference/architecture.md)
+- [Data Model](docs/reference/data-model.md)
+- [API Reference](docs/reference/api-reference.md)
+- [State Machines](docs/reference/state-machines.md)
+- [AI Provider Integration](docs/reference/ai-provider-integration.md)
+- [Testing](docs/reference/testing.md)
+
+---
+
+## 当前已知边界
+
+Pawlight 仍然是资源有限条件下的独立产品。
+
+当前 AI 长任务仍由 Web Server 进程内异步执行，没有引入独立 Queue / Worker；iOS / H5 也尚未建立完整客户端行为自动化测试。
+
+这些是我明确知道并接受的当前技术债，而不是为了作品集强行隐藏的问题。
+
+---
+
+## 文档导航
+
+如果只看三份补充材料：
+
+1. [**AI 模型评测与选型**](docs/portfolio/ai-model-evaluation.md)
+2. [**产品决策复盘**](docs/portfolio/product-decisions.md)
+3. [**独立开发 Case Study**](docs/portfolio/independent-build.md)
+
+当前产品事实：
+
+- [Product Spec](docs/reference/product-spec.md)
+- [Docs Index](docs/README.md)
+
+---
+
+Pawlight 对我最大的意义并不是“独立写了一个 App”。
+
+而是让我完整经历了：
+
+> **判断一个场景是否应该使用 AI → 找到模型最昂贵的错误 → 设计模型评测与产品兜底 → 把产品做上线 → 获得真实用户与付费验证。**

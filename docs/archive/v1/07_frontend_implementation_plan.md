@@ -1,3 +1,8 @@
+> **Historical V1 document**
+>
+> This file records Pawlight's V1 product/design state and is kept for historical reference.
+> It does not describe the current implementation.
+
 # 07 Frontend Implementation Plan
 
 ## 1. 总体建议

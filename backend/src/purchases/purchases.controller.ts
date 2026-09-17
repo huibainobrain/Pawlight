@@ -16,10 +16,7 @@ export class PurchasesController {
   constructor(private readonly purchasesService: PurchasesService) {}
 
   @Post('verify')
-  verify(
-    @CurrentUser() user: { id: string },
-    @Body() dto: VerifyPurchaseDto,
-  ) {
+  verify(@CurrentUser() user: { id: string }, @Body() dto: VerifyPurchaseDto) {
     return this.purchasesService.verifyAndApply(user.id, dto.jws_token);
   }
 }

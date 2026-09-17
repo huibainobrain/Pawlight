@@ -1,3 +1,8 @@
+> **Historical V1 document**
+>
+> This file records Pawlight's V1 product/design state and is kept for historical reference.
+> It does not describe the current implementation.
+
 # 03 Data Model
 
 以下为真实开发建议的数据模型。字段名使用 snake_case 便于后端落库，客户端可按平台规范转换。

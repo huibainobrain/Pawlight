@@ -1,3 +1,8 @@
+> **Historical V1 document**
+>
+> This file records Pawlight's V1 product/design state and is kept for historical reference.
+> It does not describe the current implementation.
+
 # 10 Open Questions And Risks
 
 本文件记录进入真实开发前仍需确认的问题、风险，以及HTML原型与PRD可能存在的实现口径差异。以下事项不建议由开发单方面决定。

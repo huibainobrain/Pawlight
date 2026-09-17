@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pawlight_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # Real Ark/Apple/R2 credentials are intentionally never present in CI —
+      # SCENE_PORTRAIT_*_PROVIDER=fake and STORAGE_PROVIDER=fake (set by
+      # test/env.setup.ts for the e2e step) mean they're never needed to run
+      # the suites below. See docs/reference/testing.md.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/pawlight_ci
+      DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/pawlight_ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
+      # Non-mutating (no --fix) — CI must never modify the working tree.
+      - run: npm run lint:check
+
+      - run: npm test
+
+      - name: Apply Prisma migrations to the CI database
+        run: npx prisma migrate deploy
+
+      - run: npm run test:e2e
+
+      - run: npm run build
+
+  h5:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: h5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: h5/package-lock.json
+
+      - run: npm ci
+
+      # h5's "lint" script has no --fix, so this is already non-mutating.
+      - run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # NEXT_PUBLIC_API_URL is required at build time (see lib/config.ts)
+          # and gets inlined into the client bundle — a real backend URL is
+          # not needed just to type-check and produce a production build.
+          NEXT_PUBLIC_API_URL: https://ci-placeholder.invalid
+
+  ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build for iOS Simulator (no code signing, no App Store upload)
+        run: |
+          xcodebuild \
+            -scheme MemorialApp \
+            -configuration Debug \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            build

@@ -1,3 +1,8 @@
+> **Historical V1 document**
+>
+> This file records Pawlight's V1 product/design state and is kept for historical reference.
+> It does not describe the current implementation.
+
 # 02 Pages And Routes
 
 本文件基于 PRD 和冻结版 `V1开发参照HTML` 整理页面、路由和职责。HTML 中的 route 名仅作为开发参考，真实 App 可按 iOS 路由/导航体系重命名。

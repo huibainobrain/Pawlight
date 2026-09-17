@@ -1,3 +1,8 @@
+> **Historical V1 document**
+>
+> This file records Pawlight's V1 product/design state and is kept for historical reference.
+> It does not describe the current implementation.
+
 # 06 Upload Storage Payment
 
 ## 1. 图片上传

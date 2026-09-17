@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   ForbiddenException,
   NotFoundException,
@@ -8,13 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { randomBytes } from 'crypto';
 import { PhotoType } from '@prisma/client';
 import { albumPhotoLimit } from '../common/entitlement.util';
-import { R2StorageService } from '../storage/r2-storage.service';
+import { STORAGE_SERVICE } from '../storage/storage.interface';
+import type { StorageService } from '../storage/storage.interface';
 
 @Injectable()
 export class PhotosService {
   constructor(
     private prisma: PrismaService,
-    private storage: R2StorageService,
+    @Inject(STORAGE_SERVICE) private storage: StorageService,
   ) {}
 
   async upload(

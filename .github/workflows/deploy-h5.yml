@@ -8,7 +8,29 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: h5
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: h5/package-lock.json
+
+      - run: npm ci
+
+      # A commit with a lint or build failure must not reach the deploy step
+      # below — this is the actual quality gate, not just a duplicate of ci.yml.
+      - run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://ci-placeholder.invalid
+
       - name: Trigger Vercel Deploy Hook
         run: |
           curl -sX POST "${{ secrets.VERCEL_DEPLOY_HOOK }}" | grep -q '"state":"PENDING"' && echo "Deploy triggered" || echo "Deploy failed"

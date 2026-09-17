@@ -19,6 +19,8 @@ export type VideoGenTaskResult =
 // Swappable behind SCENE_PORTRAIT_VIDEO_PROVIDER — see scene-portraits.module.ts.
 // Both Ark/Seedance and Kling follow this submit-task-then-poll shape.
 export interface VideoGenProvider {
-  submitImageToVideo(input: SubmitImageToVideoInput): Promise<{ providerTaskId: string }>;
+  submitImageToVideo(
+    input: SubmitImageToVideoInput,
+  ): Promise<{ providerTaskId: string }>;
   pollTask(providerTaskId: string): Promise<VideoGenTaskResult>;
 }

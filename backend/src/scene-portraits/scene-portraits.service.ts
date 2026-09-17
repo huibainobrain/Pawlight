@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { R2StorageService } from '../storage/r2-storage.service';
+import { STORAGE_SERVICE } from '../storage/storage.interface';
+import type { StorageService } from '../storage/storage.interface';
 import { IMAGE_GEN_PROVIDER } from './providers/image-gen.provider';
 import type { ImageGenProvider } from './providers/image-gen.provider';
 import { VIDEO_GEN_PROVIDER } from './providers/video-gen.provider';
@@ -29,7 +30,7 @@ export class ScenePortraitsService {
 
   constructor(
     private prisma: PrismaService,
-    private storage: R2StorageService,
+    @Inject(STORAGE_SERVICE) private storage: StorageService,
     @Inject(IMAGE_GEN_PROVIDER) private imageGen: ImageGenProvider,
     @Inject(VIDEO_GEN_PROVIDER) private videoGen: VideoGenProvider,
   ) {}
@@ -39,7 +40,9 @@ export class ScenePortraitsService {
     if (!pet) throw new NotFoundException('Pet not found');
     if (pet.userId !== userId) throw new ForbiddenException();
 
-    const entitlement = await this.prisma.entitlement.findUnique({ where: { userId } });
+    const entitlement = await this.prisma.entitlement.findUnique({
+      where: { userId },
+    });
     if (entitlement?.tier !== 'PAID') {
       throw new ForbiddenException({
         code: 'PAID_ONLY',
@@ -47,7 +50,9 @@ export class ScenePortraitsService {
       });
     }
 
-    const mainPhoto = await this.prisma.photo.findFirst({ where: { petId, type: 'MAIN' } });
+    const mainPhoto = await this.prisma.photo.findFirst({
+      where: { petId, type: 'MAIN' },
+    });
     if (!mainPhoto) {
       throw new BadRequestException({
         code: 'NO_MAIN_PHOTO',
@@ -158,7 +163,11 @@ export class ScenePortraitsService {
   // this backend, so generation runs in-process. Known tradeoff: a job stuck
   // mid-flight is lost if the server process restarts; accepted as an MVP
   // limitation (see the plan doc).
-  private async runImageGeneration(jobId: string, referenceImageUrl: string, sceneText: string) {
+  private async runImageGeneration(
+    jobId: string,
+    referenceImageUrl: string,
+    sceneText: string,
+  ) {
     try {
       await this.prisma.scenePortraitJob.update({
         where: { id: jobId },
@@ -220,7 +229,9 @@ export class ScenePortraitsService {
         contentType: video.contentType,
       });
 
-      const job = await this.prisma.scenePortraitJob.findUniqueOrThrow({ where: { id: jobId } });
+      const job = await this.prisma.scenePortraitJob.findUniqueOrThrow({
+        where: { id: jobId },
+      });
 
       // Job completion auto-activates the observation window — no separate
       // "confirm" endpoint, matching "pick one, no further confirmation".
@@ -254,8 +265,11 @@ export class ScenePortraitsService {
   }
 
   private async markFailed(jobId: string, err: unknown) {
-    const isNotConfigured = err instanceof ScenePortraitProviderNotConfiguredError;
-    const errorCode = isNotConfigured ? 'PROVIDER_NOT_CONFIGURED' : 'GENERATION_FAILED';
+    const isNotConfigured =
+      err instanceof ScenePortraitProviderNotConfiguredError;
+    const errorCode = isNotConfigured
+      ? 'PROVIDER_NOT_CONFIGURED'
+      : 'GENERATION_FAILED';
     const errorMessage = err instanceof Error ? err.message : String(err);
     this.logger.warn(`Scene portrait job ${jobId} failed: ${errorMessage}`);
     await this.prisma.scenePortraitJob.update({

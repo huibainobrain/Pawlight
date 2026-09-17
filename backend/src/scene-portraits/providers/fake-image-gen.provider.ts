@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ImageGenProvider, GenerateCandidatesInput, GeneratedImage } from './image-gen.provider';
+import {
+  ImageGenProvider,
+  GenerateCandidatesInput,
+  GeneratedImage,
+} from './image-gen.provider';
 
 // A valid, tiny (68-byte) 1x1 PNG — enough to round-trip through R2 and render
 // in an iOS AsyncImage, without calling any real vendor. Selected via
@@ -10,10 +14,15 @@ const FAKE_PNG_BASE64 =
 
 @Injectable()
 export class FakeImageGenProvider implements ImageGenProvider {
-  async generateCandidates({ count }: GenerateCandidatesInput): Promise<GeneratedImage[]> {
+  async generateCandidates({
+    count,
+  }: GenerateCandidatesInput): Promise<GeneratedImage[]> {
     await sleep(500);
     const buffer = Buffer.from(FAKE_PNG_BASE64, 'base64');
-    return Array.from({ length: count }, () => ({ buffer, contentType: 'image/png' }));
+    return Array.from({ length: count }, () => ({
+      buffer,
+      contentType: 'image/png',
+    }));
   }
 }
 

@@ -1,3 +1,8 @@
+> **Historical V1 document**
+>
+> This file records Pawlight's V1 product/design state and is kept for historical reference.
+> It does not describe the current implementation.
+
 # DEVELOPMENT_HANDOFF
 
 ## 1. 项目一句话定位

@@ -17,7 +17,12 @@ const NEGATIVE_CONSTRAINTS =
 
 export function buildScenePortraitPrompt(sceneText: string): string {
   const scene = sceneText.trim() || 'resting peacefully in a soft, sunlit spot';
-  return [STYLE_PREFIX, IDENTITY_LOCK, `Scene: ${scene}.`, NEGATIVE_CONSTRAINTS].join(' ');
+  return [
+    STYLE_PREFIX,
+    IDENTITY_LOCK,
+    `Scene: ${scene}.`,
+    NEGATIVE_CONSTRAINTS,
+  ].join(' ');
 }
 
 // One fixed "gentle idle loop" motion prompt — no per-scene-category taxonomy

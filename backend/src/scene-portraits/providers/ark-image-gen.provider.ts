@@ -11,9 +11,16 @@ import { IMAGE_SIZE } from '../scene-portraits.constants';
 const DEFAULT_BASE_URL = 'https://ark.cn-beijing.volces.com/api/v3';
 
 // Volcengine Ark (火山方舟) image generation — POST /images/generations.
-// Field names reconstructed from third-party write-ups, NOT the official docs
-// (see docs/11_ai_scene_portrait_api_research.md and the plan doc) — verify
-// against live docs once a real ARK_API_KEY is available.
+//
+// Status: implemented. This adapter's request/response contract has been
+// validated against the live Ark API in Pawlight's production generation
+// flow (see `npm run smoke:scene:ark`, backend/scripts/smoke-scene-provider.ts).
+// It must be revalidated the same way when migrating to a materially
+// different Ark API/model version, since Volcengine's API can change
+// independently of this codebase. Field names were originally drafted from
+// docs/archive/research/2026-09-ai-scene-portrait-api-research.md, a
+// research snapshot — see docs/reference/ai-provider-integration.md for the
+// current, validated contract.
 @Injectable()
 export class ArkImageGenProvider implements ImageGenProvider {
   async generateCandidates({
@@ -25,7 +32,8 @@ export class ArkImageGenProvider implements ImageGenProvider {
     if (!apiKey) {
       throw new ScenePortraitProviderNotConfiguredError('ArkImageGenProvider');
     }
-    const model = process.env.ARK_IMAGE_MODEL_ID ?? 'doubao-seedream-4-0-250828';
+    const model =
+      process.env.ARK_IMAGE_MODEL_ID ?? 'doubao-seedream-4-0-250828';
     const baseUrl = process.env.ARK_BASE_URL ?? DEFAULT_BASE_URL;
     const prompt = buildScenePortraitPrompt(sceneText);
 
@@ -61,7 +69,9 @@ export class ArkImageGenProvider implements ImageGenProvider {
       }),
     });
     if (!res.ok) {
-      throw new Error(`Ark image generation failed: ${res.status} ${await res.text()}`);
+      throw new Error(
+        `Ark image generation failed: ${res.status} ${await res.text()}`,
+      );
     }
     const json = (await res.json()) as { data?: { url?: string }[] };
     const url = json.data?.[0]?.url;

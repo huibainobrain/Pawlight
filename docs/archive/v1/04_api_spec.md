@@ -1,3 +1,8 @@
+> **Historical V1 document**
+>
+> This file records Pawlight's V1 product/design state and is kept for historical reference.
+> It does not describe the current implementation.
+
 # 04 API Spec
 
 本文件为真实开发接口清单草案。接口路径仅供研发对齐，实际可按团队网关、鉴权和版本规范调整。默认返回结构：

@@ -1,3 +1,8 @@
+> Research snapshot from September 2026.
+> Model availability, pricing and API capabilities may change.
+> Current production integration details are documented in
+> `docs/reference/ai-provider-integration.md`.
+
 # 11 AI 场景画像功能 — 图像生成 API 调研
 
 > 状态：调研稿 / 待决策

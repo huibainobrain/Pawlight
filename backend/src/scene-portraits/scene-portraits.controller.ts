@@ -43,7 +43,11 @@ export class ScenePortraitsController {
     @Param('jobId') jobId: string,
     @Body() dto: SelectCandidateDto,
   ) {
-    return this.scenePortraitsService.selectCandidate(user.id, jobId, dto.candidateId);
+    return this.scenePortraitsService.selectCandidate(
+      user.id,
+      jobId,
+      dto.candidateId,
+    );
   }
 
   @Post('pets/:petId/observation-window/revert')

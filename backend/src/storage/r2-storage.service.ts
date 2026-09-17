@@ -39,7 +39,11 @@ export class R2StorageService {
     });
   }
 
-  async upload({ key, buffer, contentType }: R2UploadParams): Promise<R2UploadResult> {
+  async upload({
+    key,
+    buffer,
+    contentType,
+  }: R2UploadParams): Promise<R2UploadResult> {
     await this.s3.send(
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -55,9 +59,13 @@ export class R2StorageService {
   // (or, for scene portraits, freeing up an attempt/finishing account deletion).
   async delete(key: string): Promise<void> {
     try {
-      await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
+      await this.s3.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+      );
     } catch (err) {
-      this.logger.warn(`Best-effort R2 delete failed for ${key}: ${String(err)}`);
+      this.logger.warn(
+        `Best-effort R2 delete failed for ${key}: ${String(err)}`,
+      );
     }
   }
 }
