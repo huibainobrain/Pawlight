@@ -441,8 +441,7 @@ struct Strings {
     var mineAppleLogin: String         { t("Apple 账号登录", "Signed in with Apple") }
     var mineBottomLine1: String        { t("回忆不在远方，", "Memories are not far away —") }
     var mineBottomLine2: String        { t("它一直在这里。", "they've been here all along.") }
-    func mineVersion(_ v: String) -> String     { t("版本 \(v)", "Version \(v)") }
-    func mineVersionDebug(_ v: String) -> String { t("版本 \(v)（测试版）", "Version \(v) (Debug)") }
+    func mineVersion(_ v: String) -> String { "V\(v)" }
 
     // MARK: - Share Panel
 

@@ -502,11 +502,7 @@ private struct MineBottomDecoration: View {
 
     private var versionText: String {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-        #if DEBUG
-        return ls.strings.mineVersionDebug(v)
-        #else
         return ls.strings.mineVersion(v)
-        #endif
     }
 
     var body: some View {
