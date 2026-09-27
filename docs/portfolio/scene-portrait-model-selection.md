@@ -1,8 +1,8 @@
 # Pawlight 图片生成模型选型
 
-详细选型过程可见[此处](https://github.com/huibainobrain/Pawlight/blob/main/docs/portfolio/scene-portrait-model-selection.xlsx)
+详细选型文档、评分标准、机器评分及人工复核、结论形成等全过程过程可见[点击此处](https://github.com/huibainobrain/Pawlight/blob/main/docs/portfolio/scene-portrait-model-selection.xlsx)
 
-由于其上文档包含大量测评用的生成图片，文件体积较大，需要下载查看，无法在线打开，也可[点击此处](https://github.com/huibainobrain/Pawlight/blob/main/docs/portfolio/scene-portrait-model-selection-no-images.xlsx)查看不含具体测评图的轻量Excel
+由于其上文档包含大量测评用的生成图片，文件体积较大，也可[点击此处](https://github.com/huibainobrain/Pawlight/blob/main/docs/portfolio/scene-portrait-model-selection-no-images.xlsx)查看不含具体测评图的轻量Excel
 
 ## 1. 背景与结论
 
