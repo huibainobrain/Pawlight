@@ -2,7 +2,7 @@
 
 详细选型过程可见[此处](https://github.com/huibainobrain/Pawlight/blob/main/docs/portfolio/scene-portrait-model-selection.xlsx)
 
-由于其上文档包含大量测评用的生成图片，文件体积较大，需要下载查看，无法在线打开，也可[点击此处]查看不含具体测评图的轻量Excel
+由于其上文档包含大量测评用的生成图片，文件体积较大，需要下载查看，无法在线打开，也可[点击此处](https://github.com/huibainobrain/Pawlight/blob/main/docs/portfolio/scene-portrait-model-selection-no-images.xlsx)查看不含具体测评图的轻量Excel
 
 ## 1. 背景与结论
 
