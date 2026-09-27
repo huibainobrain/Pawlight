@@ -1,0 +1,22 @@
+{
+  "name": "pawlight-model-eval",
+  "version": "0.0.1",
+  "description": "One-off batch runner for the Seedream / Nano Banana / Flux scene-portrait model evaluation. Not part of the Pawlight app; never deployed.",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "scripts": {
+    "generate": "tsx src/run-eval.ts",
+    "fill-sheet": "tsx src/fill-spreadsheet.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
+    "p-limit": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.3"
+  }
+}

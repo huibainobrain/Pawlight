@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+output/*
+!output/.gitkeep
+manifest.csv
+*.log
+
+# Reference photos are the user's own pet photos - never commit them.
+pets/**
+!pets/.gitkeep
+!pets/README.md
+
+# The real scoring workbook lives outside the repo (in Downloads) and is
+# copied in locally when running fill-spreadsheet - never commit a copy.
+*.xlsx
