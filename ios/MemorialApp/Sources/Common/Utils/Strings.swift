@@ -226,6 +226,19 @@ struct Strings {
     var scenePortraitGeneratingImage: String { t("正在为 TA 绘制画像…", "Painting their portrait…") }
     var scenePortraitGeneratingVideo: String { t("画面正在慢慢成形…", "The scene is gently taking shape…") }
 
+    // MARK: - Companion Window (随身观察窗 PiP, 付费功能)
+
+    var companionWindowStartBtn: String         { t("陪我一会儿", "Stay with me a while") }
+    var companionWindowStopBtn: String          { t("结束陪伴", "End companion mode") }
+    var companionWindowIntroTitle: String       { t("让 TA 陪你一会儿", "Let them stay with you a while") }
+    var companionWindowIntroBody: String        { t("离开 Pawlight 后，TA 的观察窗也会安静地留在屏幕一角。", "When you leave Pawlight, their window stays quietly in the corner of your screen.") }
+    var companionWindowIntroStartBtn: String    { t("开始陪伴", "Start") }
+    var companionWindowIntroLaterBtn: String    { t("暂不", "Not now") }
+    var companionWindowStartFailedTitle: String { t("随身观察窗暂时没有打开", "The companion window couldn't open") }
+    var companionWindowStartFailedBody: String  { t("你仍然可以在 Pawlight 首页看看 TA。", "You can still visit them on the Pawlight home screen.") }
+    var companionWindowNotReadyTitle: String    { t("观察窗暂时没有打开", "The window isn't ready yet") }
+    var companionWindowNotReadyBody: String     { t("请稍后再试。", "Please try again in a moment.") }
+
     // MARK: - Memory View
 
     var memoryUnboardedTitle: String    { t("还没有为TA创建星球", "No little planet yet") }

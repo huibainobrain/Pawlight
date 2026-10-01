@@ -29,6 +29,7 @@ struct ScenePortraitEntryButton: View {
 struct ScenePortraitRevertButton: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var ls: LanguageStore
+    @EnvironmentObject var pip: CompanionWindowPiPController
     @State private var isReverting = false
 
     private var s: Strings { ls.strings }
@@ -50,6 +51,7 @@ struct ScenePortraitRevertButton: View {
 
     private func revert() {
         guard let token = KeychainHelper.loadToken(), let petId = appState.currentPet?.id else { return }
+        if pip.isActive { pip.stop() }
         isReverting = true
         Task {
             try? await APIClient.shared.revertObservationWindow(token: token, petId: petId)

@@ -373,7 +373,10 @@ struct PlanetWindowView: View {
                 if appState.isPaid, appState.currentPet?.mainPhoto != nil,
                    scenePortrait.stage == .idle {
                     if appState.currentPet?.observationVideoUrl != nil {
-                        ScenePortraitRevertButton()
+                        HStack(spacing: 10) {
+                            CompanionWindowToggleButton()
+                            ScenePortraitRevertButton()
+                        }
                     } else {
                         ScenePortraitEntryButton()
                     }

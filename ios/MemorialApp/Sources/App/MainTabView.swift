@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var companionWindowPiP: CompanionWindowPiPController
 
     var body: some View {
         TabView(selection: $appState.selectedTab) {
@@ -26,7 +27,10 @@ struct MainTabView: View {
                 .offset(y: appState.tabBarHidden ? 120 : 0)
                 .animation(.easeInOut(duration: 0.22), value: appState.tabBarHidden)
         }
-        .onAppear { applyTransparentTabBar() }
+        .onAppear {
+            applyTransparentTabBar()
+            companionWindowPiP.onRestoreToForeground = { appState.selectedTab = 0 }
+        }
         #if DEBUG
         .overlay(alignment: .topLeading) {
             // Hidden whenever a full-screen subpage (Mailbox, Album, Hugs, ...) is

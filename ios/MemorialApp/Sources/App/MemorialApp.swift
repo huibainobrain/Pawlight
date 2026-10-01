@@ -6,6 +6,7 @@ struct MemorialApp: App {
     @StateObject private var purchaseManager = PurchaseManager()
     @StateObject private var languageStore = LanguageStore()
     @StateObject private var scenePortrait = ScenePortraitController()
+    @StateObject private var companionWindowPiP = CompanionWindowPiPController()
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +15,7 @@ struct MemorialApp: App {
                 .environmentObject(purchaseManager)
                 .environmentObject(languageStore)
                 .environmentObject(scenePortrait)
+                .environmentObject(companionWindowPiP)
         }
     }
 }

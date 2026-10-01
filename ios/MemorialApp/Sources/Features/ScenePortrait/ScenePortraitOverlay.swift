@@ -8,6 +8,7 @@ extension View {
 
 private struct ScenePortraitOverlayModifier: ViewModifier {
     @EnvironmentObject var scenePortrait: ScenePortraitController
+    @EnvironmentObject var ls: LanguageStore
 
     func body(content: Content) -> some View {
         content
@@ -23,7 +24,7 @@ private struct ScenePortraitOverlayModifier: ViewModifier {
             }
             .animation(.easeInOut(duration: 0.28), value: scenePortrait.stage)
             .alert(failedMessage ?? "", isPresented: isFailedPresented) {
-                Button("好的") { scenePortrait.dismissError() }
+                Button(ls.strings.ok, role: .cancel) { scenePortrait.dismissError() }
             }
     }
 

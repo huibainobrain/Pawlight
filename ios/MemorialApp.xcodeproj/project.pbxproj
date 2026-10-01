@@ -24,6 +24,9 @@
 		44243CDADEF646AD402136D6 /* HugsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FBDB325D733AE8E09C8DF2 /* HugsView.swift */; };
 		4466670647B150DDBBEEA1F3 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C6461E77A8135CE9C344F /* HomeView.swift */; };
 		46EF4BF1B25399CBC6EAA907 /* ScenePortraitObservationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C52440690AFB8261D572CF8 /* ScenePortraitObservationContent.swift */; };
+		CD215FFAC40729CFAC77ADCF /* CompanionWindowPiPController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */; };
+		026C3510C418488D8FE5D259 /* CompanionWindowToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */; };
+		344154C5C81BE54C125BD3A2 /* CompanionWindowIntroSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */; };
 		4E0731FB8DCF7D0A12CDCA61 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF218F1364C5AAF4DD3C92AC /* APIModels.swift */; };
 		5137174C420982AA770504D8 /* CreateSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */; };
 		5643DE6B080E87407C9F82A6 /* PetProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0D50567A918025751525DC /* PetProfileView.swift */; };
@@ -57,6 +60,9 @@
 		00FB43A7ABA3BB5344B7D90E /* ScenePortraitOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitOverlay.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitOverlay.swift; sourceTree = SOURCE_ROOT; };
 		017D65EE9976E5085D1863A3 /* TierSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierSelectView.swift; sourceTree = "<group>"; };
 		0C52440690AFB8261D572CF8 /* ScenePortraitObservationContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitObservationContent.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitObservationContent.swift; sourceTree = SOURCE_ROOT; };
+		C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowPiPController.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowPiPController.swift; sourceTree = SOURCE_ROOT; };
+		2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowToggleButton.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowToggleButton.swift; sourceTree = SOURCE_ROOT; };
+		6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowIntroSheet.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowIntroSheet.swift; sourceTree = SOURCE_ROOT; };
 		1EB467A0A82942285D6C1016 /* OnboardingStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStartView.swift; sourceTree = "<group>"; };
 		26167546E792AA3A0A734513 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		288E4064AC7544A4D401F76B /* ScenePortraitSceneInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitSceneInputView.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitSceneInputView.swift; sourceTree = SOURCE_ROOT; };
@@ -155,6 +161,9 @@
 				0C52440690AFB8261D572CF8 /* ScenePortraitObservationContent.swift */,
 				4D8D4B4C8AF332B19B493462 /* ScenePortraitEntryControls.swift */,
 				00FB43A7ABA3BB5344B7D90E /* ScenePortraitOverlay.swift */,
+				C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */,
+				2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */,
+				6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -420,6 +429,9 @@
 				46EF4BF1B25399CBC6EAA907 /* ScenePortraitObservationContent.swift in Sources */,
 				1E1F479C8DF293A8BA3FBBB2 /* ScenePortraitEntryControls.swift in Sources */,
 				07634BA0AE2BBF0224889600 /* ScenePortraitOverlay.swift in Sources */,
+				CD215FFAC40729CFAC77ADCF /* CompanionWindowPiPController.swift in Sources */,
+				026C3510C418488D8FE5D259 /* CompanionWindowToggleButton.swift in Sources */,
+				344154C5C81BE54C125BD3A2 /* CompanionWindowIntroSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
