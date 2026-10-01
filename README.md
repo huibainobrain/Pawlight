@@ -15,7 +15,7 @@ Pawlight 是我独立推进的一款宠物纪念产品，已完成海外 App Sto
 | 角色    | 产品经理｜独立开发（AI Coding）                                      |
 | 产品形态  | iOS App + H5 分享页                                          |
 | 商业验证  | 海外 App Store 上线，50+ 付费用户                                  |
-| AI 应用 | 参考图生成 → 4 张候选 → 主人选择 → 图生视频                               |
+| AI 应用 | 参考图生成 → 候选筛选 → 图生视频 → 动态 / 随身观察窗                        |
 | 模型能力  | Seedream / Seedance 等真实 API 链路已跑通                         |
 | 产品边界  | AI 增强纪念表达，不模拟宠物人格                                         |
 | 工程形态  | SwiftUI / Next.js / NestJS / PostgreSQL / R2 / StoreKit 2 |
@@ -43,6 +43,10 @@ Pawlight 是我独立推进的一款宠物纪念产品，已完成海外 App Sto
 **AI 场景生成与星球观察窗效果：**
 
 https://github.com/user-attachments/assets/97a828cd-6919-4d33-a49e-28a9532b5648
+
+### 随身观察窗
+
+用户可以点击「陪我一会儿」，将 AI 动态场景带到 Pawlight 之外，在使用其他 App 时继续低打扰地查看。
 
 ### 保存与回看回忆
 
@@ -132,6 +136,8 @@ https://github.com/user-attachments/assets/97a828cd-6919-4d33-a49e-28a9532b5648
 
 同时，真实主照片始终保留，AI 内容可以随时撤销。
 
+**AI 场景上线后，我没有继续堆叠生成能力，而是进一步考虑生成结果如何被持续使用。于是增加「随身观察窗」，复用已有动态内容，把一次 AI 生成从 App 内展示延伸到用户的日常使用场景。**
+
 更完整的模型评测和选型过程见：
 
 [**AI 模型评测与选型**](docs/portfolio/ai-model-evaluation.md)
@@ -191,6 +197,7 @@ H5 / Next.js
 - H5 分享和隐私权限；
 - Hug 去重与并发保护；
 - 图片 / AI 视频对象存储；
+- AI 动态场景的首页展示与跨 App 随身观察；
 - AI 异步任务状态机；
 - 图像 / 视频 Provider 抽象；
 - 删除账号时的数据与对象存储清理。
