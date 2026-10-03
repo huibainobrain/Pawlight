@@ -3,6 +3,7 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var companionWindowPiP: CompanionWindowPiPController
+    @EnvironmentObject var planetLife: PlanetLifeController
 
     var body: some View {
         TabView(selection: $appState.selectedTab) {
@@ -30,6 +31,7 @@ struct MainTabView: View {
         .onAppear {
             applyTransparentTabBar()
             companionWindowPiP.onRestoreToForeground = { appState.selectedTab = 0 }
+            appState.onLocalSessionCleared = { planetLife.reset() }
         }
         #if DEBUG
         .overlay(alignment: .topLeading) {

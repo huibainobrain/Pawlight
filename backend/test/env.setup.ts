@@ -8,6 +8,14 @@ process.env.SCENE_PORTRAIT_IMAGE_PROVIDER =
 process.env.SCENE_PORTRAIT_VIDEO_PROVIDER =
   process.env.SCENE_PORTRAIT_VIDEO_PROVIDER ?? 'fake';
 process.env.STORAGE_PROVIDER = process.env.STORAGE_PROVIDER ?? 'fake';
+process.env.PLANET_LIFE_TEXT_PROVIDER =
+  process.env.PLANET_LIFE_TEXT_PROVIDER ?? 'fake';
+process.env.PLANET_LIFE_IMAGE_PROVIDER =
+  process.env.PLANET_LIFE_IMAGE_PROVIDER ?? 'fake';
+process.env.PLANET_LIFE_IMAGE_QUALITY_PROVIDER =
+  process.env.PLANET_LIFE_IMAGE_QUALITY_PROVIDER ?? 'fake';
+process.env.PLANET_LIFE_TEXT_QUALITY_PROVIDER =
+  process.env.PLANET_LIFE_TEXT_QUALITY_PROVIDER ?? 'fake';
 process.env.JWT_SECRET =
   process.env.JWT_SECRET ?? 'test-jwt-secret-not-for-production';
 process.env.DEBUG_SECRET = process.env.DEBUG_SECRET ?? 'test-debug-secret';

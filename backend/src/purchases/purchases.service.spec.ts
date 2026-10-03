@@ -6,6 +6,7 @@ import {
 } from '@apple/app-store-server-library';
 import { PurchasesService } from './purchases.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { GiftsService } from '../planet-life/gifts.service';
 
 // A hand-built mock satisfying only the Prisma delegate method
 // PurchasesService actually calls. Naturally typed (no `any`) so
@@ -13,11 +14,33 @@ import { PrismaService } from '../prisma/prisma.service';
 // the point each test constructs the service, since the mock is
 // intentionally not a full PrismaService (see docs/reference/testing.md).
 function makePrisma() {
-  return { entitlement: { upsert: jest.fn() } };
+  return {
+    entitlement: { upsert: jest.fn() },
+    pet: { findFirst: jest.fn() },
+  };
 }
 
 function asPrismaService(prisma: ReturnType<typeof makePrisma>) {
   return prisma as unknown as PrismaService;
+}
+
+function makeGiftsService() {
+  return {
+    findActiveProductByProductId: jest.fn().mockResolvedValue(null),
+    createGiftInstanceFromPurchase: jest.fn(),
+  };
+}
+
+function asGiftsService(giftsService: ReturnType<typeof makeGiftsService>) {
+  return giftsService as unknown as GiftsService;
+}
+
+function makeService(prisma = makePrisma(), giftsService = makeGiftsService()) {
+  const service = new PurchasesService(
+    asPrismaService(prisma),
+    asGiftsService(giftsService),
+  );
+  return { service, prisma, giftsService };
 }
 
 const EXPECTED_PRODUCT_ID = 'com.pawlight.full_memorial_space';
@@ -37,9 +60,8 @@ describe('PurchasesService', () => {
       delete process.env.APPLE_APP_APPLE_ID;
     });
 
-    it('applies PAID entitlement for a valid, non-revoked transaction', async () => {
-      const prisma = makePrisma();
-      const service = new PurchasesService(asPrismaService(prisma));
+    it('applies PAID + starLifeEnabled entitlement for the legacy product', async () => {
+      const { service, prisma } = makeService();
       jest
         .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')
         .mockResolvedValue({
@@ -51,19 +73,69 @@ describe('PurchasesService', () => {
 
       expect(prisma.entitlement.upsert).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
-        update: { tier: 'PAID', photoLimit: 50, mailboxEnabled: true },
+        update: {
+          tier: 'PAID',
+          photoLimit: 50,
+          mailboxEnabled: true,
+          starLifeEnabled: true,
+        },
         create: {
           userId: 'user-1',
           tier: 'PAID',
           photoLimit: 50,
           mailboxEnabled: true,
+          starLifeEnabled: true,
         },
       });
     });
 
-    it('rejects a transaction for a different product id', async () => {
-      const prisma = makePrisma();
-      const service = new PurchasesService(asPrismaService(prisma));
+    // Case 4 (dev spec §37): a verified purchase of a known Gift product
+    // creates a Gift Instance instead of touching Entitlement.
+    it('creates a Gift Instance for a recognized gift product id, without touching Entitlement', async () => {
+      const { service, prisma, giftsService } = makeService();
+      jest
+        .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')
+        .mockResolvedValue({
+          productId: 'com.pawlight.gift.ball.test',
+          transactionId: 'txn-1',
+          revocationDate: undefined,
+        });
+      giftsService.findActiveProductByProductId.mockResolvedValue({
+        giftAssetId: 'asset-ball',
+      });
+      prisma.pet.findFirst.mockResolvedValue({ id: 'pet-1', userId: 'user-1' });
+
+      await service.verifyAndApply('user-1', 'fake-jws-token');
+
+      expect(giftsService.createGiftInstanceFromPurchase).toHaveBeenCalledWith(
+        'pet-1',
+        'asset-ball',
+        'txn-1',
+      );
+      expect(prisma.entitlement.upsert).not.toHaveBeenCalled();
+    });
+
+    it('rejects a gift purchase with no transaction id', async () => {
+      const { service, giftsService, prisma } = makeService();
+      jest
+        .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')
+        .mockResolvedValue({
+          productId: 'com.pawlight.gift.ball.test',
+          transactionId: undefined,
+          revocationDate: undefined,
+        });
+      giftsService.findActiveProductByProductId.mockResolvedValue({
+        giftAssetId: 'asset-ball',
+      });
+
+      await expect(
+        service.verifyAndApply('user-1', 'fake-jws-token'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.pet.findFirst).not.toHaveBeenCalled();
+    });
+
+    it('rejects a transaction for a product id that matches neither the legacy product nor any active gift product', async () => {
+      const { service, prisma, giftsService } = makeService();
       jest
         .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')
         .mockResolvedValue({
@@ -75,11 +147,13 @@ describe('PurchasesService', () => {
         service.verifyAndApply('user-1', 'fake-jws-token'),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(prisma.entitlement.upsert).not.toHaveBeenCalled();
+      expect(
+        giftsService.createGiftInstanceFromPurchase,
+      ).not.toHaveBeenCalled();
     });
 
     it('rejects a revoked transaction', async () => {
-      const prisma = makePrisma();
-      const service = new PurchasesService(asPrismaService(prisma));
+      const { service, prisma } = makeService();
       jest
         .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')
         .mockResolvedValue({
@@ -94,8 +168,7 @@ describe('PurchasesService', () => {
     });
 
     it('rejects when signature/chain verification itself fails', async () => {
-      const prisma = makePrisma();
-      const service = new PurchasesService(asPrismaService(prisma));
+      const { service, prisma } = makeService();
       jest
         .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')
         .mockRejectedValue(
@@ -109,8 +182,7 @@ describe('PurchasesService', () => {
     });
 
     it('re-throws a non-VerificationException error unchanged', async () => {
-      const prisma = makePrisma();
-      const service = new PurchasesService(asPrismaService(prisma));
+      const { service } = makeService();
       jest
         .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')
         .mockRejectedValue(new Error('network down'));
@@ -127,8 +199,7 @@ describe('PurchasesService', () => {
     });
 
     it('falls back to the sandbox verifier when the production verifier rejects with VerificationException', async () => {
-      const prisma = makePrisma();
-      const service = new PurchasesService(asPrismaService(prisma));
+      const { service, prisma } = makeService();
       let call = 0;
       jest
         .spyOn(SignedDataVerifier.prototype, 'verifyAndDecodeTransaction')

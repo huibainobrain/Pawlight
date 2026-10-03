@@ -13,6 +13,10 @@ model User {
   email       String?
   nickname    String?
   avatarUrl   String?
+  // Current in-app language (iOS LanguageStore, not device locale), synced
+  // from iOS so Planet Life can generate event text in the right language
+  // during an async background tick with no live request to read it from.
+  language    String?  @default("en")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -21,11 +25,11 @@ model User {
 }
 
 model Pet {
-  id                    String      @id @default(cuid())
+  id                    String   @id @default(cuid())
   userId                String
-  user                  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name                  String
-  type                  PetType     @default(CAT)
+  type                  PetType  @default(CAT)
   arrivedOn             String?
   bornOn                String?
   leftOn                String?
@@ -38,13 +42,16 @@ model Pet {
   observationVideoJobId String?
   observationVideoKey   String?
   observationVideoUrl   String?
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   photos            Photo[]
   share             Share?
   letters           Letter[]
   scenePortraitJobs ScenePortraitJob[]
+  planetLifeState   PlanetLifeState?
+  planetEvents      PlanetEvent[]
+  giftInstances     GiftInstance[]
 }
 
 enum PetType {
@@ -55,14 +62,19 @@ enum PetType {
 
 // Entitlement is account-level (one per User), not per-pet.
 model Entitlement {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tier           Tier     @default(FREE)
-  photoLimit     Int      @default(9)
-  mailboxEnabled Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier            Tier     @default(FREE)
+  photoLimit      Int      @default(9)
+  mailboxEnabled  Boolean  @default(false)
+  // Independent capability flag (mirrors mailboxEnabled): today always set
+  // alongside tier=PAID, but kept separate so "can Planet Life still
+  // generate new events" can later diverge from the base paid tier (e.g. a
+  // future dedicated subscription) without touching every read site.
+  starLifeEnabled Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 enum Tier {
@@ -169,4 +181,247 @@ model Letter {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Planet Life (星球生活): a low-frequency, pet-level async content stream,
+// independent of ScenePortraitJob's on-demand generation. One PlanetLifeState
+// row per Pet tracks opt-in/pause and when the next event is eligible.
+// ---------------------------------------------------------------------------
+
+model PlanetLifeState {
+  id                String    @id @default(cuid())
+  petId             String    @unique
+  pet               Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  enabled           Boolean   @default(false)
+  paused            Boolean   @default(false)
+  notifyOnNewEvent  Boolean   @default(true)
+  // Set to "now + first wait" on enable, then recomputed on markRead (not on
+  // publish) — the wait restarts when the user reads the unread event, per
+  // product spec, not when the event was generated.
+  nextEligibleAt    DateTime?
+  weeklyEventCount  Int       @default(0)
+  weeklyWindowStart DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+enum PlanetEventStatus {
+  UNREAD
+  READ
+  BAD_CASE
+}
+
+// "星球来信" (unread) and "星球纪事" (read) are the same object at different
+// read states — one status field, not two separate models.
+model PlanetEvent {
+  id               String            @id @default(cuid())
+  petId            String
+  pet              Pet               @relation(fields: [petId], references: [id], onDelete: Cascade)
+  eventTemplateKey String
+  title            String
+  body             String
+  language         String
+  imageR2Key       String
+  imageR2Url       String
+  status           PlanetEventStatus @default(UNREAD)
+  // Snapshot of the resolved facts (location/action/time/atmosphere/...)
+  // actually used for this event — avoids a column per fact dimension.
+  factsJson        Json
+  giftInstanceId   String?
+  giftInstance     GiftInstance?     @relation(fields: [giftInstanceId], references: [id])
+  createdAt        DateTime          @default(now())
+  readAt           DateTime?
+
+  @@index([petId, createdAt])
+  @@index([giftInstanceId])
+}
+
+// Human-curated, long-term-maintained fact pools a PlanetEvent is generated
+// from — the system picks facts from here; AI only expresses them (never
+// invents them). Seeded with one P0 test template ("小花园休息").
+//
+// Each *Keys field holds stable `key` values from the matching content-asset
+// table below (LocationAsset / ActionAsset / ContentAsset) — never raw
+// natural-language strings. A new Location/Action/Time/Atmosphere/Ambient
+// Detail is "add a row and reference its key here", not "edit this template
+// or any generation code". See PlanetEventGenerationService.resolveFacts for
+// how these are resolved.
+model EventTemplate {
+  id                   String   @id @default(cuid())
+  key                  String   @unique
+  // Free-form human label (e.g. "daily" / "special") — purely informational,
+  // not read by any selection logic. cooldownDays already provides the real
+  // "rare/special event" mechanism; this just lets a human filter/scan the
+  // template table by eye once there are 20-30 rows.
+  category             String?
+  locationKeys         Json
+  actionKeys           Json
+  timeKeys             Json
+  atmosphereKeys       Json
+  ambientDetailKeys    Json?
+  giftCompatible       Boolean  @default(false)
+  weight               Int      @default(1)
+  cooldownDays         Int?
+  speciesApplicability Json?
+  active               Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+// A Location content asset — stable key, bilingual name, and the two
+// distinct descriptions PRD content-authoring needs: visualDefinition (an
+// internal/narrative note so the same location stays consistent across many
+// generations — not shown to users) and imageGenPrompt (the actual prompt
+// fragment handed to the image-gen provider, which can reasonably diverge in
+// wording from visualDefinition).
+model LocationAsset {
+  id                     String   @id @default(cuid())
+  key                    String   @unique
+  nameZh                 String
+  nameEn                 String
+  visualDefinition       String
+  imageGenPrompt         String
+  speciesApplicability   Json?
+  // Optional: ActionAsset keys that don't make narrative sense at this
+  // location (e.g. a window-sill location excludes a "digging" action).
+  // Null = no restriction. Checked together with
+  // ActionAsset.incompatibleLocationKeys — either side can exclude a
+  // pairing — see PlanetEventGenerationService.pickAction for the
+  // filter-with-fallback enforcement (a misconfigured exclusion can make a
+  // pairing less likely, never blocks generation outright).
+  incompatibleActionKeys Json?
+  active                 Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+// An Action content asset — same role as LocationAsset for EventTemplate's
+// actionKeys pool.
+model ActionAsset {
+  id                       String   @id @default(cuid())
+  key                      String   @unique
+  nameZh                   String
+  nameEn                   String
+  visualAction             String
+  speciesApplicability     Json?
+  // Optional: LocationAsset keys this action doesn't make sense at. See
+  // LocationAsset.incompatibleActionKeys — this is the other side of the
+  // same mutual check, not a second independent mechanism.
+  incompatibleLocationKeys Json?
+  active                   Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+enum ContentAssetKind {
+  TIME
+  ATMOSPHERE
+  AMBIENT_DETAIL
+}
+
+// Shared table for Time / Atmosphere / Ambient Detail content assets — the
+// product spec gives all three the same minimal shape (stable key, bilingual
+// expression, one stable description for the image-gen model), so one table
+// with a `kind` discriminator avoids three near-identical tables. A
+// template's timeKeys/atmosphereKeys/ambientDetailKeys must only reference
+// rows of the matching `kind` — enforced at resolution time, not by the DB.
+model ContentAsset {
+  id                String           @id @default(cuid())
+  key               String           @unique
+  kind              ContentAssetKind
+  nameZh            String
+  nameEn            String
+  visualDescription String
+  active            Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([kind])
+}
+
+enum GiftSaleStatus {
+  ACTIVE
+  HIDDEN
+}
+
+// A gift TYPE (e.g. "小球"). Deliberately has no price field — price comes
+// from GiftProduct's StoreKit mapping, never hardcoded here.
+model GiftAsset {
+  id                    String         @id @default(cuid())
+  key                   String         @unique
+  nameZh                String
+  nameEn                String
+  descriptionZh         String
+  descriptionEn         String
+  illustrationAssetName String
+  // Free-form human label (e.g. "toy" / "comfort" / "decoration") — purely
+  // informational, not read by any selection logic today. Reserved for
+  // future grouping/filtering once there are several gifts.
+  category              String?
+  // Which EventTemplate.key values this gift may appear in. Checked for
+  // real in the generation pipeline (PlanetEventGenerationService) — see
+  // that file's header comment for why this must be read, not just stored.
+  eventCompatibility    Json
+  // Optional finer restriction: which specific EventTemplate.actionPool
+  // entries this gift makes narrative sense with, across any template it's
+  // otherwise compatible with. Null = no restriction (any action in a
+  // compatible template is fine) — this is the default and what the one
+  // current test gift ("ball") uses.
+  actionCompatibility   Json?
+  repeatable            Boolean        @default(true)
+  saleStatus            GiftSaleStatus @default(ACTIVE)
+  displayOrder          Int            @default(0)
+  speciesApplicability  Json?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  products  GiftProduct[]
+  instances GiftInstance[]
+}
+
+// Maps a GiftAsset to a real storefront product id. iOS reads the live
+// localized price from StoreKit via this productId — price is never stored
+// here or on GiftAsset.
+model GiftProduct {
+  id          String    @id @default(cuid())
+  giftAssetId String
+  giftAsset   GiftAsset @relation(fields: [giftAssetId], references: [id], onDelete: Cascade)
+  platform    String
+  productId   String    @unique
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([giftAssetId])
+}
+
+enum GiftInstanceStatus {
+  PENDING
+  COMPLETED
+}
+
+// One real purchase = one independent gift instance (never a permanent
+// "owns this gift type" flag). The same GiftAsset can produce many
+// GiftInstances over time, each tracked separately.
+model GiftInstance {
+  id                    String             @id @default(cuid())
+  petId                 String
+  pet                   Pet                @relation(fields: [petId], references: [id], onDelete: Cascade)
+  giftAssetId           String
+  giftAsset             GiftAsset          @relation(fields: [giftAssetId], references: [id])
+  status                GiftInstanceStatus @default(PENDING)
+  // Apple transaction id, guarded unique to make purchase verification
+  // idempotent against retries/duplicate client submissions.
+  purchaseTransactionId String?            @unique
+  purchasedAt           DateTime           @default(now())
+  completedAt           DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  // Every PlanetEvent that has ever carried this instance (across retries
+  // and bad-case resets) — the "current" one is whichever isn't BAD_CASE.
+  events PlanetEvent[]
+
+  @@index([petId, status])
 }

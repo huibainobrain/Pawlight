@@ -3,6 +3,7 @@ import SwiftUI
 struct MineView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var ls: LanguageStore
+    @EnvironmentObject var planetLife: PlanetLifeController
     @State private var showDeleteAlert = false
     @State private var isDeletingAccount = false
     @State private var showDeleteError = false
@@ -10,6 +11,10 @@ struct MineView: View {
     @State private var goPetProfile = false
     @State private var goEntitlement = false
     @State private var goPrivacySettings = false
+    #if DEBUG
+    @State private var goPlanetLifeDebug = false
+    @State private var liveTriggerResult: String?
+    #endif
     @Environment(\.openURL) var openURL
 
     // 临时隐藏「开发调试」模块；需要恢复时改回 true 即可
@@ -181,6 +186,32 @@ struct MineView: View {
                                 .buttonStyle(.plain)
                             }
                             .padding(.horizontal, 20)
+
+                            MineSectionLabel("星球生活调试", isDebug: true)
+                            MineSectionCard(debugStyle: true) {
+                                Button { goPlanetLifeDebug = true } label: {
+                                    MineRowContent(
+                                        icon: "sparkles",
+                                        iconBg: AppColors.green.opacity(0.10),
+                                        iconColor: AppColors.green.opacity(0.68),
+                                        label: s.mineDebugPlanetLifeFakeFlow,
+                                        showDivider: true
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
+                                Button { runLiveTrigger() } label: {
+                                    MineRowContent(
+                                        icon: "antenna.radiowaves.left.and.right",
+                                        iconBg: AppColors.muted.opacity(0.08),
+                                        iconColor: AppColors.muted.opacity(0.55),
+                                        label: s.mineDebugPlanetLifeLiveTrigger,
+                                        showDivider: false
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.horizontal, 20)
                             }
                             #endif
 
@@ -272,10 +303,23 @@ struct MineView: View {
                         .navigationDestination(isPresented: $goPetProfile) { PetProfileView() }
                         .navigationDestination(isPresented: $goEntitlement) { EntitlementView() }
                         .navigationDestination(isPresented: $goPrivacySettings) { PrivacySettingsView() }
+                        #if DEBUG
+                        .navigationDestination(isPresented: $goPlanetLifeDebug) { PlanetLifeDebugView() }
+                        #endif
                     }
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            #if DEBUG
+            .alert("真实生成一次", isPresented: Binding(
+                get: { liveTriggerResult != nil },
+                set: { if !$0 { liveTriggerResult = nil } }
+            )) {
+                Button(s.ok, role: .cancel) {}
+            } message: {
+                Text(liveTriggerResult ?? "")
+            }
+            #endif
             .alert(s.mineDeleteAlertTitle, isPresented: $showDeleteAlert) {
                 Button(s.mineDeleteConfirmBtn, role: .destructive) { performDeleteAccount() }
                 Button(s.cancel, role: .cancel) {}
@@ -295,10 +339,17 @@ struct MineView: View {
         .onChange(of: goPetProfile)      { _, _ in syncTabBar() }
         .onChange(of: goEntitlement)     { _, _ in syncTabBar() }
         .onChange(of: goPrivacySettings) { _, _ in syncTabBar() }
+        #if DEBUG
+        .onChange(of: goPlanetLifeDebug) { _, _ in syncTabBar() }
+        #endif
     }
 
     private func syncTabBar() {
+        #if DEBUG
+        appState.tabBarHidden = goPetProfile || goEntitlement || goPrivacySettings || goPlanetLifeDebug
+        #else
         appState.tabBarHidden = goPetProfile || goEntitlement || goPrivacySettings
+        #endif
     }
 
     private func performDeleteAccount() {
@@ -313,6 +364,27 @@ struct MineView: View {
             }
         }
     }
+
+    #if DEBUG
+    private func runLiveTrigger() {
+        guard let token = KeychainHelper.loadToken(), let petId = appState.currentPet?.id else {
+            liveTriggerResult = "没有登录或没有宠物"
+            return
+        }
+        Task { @MainActor in
+            switch await planetLife.debugLiveTrigger(token: token, petId: petId) {
+            case .success:
+                liveTriggerResult = "✅ 真实生成已触发"
+            case .failure(let failure) where failure.code == "AI_PROVIDER_NOT_CONFIGURED":
+                let missing = failure.missingProviders
+                liveTriggerResult = s.debugAIProviderNotConfigured
+                    + (missing.isEmpty ? "" : "\n" + s.debugAIProviderMissing(missing))
+            case .failure(let failure):
+                liveTriggerResult = "❌ \(failure.code)"
+            }
+        }
+    }
+    #endif
 }
 
 // MARK: - 未入驻空态

@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { PhotosService } from '../photos/photos.service';
 import { ScenePortraitsService } from '../scene-portraits/scene-portraits.service';
+import { PlanetLifeService } from '../planet-life/planet-life.service';
 import appleSignin from 'apple-signin-auth';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class AuthService {
     private jwt: JwtService,
     private photosService: PhotosService,
     private scenePortraitsService: ScenePortraitsService,
+    private planetLifeService: PlanetLifeService,
   ) {}
 
   async loginWithApple(identityToken: string) {
@@ -62,7 +64,12 @@ export class AuthService {
     // features work without manual DB edits.
     await this.prisma.entitlement.update({
       where: { userId: user.id },
-      data: { mailboxEnabled: true, photoLimit: 50, tier: 'PAID' },
+      data: {
+        mailboxEnabled: true,
+        photoLimit: 50,
+        tier: 'PAID',
+        starLifeEnabled: true,
+      },
     });
     await this.prisma.pet.deleteMany({ where: { userId: user.id } });
 
@@ -80,6 +87,7 @@ export class AuthService {
   async deleteAccount(userId: string) {
     await this.photosService.deleteAllForUser(userId);
     await this.scenePortraitsService.deleteAllForUser(userId);
+    await this.planetLifeService.deleteAllForUser(userId);
     await this.prisma.user.delete({ where: { id: userId } });
   }
 
@@ -91,7 +99,13 @@ export class AuthService {
     });
     if (!existing) {
       await this.prisma.entitlement.create({
-        data: { userId, tier: 'FREE', photoLimit: 9, mailboxEnabled: false },
+        data: {
+          userId,
+          tier: 'FREE',
+          photoLimit: 9,
+          mailboxEnabled: false,
+          starLifeEnabled: false,
+        },
       });
     }
   }

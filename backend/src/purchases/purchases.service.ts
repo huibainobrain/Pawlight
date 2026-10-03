@@ -8,6 +8,7 @@ import {
   VerificationException,
 } from '@apple/app-store-server-library';
 import { PrismaService } from '../prisma/prisma.service';
+import { GiftsService } from '../planet-life/gifts.service';
 import {
   EXPECTED_APPLE_BUNDLE_ID,
   getAppleAppAppleId,
@@ -26,7 +27,10 @@ export class PurchasesService {
   // be verified without it, but Sandbox/TestFlight/App Review testing still works.
   private readonly productionVerifier: SignedDataVerifier | null;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly giftsService: GiftsService,
+  ) {
     const rootCA = readFileSync(join(__dirname, 'certs', 'AppleRootCA-G3.cer'));
 
     this.sandboxVerifier = new SignedDataVerifier(
@@ -53,21 +57,62 @@ export class PurchasesService {
     }
   }
 
+  // Dispatches by the JWS-decoded productId to one of two effects:
+  // - the one legacy full-memorial-space product -> upgrade Entitlement
+  //   (unchanged from before gifts existed)
+  // - any active GiftProduct's productId -> create/complete a Gift Instance
+  // An unrecognized productId is rejected outright, the same "resolve by
+  // configured key, fail loudly on unknown" shape scene-portraits.module.ts
+  // uses for provider selection — never silently falls through to either effect.
   async verifyAndApply(userId: string, jwsToken: string): Promise<void> {
     const payload = await this.verifySignedTransaction(jwsToken);
 
-    if (payload.productId !== EXPECTED_PRODUCT_ID) {
-      throw new BadRequestException('Product ID mismatch');
-    }
     if (payload.revocationDate) {
       throw new BadRequestException('Purchase has been revoked');
     }
 
-    await this.prisma.entitlement.upsert({
-      where: { userId },
-      update: { tier: 'PAID', photoLimit: 50, mailboxEnabled: true },
-      create: { userId, tier: 'PAID', photoLimit: 50, mailboxEnabled: true },
-    });
+    if (payload.productId === EXPECTED_PRODUCT_ID) {
+      await this.prisma.entitlement.upsert({
+        where: { userId },
+        update: {
+          tier: 'PAID',
+          photoLimit: 50,
+          mailboxEnabled: true,
+          starLifeEnabled: true,
+        },
+        create: {
+          userId,
+          tier: 'PAID',
+          photoLimit: 50,
+          mailboxEnabled: true,
+          starLifeEnabled: true,
+        },
+      });
+      return;
+    }
+
+    const giftProduct = await this.giftsService.findActiveProductByProductId(
+      payload.productId ?? '',
+    );
+    if (!giftProduct) {
+      throw new BadRequestException('Product ID mismatch');
+    }
+    if (!payload.transactionId) {
+      throw new BadRequestException('Missing transaction id');
+    }
+
+    // V1: a user may only own a single pet (PetsService.create) — the gift
+    // belongs to whichever pet that is; the client never has to pass a petId.
+    const pet = await this.prisma.pet.findFirst({ where: { userId } });
+    if (!pet) {
+      throw new BadRequestException('No pet found for this account');
+    }
+
+    await this.giftsService.createGiftInstanceFromPurchase(
+      pet.id,
+      giftProduct.giftAssetId,
+      payload.transactionId,
+    );
   }
 
   // Cryptographically verifies the JWS against Apple's certificate chain (rooted at

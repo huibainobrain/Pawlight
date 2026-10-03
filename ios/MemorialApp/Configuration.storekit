@@ -16,6 +16,21 @@
       "productID" : "com.pawlight.full_memorial_space",
       "referenceName" : "Full Memorial Space Lifetime Unlock",
       "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "A1B2C3D4E5F6",
+      "localizations" : [
+        {
+          "description" : "A one-time gift left on their planet — can be bought again later.",
+          "displayName" : "Ball",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.pawlight.gift.ball.test",
+      "referenceName" : "Gift: Ball (test)",
+      "type" : "Consumable"
     }
   ],
   "settings" : {

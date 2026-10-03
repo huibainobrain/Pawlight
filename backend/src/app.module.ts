@@ -10,6 +10,7 @@ import { HugsModule } from './hugs/hugs.module';
 import { LettersModule } from './letters/letters.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { ScenePortraitsModule } from './scene-portraits/scene-portraits.module';
+import { PlanetLifeModule } from './planet-life/planet-life.module';
 import { validateRequiredEnv } from './config/env.validation';
 
 validateRequiredEnv();
@@ -27,6 +28,7 @@ validateRequiredEnv();
     LettersModule,
     PurchasesModule,
     ScenePortraitsModule,
+    PlanetLifeModule,
   ],
 })
 export class AppModule {}

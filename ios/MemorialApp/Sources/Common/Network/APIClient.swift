@@ -49,11 +49,13 @@ final class APIClient {
     }
 
     #if DEBUG
+    static let debugSecret = "pawlight-debug-2024"
+
     func debugLogin() async throws -> AuthLoginResponse {
         let url = url("/api/v1/auth/debug-login")
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
-        req.setValue("pawlight-debug-2024", forHTTPHeaderField: "X-Debug-Secret")
+        req.setValue(Self.debugSecret, forHTTPHeaderField: "X-Debug-Secret")
         return try await perform(req)
     }
     #endif
@@ -227,6 +229,89 @@ final class APIClient {
         req.httpBody = try? JSONSerialization.data(withJSONObject: ["jws_token": jwsToken])
         try await performVoid(req)
     }
+
+    // MARK: - Planet Life (星球生活) + Gifts
+
+    func fetchPlanetLifeStatus(token: String, petId: String) async throws -> ApiPlanetLifeStatus {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/planet-life"))
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    func enablePlanetLife(token: String, petId: String, notifyOnNewEvent: Bool) async throws -> ApiPlanetLifeState {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/planet-life/enable"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["notifyOnNewEvent": notifyOnNewEvent])
+        return try await perform(req)
+    }
+
+    func updatePlanetLifeSettings(token: String, petId: String, notifyOnNewEvent: Bool?, paused: Bool?) async throws -> ApiPlanetLifeState {
+        var body: [String: Any] = [:]
+        if let notifyOnNewEvent { body["notifyOnNewEvent"] = notifyOnNewEvent }
+        if let paused { body["paused"] = paused }
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/planet-life/settings"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        return try await perform(req)
+    }
+
+    func fetchPlanetLifeEvents(token: String, petId: String) async throws -> [ApiPlanetEvent] {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/planet-life/events"))
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    func markPlanetEventRead(token: String, petId: String, eventId: String) async throws -> ApiPlanetEvent {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/planet-life/events/\(eventId)/read"))
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    func markPlanetEventBadCase(token: String, petId: String, eventId: String) async throws -> ApiPlanetEvent {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/planet-life/events/\(eventId)/bad-case"))
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    func fetchGifts(token: String, petId: String) async throws -> ApiGiftsResponse {
+        var req = URLRequest(url: url("/api/v1/pets/\(petId)/gifts"))
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await perform(req)
+    }
+
+    #if DEBUG
+    func debugPlanetLifeFakeTrigger(token: String, petId: String) async throws -> ApiPlanetLifeStatus {
+        var req = URLRequest(url: url("/api/v1/debug/pets/\(petId)/planet-life/fake-trigger"))
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue(Self.debugSecret, forHTTPHeaderField: "X-Debug-Secret")
+        return try await perform(req)
+    }
+
+    func debugPlanetLifeLiveTrigger(token: String, petId: String) async throws {
+        var req = URLRequest(url: url("/api/v1/debug/pets/\(petId)/planet-life/live-trigger"))
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue(Self.debugSecret, forHTTPHeaderField: "X-Debug-Secret")
+        try await performVoid(req)
+    }
+
+    func debugSimulateGiftPurchase(token: String, petId: String, giftAssetKey: String) async throws -> ApiGiftInstance {
+        var req = URLRequest(url: url("/api/v1/debug/pets/\(petId)/gifts/simulate-purchase"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue(Self.debugSecret, forHTTPHeaderField: "X-Debug-Secret")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["giftAssetKey": giftAssetKey])
+        return try await perform(req)
+    }
+    #endif
 
     // MARK: - Private
 

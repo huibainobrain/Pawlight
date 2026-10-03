@@ -3,10 +3,12 @@ import SwiftUI
 struct MemoryView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var ls: LanguageStore
+    @EnvironmentObject var planetLife: PlanetLifeController
     @State private var showStoryEdit = false
     @State private var showAlbum = false
     @State private var showMailbox = false
     @State private var showHugs = false
+    @State private var showPlanetLife = false
     @State private var showMemorialEdit = false
     @State private var showOnboarding = false
 
@@ -111,6 +113,27 @@ struct MemoryView: View {
                                     }
                                 }
 
+                                MemorySectionCard(title: s.memorySectionPlanetLife, icon: "sparkles") {
+                                    showPlanetLife = true
+                                } content: {
+                                    if let unread = planetLife.status?.unread {
+                                        Text(unread.title)
+                                            .font(AppFonts.body(14, weight: .medium))
+                                            .foregroundStyle(AppColors.ink)
+                                            .lineLimit(1)
+                                    } else if let latest = planetLife.status?.recent.first {
+                                        Text(latest.title)
+                                            .font(AppFonts.body(14))
+                                            .foregroundStyle(AppColors.muted)
+                                            .lineLimit(1)
+                                    } else {
+                                        Text(s.planetLifeChroniclesEmptyTitle)
+                                            .font(AppFonts.body(14))
+                                            .foregroundStyle(AppColors.muted)
+                                            .lineSpacing(4)
+                                    }
+                                }
+
                                 MemorySectionCard(title: s.memorySectionHugs, icon: "heart.fill") {
                                     showHugs = true
                                 } content: {
@@ -155,18 +178,24 @@ struct MemoryView: View {
                 appState.mailboxEnabled ? AnyView(MailboxView()) : AnyView(MailboxLockedView())
             }
             .navigationDestination(isPresented: $showHugs) { HugsView() }
+            .navigationDestination(isPresented: $showPlanetLife) { PlanetChroniclesListView() }
         }
         .fullScreenCover(isPresented: $showOnboarding) { OnboardingStartView() }
         .onChange(of: appState.hasPet) { _, hasPet in
             if hasPet { showOnboarding = false }
         }
-        .onChange(of: showAlbum)   { _, _ in syncTabBar() }
-        .onChange(of: showMailbox) { _, _ in syncTabBar() }
-        .onChange(of: showHugs)    { _, _ in syncTabBar() }
+        .onChange(of: showAlbum)      { _, _ in syncTabBar() }
+        .onChange(of: showMailbox)    { _, _ in syncTabBar() }
+        .onChange(of: showHugs)       { _, _ in syncTabBar() }
+        .onChange(of: showPlanetLife) { _, _ in syncTabBar() }
+        .task(id: appState.currentPet?.id) {
+            guard let petId = appState.currentPet?.id, let token = KeychainHelper.loadToken() else { return }
+            await planetLife.loadStatus(token: token, petId: petId)
+        }
     }
 
     private func syncTabBar() {
-        appState.tabBarHidden = showAlbum || showMailbox || showHugs
+        appState.tabBarHidden = showAlbum || showMailbox || showHugs || showPlanetLife
     }
 }
 

@@ -84,6 +84,7 @@ export class PetsService {
           albumPhotoCount,
           albumPhotoLimit: limit,
           mailboxEnabled: entitlement?.mailboxEnabled ?? false,
+          starLifeEnabled: entitlement?.starLifeEnabled ?? false,
         };
       }),
     );
@@ -111,6 +112,7 @@ export class PetsService {
       albumPhotoCount,
       albumPhotoLimit: albumPhotoLimit(entitlement),
       mailboxEnabled: entitlement?.mailboxEnabled ?? false,
+      starLifeEnabled: entitlement?.starLifeEnabled ?? false,
     };
   }
 

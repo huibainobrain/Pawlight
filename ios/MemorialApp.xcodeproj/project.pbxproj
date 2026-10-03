@@ -8,8 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		002FAEA3C95D60B152C32A52 /* OnboardingStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB467A0A82942285D6C1016 /* OnboardingStartView.swift */; };
+		026C3510C418488D8FE5D259 /* CompanionWindowToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */; };
+		042D6B3E4F5BD0E14469E773 /* PlanetLifeEnableSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411A63EE0F370FF23BD7AE12 /* PlanetLifeEnableSheet.swift */; };
 		07634BA0AE2BBF0224889600 /* ScenePortraitOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FB43A7ABA3BB5344B7D90E /* ScenePortraitOverlay.swift */; };
 		0A9EF115B65E152C15586369 /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407F558E5B2349773FE9806 /* PrivacySettingsView.swift */; };
+		0EB35D38A9DD44E7581A9EE9 /* GiftSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536DCFDC91AEF427A79DB28A /* GiftSelectionView.swift */; };
 		0FA09588B602DDDB5C6A9956 /* MineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B3BFF0C456566C5FD3C1C6 /* MineView.swift */; };
 		1226FAD4D9D078719D3CB817 /* MemorialSentenceEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */; };
 		162884CC621EA2A8E9C0F7FF /* MailboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1020B1B660C233418782944 /* MailboxView.swift */; };
@@ -18,17 +21,17 @@
 		1F953BE202ED0B123ABF3AED /* MailboxLockedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793C643D0522E264F127E573 /* MailboxLockedView.swift */; };
 		212E63EAFD46B6B7660091D2 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8510878390A19F7D46D31821 /* KeychainHelper.swift */; };
 		237503EEAB4CA1CA32FD985F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8830EE2A3C903C1A16AE7670 /* AppState.swift */; };
+		344154C5C81BE54C125BD3A2 /* CompanionWindowIntroSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */; };
 		3E0B48C3B364A21417098266 /* ScenePortraitSceneInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288E4064AC7544A4D401F76B /* ScenePortraitSceneInputView.swift */; };
 		4272315CFC0783C8732416AF /* SharePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB94814E21284C70E752BAE2 /* SharePanelView.swift */; };
 		43080225A217466CC254B91F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 516B0249E76335F20828B276 /* MainTabView.swift */; };
 		44243CDADEF646AD402136D6 /* HugsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FBDB325D733AE8E09C8DF2 /* HugsView.swift */; };
 		4466670647B150DDBBEEA1F3 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31C6461E77A8135CE9C344F /* HomeView.swift */; };
+		45DFEB51C7AFDD1483050C4C /* PlanetLifeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A508E33DD7D44D4157D1F1CB /* PlanetLifeSettingsView.swift */; };
 		46EF4BF1B25399CBC6EAA907 /* ScenePortraitObservationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C52440690AFB8261D572CF8 /* ScenePortraitObservationContent.swift */; };
-		CD215FFAC40729CFAC77ADCF /* CompanionWindowPiPController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */; };
-		026C3510C418488D8FE5D259 /* CompanionWindowToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */; };
-		344154C5C81BE54C125BD3A2 /* CompanionWindowIntroSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */; };
 		4E0731FB8DCF7D0A12CDCA61 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF218F1364C5AAF4DD3C92AC /* APIModels.swift */; };
 		5137174C420982AA770504D8 /* CreateSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */; };
+		5190E0D33523B00D8AF22D1F /* PlanetChroniclesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EB22876369DEDF8756543A /* PlanetChroniclesListView.swift */; };
 		5643DE6B080E87407C9F82A6 /* PetProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0D50567A918025751525DC /* PetProfileView.swift */; };
 		59091E848DE621C8ACAC8AFB /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD71578A5A4A3C1176F500D8 /* LoginView.swift */; };
 		61EB3478A7B4BFC429E8D0B6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 565836C1AD9D7A2ACE578D16 /* Assets.xcassets */; };
@@ -38,17 +41,24 @@
 		6C8CE782EB987A2D6576C5C5 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26167546E792AA3A0A734513 /* Models.swift */; };
 		7E0E9C7397EB79949A74070B /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD8E046BB99B466ADE1CC70 /* APIClient.swift */; };
 		7E66E715757137B43349A6D3 /* TierSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017D65EE9976E5085D1863A3 /* TierSelectView.swift */; };
+		8EDFED9B8B6FDB0093BD5C79 /* PlanetLifeCapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB9351F783BFCE5FA94A56DA /* PlanetLifeCapabilities.swift */; };
 		8F7F6014ACD7577531F7DE5B /* EntitlementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73DA614CCC0D6060777285F4 /* EntitlementView.swift */; };
+		A644215D48853D57E2D95ACE /* PlanetLifeIllustrationSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F48BAC8B43A12E6CE8D61BF /* PlanetLifeIllustrationSlot.swift */; };
 		B1C2D3E4F5A607182930BBCC /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */; };
+		B5F949308E7772E47744E15D /* PlanetLifeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E458AC1196B5CB8F567D6425 /* PlanetLifeController.swift */; };
 		BB22CC33DD44EE55FF6611AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */; };
+		BFDB3A4037277ECB56678320 /* PlanetEventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1B70533CA2EC3D55A86337 /* PlanetEventDetailView.swift */; };
 		CC112233445566778899AABB /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD112233445566778899AABB /* PhotoDetailView.swift */; };
+		CD215FFAC40729CFAC77ADCF /* CompanionWindowPiPController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */; };
 		D1E2F3A4B5C607182930DDEE /* LanguageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */; };
 		D3973C5C601FEF14DD9D3D6A /* MainPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */; };
 		D3F87DD0C0761B37CB50F0A8 /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */; };
+		D520C92FCF6A6EEDFF7500A1 /* PlanetLifeDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863C69F4F5F507D3499C817B /* PlanetLifeDebugView.swift */; };
 		DD334455667788990011AABB /* LetterDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC334455667788990011AABB /* LetterDetailView.swift */; };
 		DD44EE55FF6611AA22BB33CC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CC33DD44EE55FF6611AA22BB /* InfoPlist.strings */; };
 		EE112233445566778899AABB /* LetterEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF112233445566778899AABB /* LetterEditView.swift */; };
 		EF1E1B725956A118E21538F3 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40540C59A31F39495D189F7 /* RootView.swift */; };
+		EF374866061ED14656DC5281 /* PlanetLifeHomeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7904DDF66BB3179AE0A541 /* PlanetLifeHomeSection.swift */; };
 		F09F47DCA8BCF7270FF2C3AB /* ScenePortraitController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F64C04B539DAF4002BE53B /* ScenePortraitController.swift */; };
 		F0EA45078F4A49310AFEC563 /* ScenePortraitCandidatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD364A01AE6D0616BF5BDDE2 /* ScenePortraitCandidatePickerView.swift */; };
 		F1A2B3C4D5E607182930FF00 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D607182930EEFF /* Strings.swift */; };
@@ -60,33 +70,38 @@
 		00FB43A7ABA3BB5344B7D90E /* ScenePortraitOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitOverlay.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitOverlay.swift; sourceTree = SOURCE_ROOT; };
 		017D65EE9976E5085D1863A3 /* TierSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierSelectView.swift; sourceTree = "<group>"; };
 		0C52440690AFB8261D572CF8 /* ScenePortraitObservationContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitObservationContent.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitObservationContent.swift; sourceTree = SOURCE_ROOT; };
-		C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowPiPController.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowPiPController.swift; sourceTree = SOURCE_ROOT; };
-		2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowToggleButton.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowToggleButton.swift; sourceTree = SOURCE_ROOT; };
-		6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowIntroSheet.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowIntroSheet.swift; sourceTree = SOURCE_ROOT; };
 		1EB467A0A82942285D6C1016 /* OnboardingStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStartView.swift; sourceTree = "<group>"; };
 		26167546E792AA3A0A734513 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		288E4064AC7544A4D401F76B /* ScenePortraitSceneInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitSceneInputView.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitSceneInputView.swift; sourceTree = SOURCE_ROOT; };
 		2B3C4D5E6F708192A0AA22BB /* DisableSwipeBack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisableSwipeBack.swift; sourceTree = "<group>"; };
 		2DC6FBB2725D9E5EB290B2B7 /* MemorialApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemorialApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F48BAC8B43A12E6CE8D61BF /* PlanetLifeIllustrationSlot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetLifeIllustrationSlot.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetLifeIllustrationSlot.swift; sourceTree = SOURCE_ROOT; };
+		2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowToggleButton.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowToggleButton.swift; sourceTree = SOURCE_ROOT; };
 		3AFE8F05A281741C405AEB86 /* MainPhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPhotoView.swift; sourceTree = "<group>"; };
+		411A63EE0F370FF23BD7AE12 /* PlanetLifeEnableSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetLifeEnableSheet.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetLifeEnableSheet.swift; sourceTree = SOURCE_ROOT; };
 		46FBDB325D733AE8E09C8DF2 /* HugsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HugsView.swift; sourceTree = "<group>"; };
 		4D8D4B4C8AF332B19B493462 /* ScenePortraitEntryControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitEntryControls.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitEntryControls.swift; sourceTree = SOURCE_ROOT; };
 		4E982C73CE62D082C2FA33C9 /* StoryEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryEditView.swift; sourceTree = "<group>"; };
 		4EF1CB7E3629C5D49D1CE3B0 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
 		516B0249E76335F20828B276 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		536DCFDC91AEF427A79DB28A /* GiftSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GiftSelectionView.swift; path = MemorialApp/Sources/Features/PlanetLife/GiftSelectionView.swift; sourceTree = SOURCE_ROOT; };
 		565836C1AD9D7A2ACE578D16 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5B4E6B181B4B945D33D6A95C /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowIntroSheet.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowIntroSheet.swift; sourceTree = SOURCE_ROOT; };
 		62F64C04B539DAF4002BE53B /* ScenePortraitController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitController.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitController.swift; sourceTree = SOURCE_ROOT; };
 		64245C6BF899F9C1142F86E0 /* AlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumView.swift; sourceTree = "<group>"; };
 		73DA614CCC0D6060777285F4 /* EntitlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementView.swift; sourceTree = "<group>"; };
 		793C643D0522E264F127E573 /* MailboxLockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxLockedView.swift; sourceTree = "<group>"; };
 		8510878390A19F7D46D31821 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		856E4EB784D031CDEA78CBBD /* PetInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetInfoView.swift; sourceTree = "<group>"; };
+		863C69F4F5F507D3499C817B /* PlanetLifeDebugView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetLifeDebugView.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetLifeDebugView.swift; sourceTree = SOURCE_ROOT; };
 		8830EE2A3C903C1A16AE7670 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		9407F558E5B2349773FE9806 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
 		9600B266FF0692FEC8363EBE /* MemorialSentenceEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorialSentenceEditView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F607182930AABB /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
+		A508E33DD7D44D4157D1F1CB /* PlanetLifeSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetLifeSettingsView.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetLifeSettingsView.swift; sourceTree = SOURCE_ROOT; };
 		AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AC1B70533CA2EC3D55A86337 /* PlanetEventDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetEventDetailView.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetEventDetailView.swift; sourceTree = SOURCE_ROOT; };
 		AD71578A5A4A3C1176F500D8 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AF218F1364C5AAF4DD3C92AC /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
 		B95DC4895BFBD7DFF3205270 /* MemorialApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MemorialApp.entitlements; sourceTree = "<group>"; };
@@ -94,14 +109,19 @@
 		C1D2E3F4A5B607182930CCDD /* LanguageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageStore.swift; sourceTree = "<group>"; };
 		C3C86B79E6279573C2ED318D /* CreateSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateSuccessView.swift; sourceTree = "<group>"; };
 		C40540C59A31F39495D189F7 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CompanionWindowPiPController.swift; path = MemorialApp/Sources/Features/ScenePortrait/CompanionWindowPiPController.swift; sourceTree = SOURCE_ROOT; };
+		C9EB22876369DEDF8756543A /* PlanetChroniclesListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetChroniclesListView.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetChroniclesListView.swift; sourceTree = SOURCE_ROOT; };
+		CB9351F783BFCE5FA94A56DA /* PlanetLifeCapabilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetLifeCapabilities.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetLifeCapabilities.swift; sourceTree = SOURCE_ROOT; };
 		CC334455667788990011AABB /* LetterDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterDetailView.swift; sourceTree = "<group>"; };
 		CDD62992F1C9DD82FBC6187F /* MemorialApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorialApp.swift; sourceTree = "<group>"; };
 		D7FD3DFD4A69C6AACDAAB5CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DB94814E21284C70E752BAE2 /* SharePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePanelView.swift; sourceTree = "<group>"; };
 		DD112233445566778899AABB /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
 		DD364A01AE6D0616BF5BDDE2 /* ScenePortraitCandidatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScenePortraitCandidatePickerView.swift; path = MemorialApp/Sources/Features/ScenePortrait/ScenePortraitCandidatePickerView.swift; sourceTree = SOURCE_ROOT; };
+		DD7904DDF66BB3179AE0A541 /* PlanetLifeHomeSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetLifeHomeSection.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetLifeHomeSection.swift; sourceTree = SOURCE_ROOT; };
 		E1F2A3B4C5D607182930EEFF /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 		E31C6461E77A8135CE9C344F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		E458AC1196B5CB8F567D6425 /* PlanetLifeController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlanetLifeController.swift; path = MemorialApp/Sources/Features/PlanetLife/PlanetLifeController.swift; sourceTree = SOURCE_ROOT; };
 		EE55FF6611AA22BB33CC44DD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F9B3BFF0C456566C5FD3C1C6 /* MineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineView.swift; sourceTree = "<group>"; };
 		FAD8E046BB99B466ADE1CC70 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
@@ -164,7 +184,33 @@
 				C84FEF433ECB609F2B2431D1 /* CompanionWindowPiPController.swift */,
 				2F5AFAFDD978F79560D6630A /* CompanionWindowToggleButton.swift */,
 				6015F7A1A16ED91913DF44AD /* CompanionWindowIntroSheet.swift */,
+				E458AC1196B5CB8F567D6425 /* PlanetLifeController.swift */,
+				DD7904DDF66BB3179AE0A541 /* PlanetLifeHomeSection.swift */,
+				411A63EE0F370FF23BD7AE12 /* PlanetLifeEnableSheet.swift */,
+				AC1B70533CA2EC3D55A86337 /* PlanetEventDetailView.swift */,
+				536DCFDC91AEF427A79DB28A /* GiftSelectionView.swift */,
+				C9EB22876369DEDF8756543A /* PlanetChroniclesListView.swift */,
+				A508E33DD7D44D4157D1F1CB /* PlanetLifeSettingsView.swift */,
+				863C69F4F5F507D3499C817B /* PlanetLifeDebugView.swift */,
+				2F48BAC8B43A12E6CE8D61BF /* PlanetLifeIllustrationSlot.swift */,
+				4A9B7A32346E113C43E96B41 /* MemorialApp */,
 			);
+			sourceTree = "<group>";
+		};
+		41AE1AC0BD102E1FDD30AEC1 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				ED1BC4DC7F0738B2DE91E7A3 /* Features */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		4A9B7A32346E113C43E96B41 /* MemorialApp */ = {
+			isa = PBXGroup;
+			children = (
+				41AE1AC0BD102E1FDD30AEC1 /* Sources */,
+			);
+			name = MemorialApp;
 			sourceTree = "<group>";
 		};
 		4C347BBBF7E78D7C82DE968B /* Services */ = {
@@ -212,6 +258,14 @@
 			);
 			path = Mailbox;
 			sourceTree = "<group>";
+		};
+		91F6ED59404363B18C1B5CC7 /* PlanetLife */ = {
+			isa = PBXGroup;
+			children = (
+				CB9351F783BFCE5FA94A56DA /* PlanetLifeCapabilities.swift */,
+			);
+			name = PlanetLife;
+			sourceTree = SOURCE_ROOT;
 		};
 		A34DD71D61702358C7104BA9 /* Products */ = {
 			isa = PBXGroup;
@@ -298,6 +352,14 @@
 			path = Share;
 			sourceTree = "<group>";
 		};
+		ED1BC4DC7F0738B2DE91E7A3 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				91F6ED59404363B18C1B5CC7 /* PlanetLife */,
+			);
+			name = Features;
+			sourceTree = "<group>";
+		};
 		EFBBD2DA9412086472483C85 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -335,8 +397,6 @@
 			dependencies = (
 			);
 			name = MemorialApp;
-			packageProductDependencies = (
-			);
 			productName = MemorialApp;
 			productReference = 2DC6FBB2725D9E5EB290B2B7 /* MemorialApp.app */;
 			productType = "com.apple.product-type.application";
@@ -432,6 +492,16 @@
 				CD215FFAC40729CFAC77ADCF /* CompanionWindowPiPController.swift in Sources */,
 				026C3510C418488D8FE5D259 /* CompanionWindowToggleButton.swift in Sources */,
 				344154C5C81BE54C125BD3A2 /* CompanionWindowIntroSheet.swift in Sources */,
+				B5F949308E7772E47744E15D /* PlanetLifeController.swift in Sources */,
+				EF374866061ED14656DC5281 /* PlanetLifeHomeSection.swift in Sources */,
+				042D6B3E4F5BD0E14469E773 /* PlanetLifeEnableSheet.swift in Sources */,
+				BFDB3A4037277ECB56678320 /* PlanetEventDetailView.swift in Sources */,
+				0EB35D38A9DD44E7581A9EE9 /* GiftSelectionView.swift in Sources */,
+				5190E0D33523B00D8AF22D1F /* PlanetChroniclesListView.swift in Sources */,
+				45DFEB51C7AFDD1483050C4C /* PlanetLifeSettingsView.swift in Sources */,
+				D520C92FCF6A6EEDFF7500A1 /* PlanetLifeDebugView.swift in Sources */,
+				A644215D48853D57E2D95ACE /* PlanetLifeIllustrationSlot.swift in Sources */,
+				8EDFED9B8B6FDB0093BD5C79 /* PlanetLifeCapabilities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

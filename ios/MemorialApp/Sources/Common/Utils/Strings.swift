@@ -239,6 +239,83 @@ struct Strings {
     var companionWindowNotReadyTitle: String    { t("观察窗暂时没有打开", "The window isn't ready yet") }
     var companionWindowNotReadyBody: String     { t("请稍后再试。", "Please try again in a moment.") }
 
+    // MARK: - Planet Life (星球生活) + Gifts (礼物)
+
+    // Home intro card (PRD §11) — shown once after the first AI scene.
+    var planetLifeIntroTitle: String      { t("让 TA 的小星球慢慢留下新的日常", "Their little planet will slowly gather new days") }
+    var planetLifeIntroBody: String       { t("以后，这里偶尔会记录一些关于 TA 的小小片段。", "From now on, it'll quietly record little moments of them.") }
+    var planetLifeIntroEnableBtn: String  { t("开启星球生活", "Turn on Planet Life") }
+    var planetLifeIntroLaterBtn: String   { t("稍后", "Later") }
+
+    // Enable confirmation sheet (PRD §13)
+    var planetLifeEnableExplainTitle: String { t("TA 的小星球以后会偶尔留下一些新的生活片段。", "Their little planet will occasionally leave behind new moments of life.") }
+    var planetLifeEnableExplainBody: String  { t("这些内容会根据 TA 的照片和星球世界生成，是 Pawlight 为 TA 创作的想象式纪念。", "These are generated from their photos and their planet's world — an imagined memorial Pawlight creates for them.") }
+    var planetLifeEnableNoteAI: String       { t("由 AI 创作", "Created by AI") }
+    var planetLifeEnableNoteNoSchedule: String { t("没有固定时间", "No fixed schedule") }
+    var planetLifeEnableNotePausable: String { t("可以随时暂停", "You can pause anytime") }
+    var planetLifeEnableContinueBtn: String  { t("继续", "Continue") }
+    var planetLifeEnableCancelBtn: String    { t("再想想", "Not yet") }
+
+    // Notification preference ask (PRD §14) — asked only after enabling.
+    var planetLifeNotifyAskTitle: String { t("有新的星球记录时，要告诉你吗？", "Let you know when there's something new?") }
+    var planetLifeNotifyAskBody: String  { t("不开启提醒，星球生活也会照常进行。", "Planet Life keeps running either way — this is just whether we nudge you.") }
+    var planetLifeNotifyYesBtn: String   { t("好，告诉我", "Yes, let me know") }
+    var planetLifeNotifyNoBtn: String    { t("不用了", "No thanks") }
+
+    // Home unread indicator (PRD §23) — deliberately no red dot / unread count.
+    var planetLifeNewLetterBadge: String { t("✦ 星球来了一封新信", "✦ A new letter arrived from the planet") }
+    var planetLifeViewBtn: String        { t("查看 →", "View →") }
+
+    // Planet Chronicles list (PRD §39) + card chip
+    var planetLifeChroniclesNavTitle: String  { t("星球纪事", "Planet Chronicles") }
+    var planetLifeChroniclesEmptyTitle: String { t("TA 的星球正在慢慢写下第一段日常", "Their planet is slowly writing its first little moment") }
+    var planetLifeChroniclesEmptyBody: String { t("星球生活是低频的，不开倒计时，偶尔回来看看就好。", "Planet Life moves slowly and quietly — just check back from time to time.") }
+    var planetLifeUnreadChip: String          { t("来信", "New") }
+    var planetLifeSettingsGearLabel: String   { t("星球生活设置", "Planet Life Settings") }
+
+    // Event detail (PRD §25, §30, §50)
+    var planetLifeAiBadge: String        { t("AI 想象 · 非真实记录", "AI imagined · not a real record") }
+    var planetLifeGiftCta: String        { t("给 TA 留点什么", "Leave something for them") }
+    func planetLifeGiftPendingStatus(_ giftName: String) -> String {
+        t("\(giftName)已经留在 TA 的星球上了", "\(giftName) is already on its way to their planet")
+    }
+    var planetLifeWeakMenuLabel: String       { t("更多", "More") }
+    var planetLifeBadCaseMenuLabel: String    { t("这张照片不像 TA", "This doesn't look like them") }
+    var planetLifeBadCaseConfirmTitle: String { t("这张照片不像 TA？", "Doesn't look like them?") }
+    var planetLifeBadCaseConfirmBody: String  { t("这段内容会被隐藏。如果它承载了一份礼物，礼物会重新等待下一次机会，不需要重新付费。", "This will be hidden. If it carried a gift, the gift simply waits for another chance — no need to pay again.") }
+    var planetLifeBadCaseConfirmBtn: String   { t("确认隐藏", "Hide it") }
+
+    // Gift selection / purchase (PRD §27-30, §38)
+    var planetLifeGiftsNavTitle: String  { t("给 TA 留点什么", "Leave something for them") }
+    var planetLifeGiftsIntro: String     { t("每一次留下礼物，都是一次独立的心意。", "Each gift you leave is its own small gesture.") }
+    var planetLifeGiftOnePendingDisclaimer: String { t("同一时间只能等待一份礼物回应", "Only one gift can be waiting to appear at a time") }
+    var planetLifeGiftAlreadyGivenBtn: String { t("已经留下过了", "Already given") }
+    var planetLifeGiftWaitingChip: String { t("等待回应中", "Waiting to appear") }
+    var planetLifeGiftLoadingPrice: String { t("读取价格中…", "Loading price…") }
+    func planetLifeGiftBuyBtn(_ name: String, _ price: String) -> String {
+        t("把\(name)留在 TA 的星球上 · \(price)", "Leave \(name) on their planet · \(price)")
+    }
+    func planetLifeGiftPendingBanner(_ name: String) -> String {
+        t("\(name)正在等待出现在 TA 的星球上，完成后才能再留下新的礼物。", "\(name) is waiting to appear on their planet — you can leave another once it does.")
+    }
+    func planetLifeGiftPurchaseSuccessToast(_ name: String) -> String {
+        t("已经把\(name)留在 TA 的星球上了。", "\(name) is now on its way to their planet.")
+    }
+    var planetLifeGiftPurchaseFailedTitle: String { t("这次没有留下成功", "This didn't go through") }
+    var planetLifeGiftPurchaseFailedBody: String  { t("请检查网络或稍后再试，还没有产生任何扣费。", "Please check your connection and try again — nothing was charged.") }
+
+    // Settings (PRD §15)
+    var planetLifeSettingsNavTitle: String    { t("星球生活设置", "Planet Life Settings") }
+    var planetLifeSettingsNotifyToggle: String { t("新记录提醒", "New record alerts") }
+    var planetLifeSettingsPauseToggle: String { t("暂停星球生活", "Pause Planet Life") }
+    var planetLifeSettingsPauseFooter: String { t("暂停后不再产生新的星球纪事，已有内容和已购买的礼物都会保留。", "While paused, no new chronicles are created — everything you already have, including any purchased gift, stays safe.") }
+
+    // Errors mapped from backend error codes (see PlanetLifeController.errorCode)
+    var planetLifeErrorPaidOnly: String          { t("这是完整纪念空间的功能", "This is part of Full Memorial Space") }
+    var planetLifeErrorNoScenePortraitYet: String { t("请先为 TA 画一个场景", "Paint a scene for them first") }
+    var planetLifeErrorGiftAlreadyPending: String { t("当前已有一份礼物在等待出现，完成后才能再次购买。", "A gift is already waiting to appear — you can buy another once it does.") }
+    var planetLifeErrorGeneric: String           { t("暂时没能完成，请稍后再试。", "Couldn't complete this — please try again.") }
+
     // MARK: - Memory View
 
     var memoryUnboardedTitle: String    { t("还没有为TA创建星球", "No little planet yet") }
@@ -246,6 +323,7 @@ struct Strings {
     var memorySectionStory: String      { t("TA的故事", "Their Story") }
     var memorySectionPhotos: String     { t("照片回忆", "Photos") }
     var memorySectionMailbox: String    { t("天堂信箱", "Letters to Them") }
+    var memorySectionPlanetLife: String { t("星球纪事", "Planet Chronicles") }
     var memorySectionHugs: String       { t("抱抱记录", "Hugs") }
     var memoryLockedBadge: String       { t("已锁定", "Locked") }
     var memorySentencePlaceholder: String { t("写一句想留给TA的话", "Add a note for them") }
@@ -455,6 +533,21 @@ struct Strings {
     var mineBottomLine1: String        { t("回忆不在远方，", "Memories are not far away —") }
     var mineBottomLine2: String        { t("它一直在这里。", "they've been here all along.") }
     func mineVersion(_ v: String) -> String { "V\(v)" }
+
+    // MARK: - Mine View (DEBUG only)
+
+    var mineDebugPlanetLifeFakeFlow: String    { t("测试：模拟星球来信", "Test: Simulate Planet Letter") }
+    var mineDebugPlanetLifeLiveTrigger: String { t("测试：真实生成一次", "Test: Real Generation Once") }
+    var debugPlanetLifeNavTitle: String        { t("星球生活调试", "Planet Life Debug") }
+    var debugForceTickBtn: String              { t("强制生成一条纪事（跳过等待）", "Force-generate one chronicle (skip wait)") }
+    var debugSimulatePurchaseBtn: String       { t("模拟购买「小球」", "Simulate buying \"Ball\"") }
+    var debugMarkReadBtn: String                { t("标记当前未读为已读", "Mark current unread as read") }
+    var debugMarkBadCaseBtn: String             { t("标记当前为「不像 TA」", "Mark current as \"doesn't look like them\"") }
+    var debugLiveTriggerBtn: String             { t("真实生成一次", "Real generation once") }
+    var debugAIProviderNotConfigured: String    { t("AI Provider 尚未配置", "AI provider not configured yet") }
+    func debugAIProviderMissing(_ names: [String]) -> String {
+        t("尚未配置：\(names.joined(separator: "、"))", "Not yet configured: \(names.joined(separator: ", "))")
+    }
 
     // MARK: - Share Panel
 

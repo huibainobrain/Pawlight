@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PhotosService } from '../photos/photos.service';
 import { ScenePortraitsService } from '../scene-portraits/scene-portraits.service';
+import { PlanetLifeService } from '../planet-life/planet-life.service';
 
 jest.mock('apple-signin-auth', () => ({
   __esModule: true,
@@ -50,6 +51,9 @@ function makeDeps() {
     scenePortraitsService: {
       deleteAllForUser: jest.fn().mockResolvedValue(undefined),
     },
+    planetLifeService: {
+      deleteAllForUser: jest.fn().mockResolvedValue(undefined),
+    },
   };
 }
 
@@ -63,6 +67,12 @@ function asScenePortraitsService(
   scenePortraitsService: ReturnType<typeof makeDeps>['scenePortraitsService'],
 ) {
   return scenePortraitsService as unknown as ScenePortraitsService;
+}
+
+function asPlanetLifeService(
+  planetLifeService: ReturnType<typeof makeDeps>['planetLifeService'],
+) {
+  return planetLifeService as unknown as PlanetLifeService;
 }
 
 describe('AuthService', () => {
@@ -79,12 +89,14 @@ describe('AuthService', () => {
         appleUserId: 'apple-sub-1',
       });
       prisma.entitlement.findUnique.mockResolvedValue(null);
-      const { photosService, scenePortraitsService } = makeDeps();
+      const { photosService, scenePortraitsService, planetLifeService } =
+        makeDeps();
       const service = new AuthService(
         asPrismaService(prisma),
         asJwtService(makeJwt()),
         asPhotosService(photosService),
         asScenePortraitsService(scenePortraitsService),
+        asPlanetLifeService(planetLifeService),
       );
 
       await service.loginWithApple('id-token');
@@ -98,6 +110,7 @@ describe('AuthService', () => {
           tier: 'FREE',
           photoLimit: 9,
           mailboxEnabled: false,
+          starLifeEnabled: false,
         },
       });
     });
@@ -116,12 +129,14 @@ describe('AuthService', () => {
         userId: 'user-1',
         tier: 'PAID',
       });
-      const { photosService, scenePortraitsService } = makeDeps();
+      const { photosService, scenePortraitsService, planetLifeService } =
+        makeDeps();
       const service = new AuthService(
         asPrismaService(prisma),
         asJwtService(makeJwt()),
         asPhotosService(photosService),
         asScenePortraitsService(scenePortraitsService),
+        asPlanetLifeService(planetLifeService),
       );
 
       await service.loginWithApple('id-token');
@@ -132,15 +147,17 @@ describe('AuthService', () => {
   });
 
   describe('deleteAccount', () => {
-    it('cleans up Photo and ScenePortrait R2 objects before deleting the User', async () => {
+    it('cleans up Photo, ScenePortrait, and PlanetLife R2 objects before deleting the User', async () => {
       const prisma = makePrisma();
       prisma.user.delete.mockResolvedValue({ id: 'user-1' });
-      const { photosService, scenePortraitsService } = makeDeps();
+      const { photosService, scenePortraitsService, planetLifeService } =
+        makeDeps();
       const service = new AuthService(
         asPrismaService(prisma),
         asJwtService(makeJwt()),
         asPhotosService(photosService),
         asScenePortraitsService(scenePortraitsService),
+        asPlanetLifeService(planetLifeService),
       );
 
       const calls: string[] = [];
@@ -150,6 +167,10 @@ describe('AuthService', () => {
       });
       scenePortraitsService.deleteAllForUser.mockImplementation(() => {
         calls.push('scenePortraits');
+        return Promise.resolve();
+      });
+      planetLifeService.deleteAllForUser.mockImplementation(() => {
+        calls.push('planetLife');
         return Promise.resolve();
       });
       prisma.user.delete.mockImplementation(() => {
@@ -163,12 +184,13 @@ describe('AuthService', () => {
       expect(scenePortraitsService.deleteAllForUser).toHaveBeenCalledWith(
         'user-1',
       );
+      expect(planetLifeService.deleteAllForUser).toHaveBeenCalledWith('user-1');
       expect(prisma.user.delete).toHaveBeenCalledWith({
         where: { id: 'user-1' },
       });
       // Storage cleanup must happen before the DB cascade removes the rows
       // that name which R2 objects to delete.
-      expect(calls).toEqual(['photos', 'scenePortraits', 'user']);
+      expect(calls).toEqual(['photos', 'scenePortraits', 'planetLife', 'user']);
     });
   });
 });

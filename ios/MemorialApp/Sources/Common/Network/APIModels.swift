@@ -168,3 +168,114 @@ struct ApiScenePortraitJob: Decodable {
     let createdAt: Date
     let updatedAt: Date
 }
+
+// MARK: - Planet Life (星球生活) + Gifts (礼物)
+//
+// Backend returns raw Prisma rows (already camelCase, matching these field
+// names 1:1 — no CodingKeys needed, same as the rest of this file's newer
+// structs). Unknown JSON keys (e.g. PlanetEvent.factsJson, which iOS never
+// displays) are silently ignored by JSONDecoder, so they're left undeclared
+// here rather than modeled for no reason.
+
+struct ApiPlanetLifeState: Decodable {
+    let id: String
+    let petId: String
+    let enabled: Bool
+    let paused: Bool
+    let notifyOnNewEvent: Bool
+    let nextEligibleAt: Date?
+    let weeklyEventCount: Int
+    let weeklyWindowStart: Date?
+}
+
+struct ApiPlanetEvent: Decodable, Identifiable, Equatable {
+    enum Status: String, Decodable {
+        case unread = "UNREAD"
+        case read = "READ"
+        case badCase = "BAD_CASE"
+    }
+
+    let id: String
+    let petId: String
+    let eventTemplateKey: String
+    let title: String
+    let body: String
+    let language: String
+    let imageR2Url: String
+    let status: Status
+    let giftInstanceId: String?
+    let createdAt: Date
+    let readAt: Date?
+
+    static func == (lhs: ApiPlanetEvent, rhs: ApiPlanetEvent) -> Bool {
+        lhs.id == rhs.id && lhs.status == rhs.status
+    }
+}
+
+// GET /pets/:petId/planet-life
+struct ApiPlanetLifeStatus: Decodable {
+    let state: ApiPlanetLifeState?
+    let unread: ApiPlanetEvent?
+    let recent: [ApiPlanetEvent]
+}
+
+struct ApiGiftProduct: Decodable, Identifiable {
+    let id: String
+    let platform: String
+    let productId: String
+    let active: Bool
+}
+
+struct ApiGiftAsset: Decodable, Identifiable {
+    let id: String
+    let key: String
+    let nameZh: String
+    let nameEn: String
+    let descriptionZh: String
+    let descriptionEn: String
+    let illustrationAssetName: String
+    let repeatable: Bool
+    let saleStatus: String
+    let displayOrder: Int
+    let products: [ApiGiftProduct]
+    // Only present on the top-level `assets` array of GET .../gifts (computed
+    // server-side) — absent when this struct decodes a nested
+    // ApiGiftInstance.giftAsset, where it isn't meaningful. nil reads the
+    // same as "not given" for display purposes.
+    let alreadyGiven: Bool?
+
+    // iOS buys through StoreKit by productId, matched to the active "ios"
+    // mapping row — never a hardcoded/guessed id (PRD §9/§45: price and the
+    // product mapping live outside the gift asset itself).
+    var iosProductId: String? {
+        products.first(where: { $0.platform == "ios" && $0.active })?.productId
+    }
+}
+
+struct ApiGiftInstance: Decodable, Identifiable {
+    let id: String
+    let petId: String
+    let giftAssetId: String
+    let status: String
+    let purchasedAt: Date
+    let completedAt: Date?
+    // Only present where the backend includes it (the "pending" slot of
+    // GET .../gifts) — absent on a bare create response.
+    let giftAsset: ApiGiftAsset?
+}
+
+// GET /pets/:petId/gifts
+struct ApiGiftsResponse: Decodable {
+    let assets: [ApiGiftAsset]
+    let canPurchase: Bool
+    let pending: ApiGiftInstance?
+}
+
+// Shared shape for this feature's structured error bodies (PAID_ONLY,
+// NO_SCENE_PORTRAIT_YET, GIFT_ALREADY_PENDING, AI_PROVIDER_NOT_CONFIGURED,
+// STAR_LIFE_NOT_ENABLED, ...) — see PlanetLifeController.errorCode(from:).
+struct ApiPlanetLifeErrorBody: Decodable {
+    let code: String?
+    let message: String?
+    let missing: [String]?
+}

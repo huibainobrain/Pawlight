@@ -183,6 +183,9 @@ struct HomeCreatedView: View {
                 PlanetWindowView()
                     .padding(.top, 12)
 
+                PlanetLifeHomeSection()
+                    .padding(.horizontal, 20)
+
                 if appState.newHugCount > 0 {
                     HugReminderCard(newCount: appState.newHugCount)
                         .padding(.horizontal, 20)

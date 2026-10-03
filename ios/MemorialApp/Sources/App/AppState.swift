@@ -31,6 +31,12 @@ class AppState: ObservableObject {
 
     static let seenHugCountKey = "seen_hug_count"
 
+    // Set by MainTabView (same idiom as CompanionWindowPiPController.
+    // onRestoreToForeground) so PlanetLifeController's fetched status/events/
+    // gifts don't go stale across a delete-account or DEBUG reset — AppState
+    // has no reference to that controller to call it directly.
+    var onLocalSessionCleared: (() -> Void)?
+
     var isLoggedIn: Bool { currentUser != nil }
     var hasPet: Bool { currentPet != nil }
     var isPaid: Bool { entitlement?.isPaid == true }
@@ -228,6 +234,7 @@ class AppState: ObservableObject {
         isAuthChecking = false
         hasSkippedOnboarding = false
         selectedTab = 0
+        onLocalSessionCleared?()
     }
 
     // MARK: - Debug
@@ -257,6 +264,7 @@ class AppState: ObservableObject {
         newHugCount = 0
         UserDefaults.standard.removeObject(forKey: AppState.seenHugCountKey)
         ownerStage = .loggedInNoPet
+        onLocalSessionCleared?()
     }
     #endif
 
