@@ -17,8 +17,7 @@ Pawlight 是我独立设计并开发的一款 **AI 宠物纪念产品**，已上
 | 产品边界 | AI 扩展纪念表达，不模拟宠物人格 |
 
 **重点材料：**  
-[模型评测与选型](docs/portfolio/ai-model-evaluation.md) · [AI 内容系统](docs/portfolio/ai-content-system.md) · [产品决策](docs/portfolio/product-decisions.md) · [独立开发](docs/portfolio/independent-build.md)
-
+[模型评测与选型](docs/portfolio/ai-model-evaluation.md) · [AI 内容系统](docs/portfolio/ai-content-system.md)
 ---
 
 ## 30 秒看产品
