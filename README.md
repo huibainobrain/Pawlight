@@ -58,7 +58,7 @@ https://github.com/user-attachments/assets/97a828cd-6919-4d33-a49e-28a9532b5648
 
 系统会以低频、不固定的节奏生成新的「星球纪事」。
 
-<img width="941" height="1672" alt="5" src="https://github.com/user-attachments/assets/59434147-607b-4d85-ab04-9199fd6e1f44" />
+<img width="240" height="400" alt="5" src="https://github.com/user-attachments/assets/59434147-607b-4d85-ab04-9199fd6e1f44" />
 
 与自由故事生成不同，纪事先由**地点、行为、时间、环境等结构化内容**确定本次发生的事实，再由 AI 生成图文。
 
