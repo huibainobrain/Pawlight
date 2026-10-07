@@ -1,116 +1,144 @@
 # AGENTS
 
-Rules for AI coding agents (Claude, Codex, or others) working in this repository.
+Rules for AI coding agents working in Pawlight.
 
-## 1. Fact Priority
+## Fact Priority
 
-When the user's request, code, and docs disagree, resolve in this order:
+When sources disagree:
 
-1. The user's most recent explicit request in the current conversation.
-2. `docs/reference/product-spec.md`, when it exists — the current intended
-   product rules, written directly by the user (see section 2).
-3. The current code (`ios/`, `backend/src/`, `h5/`) and the current Prisma
-   schema (`backend/prisma/schema.prisma`) — what is actually implemented.
-4. The rest of `docs/reference/*` — technical facts derived from current
-   code.
-5. `docs/archive/*` — historical reference only.
+~~~text
+User latest instruction
+→ docs/reference/product-spec.md
+→ current code / schema
+→ other reference docs
+→ portfolio
+→ archive
+~~~
 
-`product-spec.md` describes what the product is currently *meant* to do; the
-code and schema show what it *actually* does. These can disagree — a spec
-change not yet implemented, or an implementation that drifted from the spec.
-When they do:
+product-spec.md 可以有意领先于单次代码提交。
 
-- do not guess which one is "right" and silently change the other to match;
-- state the conflict explicitly in your response;
-- let the user's current task decide whether the spec or the implementation
-  is the one that should change;
-- `docs/archive/*` never overrides either one, regardless of this conflict.
+不要因为旧代码尚未同步，就自动把 Product Spec 改回旧状态。
 
-`product-spec.md` not existing yet is the current normal state — do not
-create it yourself (see section 2).
+## Before Coding
 
-## 2. Reference Docs
+先阅读：
 
-Current, code-derived technical facts live under `docs/reference/`:
+~~~text
+product-spec.md
++
+对应 reference
++
+相关 code
+~~~
 
-- `docs/reference/architecture.md` — module map and call relationships.
-- `docs/reference/data-model.md` — Prisma models, fields, constraints.
-- `docs/reference/api-reference.md` — controllers, routes, auth, error codes.
-- `docs/reference/state-machines.md` — ScenePortrait job states, Share/Hug/
-  Entitlement states, and iOS-only UI states.
-- `docs/reference/ai-provider-integration.md` — ImageGenProvider /
-  VideoGenProvider architecture, provider registry, environment variables.
-- `docs/reference/testing.md` — test layers, how to run them, CI behavior.
+## Current Product Domains
 
-Read the relevant one before changing that area of the system, instead of
-re-deriving it from scratch or relying on a possibly stale mental model.
+当前范围包括：
 
-Two additional reference paths are reserved for the user to write directly —
-do not create or edit them: `docs/reference/product-spec.md`,
-`docs/reference/localization.md`.
+~~~text
+Core Memorial
+Share / Hug / Letters
+AI Scene
+Observation Window / PiP
+Planet Life
+Content Assets / Event Template
+Planet Style / Home Profile / Home Anchor
+Gift
+Generation / Quality Providers
+~~~
 
-## 3. `docs/archive/` Is Historical, Not Authoritative
+不要把这些当作未来规划。
 
-`docs/archive/v1/` and `docs/archive/research/` record a past state of the
-product, or a research snapshot at a point in time. Do not:
+## AI Rules
 
-- treat an archived doc as the current spec for anything;
-- change current code to match an archived doc;
-- rewrite an archived doc's body to match current behavior — its value is
-  recording what was true when it was written.
+~~~text
+Real Pet Photo
+= Pet Identity Source
 
-If an archived doc and the current code disagree, the code wins, always.
+Planet Style + Home Profile + Home Anchor
+= World Identity
+~~~
 
-## 4. Current Scope Boundaries
+核心原则：
 
-Do not add the following unless the user explicitly asks for it:
+> Rules determine facts; AI expresses them.
 
-- community features, a public discovery/feed page, a public comment system;
-- AI chat with the pet, or the pet "replying" as if it were present;
-- pet-resurrection framing of any kind;
-- task/points/ranking systems, a marketplace or shop;
-- multi-pet management beyond the current one-pet-per-account limit enforced
-  in `PetsService.create` (the schema itself does not hard-block more, the
-  service does);
-- system push notifications, anniversary reminders;
-- user-uploaded video as a memory type (distinct from the AI-generated scene
-  video described below, which already exists).
+Personal Scene 不自动改写 Canonical Planet World。
 
-The AI scene portrait / dynamic observation window feature — natural-language
-scene description → generated candidate portraits → a generated looping video
-in the home planet window, paid-only — **is implemented**. See
-`backend/src/scene-portraits/` and
-`ios/MemorialApp/Sources/Features/ScenePortrait/`. Do not treat it as out of
-scope, and do not describe it as unimplemented or planned in new writing.
+## Provider Rules
 
-## 5. Undefined Requirements
+Vendor 必须通过 Provider Interface 接入。
 
-If something is not covered by the current code, `docs/reference/*`, or an
-explicit user request:
+未知 Provider Key 必须 fail fast。
 
-- do not invent product scope;
-- do not silently implement an adjacent feature while working on something
-  else;
-- ask the user, or note it as an open question in your response.
+禁止业务层直接依赖 Vendor implementation。
 
-## 6. Engineering Conventions
+## Product Boundaries
 
-- Backend: NestJS + Prisma + PostgreSQL. A new external vendor integration
-  (image/video generation, etc.) goes behind an interface with an explicit,
-  exhaustive provider registry — see
-  `backend/src/scene-portraits/scene-portraits.module.ts`. An unrecognized
-  provider name must fail at startup; it must never silently resolve to some
-  default vendor.
-- Never commit real secrets. `.env.example` documents variable names only,
-  left blank.
-- `npm run lint` (backend and h5) may rewrite source (`--fix` on the backend
-  script); CI must use a non-mutating check instead (`npm run lint:check` on
-  the backend) so a CI run never silently modifies the working tree.
-- Run backend unit tests, provider contract tests, and e2e tests before
-  considering a backend change done — see `docs/reference/testing.md`.
-- Live third-party AI APIs (Ark/Seedream/Seedance, and any future vendor)
-  must never run inside CI. Validate them with the smoke script
-  (`backend/scripts/smoke-scene-provider.ts`) instead.
-- iOS: DEBUG-only scaffolding must be wrapped in `#if DEBUG` and must have no
-  effect on Release builds. A paid-gated feature must be enforced
-  server-side; hiding its entry point in the UI alone is not enough.
+未经用户明确要求，不增加：
+
+~~~text
+AI Pet Chat
+Pet Persona
+Resurrection
+Public Feed / Comment / Ranking
+Task / Points / Level
+RPG Gift Economy
+Multi-pet Frontend
+~~~
+
+## Planet Life Invariants
+
+生成要求：
+
+~~~text
+enabled
+AND !paused
+AND eligible time
+AND no unread event
+AND under weekly cap
+~~~
+
+生成结果只有通过质量检查后才能发布。
+
+Bad Case：
+
+- 隐藏 Event；
+- 恢复相关 Gift 为 Pending；
+- 如命中当前 Home Anchor，则使 Anchor 失效。
+
+HomeProfile：
+
+- 初始化一次；
+- re-enable 不重新随机；
+- 使用 frozen visualSnapshot；
+- HomeVariant 后续修改不能改变已有 Home。
+
+## Purchase / Entitlement
+
+Paid Gate 必须服务端校验。
+
+StoreKit Transaction 由 Backend 验证。
+
+Gift 价格来自 StoreKit，不硬编码进 GiftAsset。
+
+## Validation
+
+Backend 变更完成前至少执行：
+
+~~~text
+Unit / Contract
+Relevant E2E
+Build
+Lint
+~~~
+
+真实第三方模型调用不进入普通确定性 CI。
+
+## Undefined Requirements
+
+如果用户要求、Product Spec 与当前实现都没有定义某个行为：
+
+- 不自行扩展相邻功能；
+- 先确认要求，或明确说明 open question；
+- 不使用 archive 补齐当前需求。

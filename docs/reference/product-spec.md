@@ -1,226 +1,185 @@
 # Pawlight Product Spec
 
-> 当前产品规则事实源。
-> 历史 V1 文档位于 `docs/archive/`。
+> Pawlight 当前产品规则事实源。历史版本与研究材料位于 docs/archive/。
 
-## 1. 定位
+## Product
 
-Pawlight 是面向宠物离世后纪念需求的：
+Pawlight = iOS Owner App + H5 Memorial Page。
 
-```text
-iOS Owner App
-+
-H5 Visitor Memorial Page
-```
+内容分为两类：
 
-核心产品闭环：
+**真实回忆**
 
-```text
-创建
-→ 纪念
-→ 分享
-→ Hug
-→ Owner 回访
-```
+- Photo
+- Story
+- Memorial Sentence
+- Letter
 
-V2 增加 AI 场景画像和动态观察窗。
+**AI 想象纪念**
 
-## 2. 用户
+- AI Scene
+- Observation Window
+- Planet Life
 
-### Owner
+AI 内容必须标识为想象式纪念，不模拟宠物人格或真实来世。
 
-可以：
+## User / Pet
 
-- 创建 1 只 Pet；
-- 设置 MAIN Photo；
-- 编辑 Story / Memorial Note；
-- 管理 Album；
-- 使用 Share；
-- 查看 Hug；
-- PAID 使用 Letters；
-- PAID 使用 AI Scene。
+- P0 一个 User 最多 1 个 Pet；
+- Pet Type：CAT / DOG / OTHER；
+- Visitor 无需登录。
 
-### Visitor
+## Entitlement
 
-通过 Share Link 进入 H5。
+FREE：
 
-无需登录。
+- 基础纪念；
+- Share / Hug；
+- Album 9 张。
 
-只能访问 Public-safe Memorial Data。
+PAID：
 
-## 3. 当前明确不做
+- Album 50 张；
+- Letters；
+- AI Scene；
+- Observation Window；
+- Planet Life。
 
-- 社区 / Feed；
-- 评论；
-- 关注；
-- 排行榜；
-- 游戏化；
-- AI 宠物聊天；
-- AI 回复；
-- 宠物人格模拟；
-- 复活叙事；
-- 多宠前台管理。
+## AI Scene
 
-## 4. Photo
-
-```text
-MAIN
-ALBUM
-```
-
-MAIN：
-
-- Pet 主视觉；
-- AI reference；
-- 不计 Album quota；
-- 不通过 Album delete flow 删除。
-
-ALBUM：
-
-```text
-FREE  9
-PAID 50
-```
-
-Quota 由 Backend 最终校验。
-
-## 5. Entitlement
-
-绑定 User。
-
-| FeatureFREEPAID |   |    |
-| --------------- | - | -- |
-| Pet             | 1 | 1  |
-| Story           | ✓ | ✓  |
-| Share           | ✓ | ✓  |
-| Hug             | ✓ | ✓  |
-| Album           | 9 | 50 |
-| Letters         | — | ✓  |
-| AI Scene        | — | ✓  |
-
-当前 PAID 为一次性购买。
-
-## 6. Share
-
-Visibility：
-
-```text
-LINK
-PRIVATE
-```
-
-Hug Enabled 独立保存。
-
-规则：
-
-- LINK 可通过分享地址访问；
-- PRIVATE 由 Backend 拒绝；
-- Public Response 不包含 User / Entitlement / Letter / Purchase 等私密数据。
-
-## 7. Hug
-
-```text
-shareId + visitorFingerprint
-```
-
-唯一约束。
-
-状态至少包括：
-
-```text
-success
-already_hugged
-hug_disabled
-private_or_unavailable
-not_found
-```
-
-## 8. Letters
-
-- PAID only；
-- Owner only；
-- Private；
-- 不进入 H5；
-- 不提供 AI Reply。
-
-## 9. AI Scene
-
-流程：
-
-```text
-MAIN Photo
-+ Scene
-
-→ Job
+~~~text
+MAIN Photo + Scene
 → 4 Candidates
 → Owner Select
 → Video
-→ R2
-→ observationVideo
-```
+→ Observation Window
+~~~
 
-AI Scene：
+真实照片始终保留。
 
-- PAID only；
-- 有生成尝试上限；
-- AI 内容不覆盖 MAIN Photo；
-- 支持恢复原照片；
-- Job 必须有明确 DONE / FAILED 状态。
+## Planet Life
 
-## 10. AI 边界
+首次开启：
 
-允许：
+- PAID；
+- 已完成 AI Scene。
 
-- Reference image generation；
-- Scene generation；
-- Light-motion video。
+调度：
 
-不允许：
+~~~text
+48–96h
+每周最多 3 条
+最多 1 条 UNREAD
+Read 后重新计时
+Pause 时停止生成
+~~~
 
-- AI Reply；
+Event：
+
+~~~text
+UNREAD → READ
+UNREAD / READ → BAD_CASE
+~~~
+
+## Content System
+
+~~~text
+Content Assets
+→ Event Template
+→ Event Facts
+→ AI Text / Image
+→ Quality Check
+→ Planet Event
+~~~
+
+原则：
+
+> Rules determine facts; AI expresses them.
+
+文本生成、图片生成、文本质检、图片质检均通过独立 Provider Interface 接入生产模型。
+
+## Identity
+
+~~~text
+Real Pet Photo
+→ Pet Identity
+
+Planet Style
++ Home Profile
++ Home Anchor
+→ World Identity
+~~~
+
+Personal Scene 不自动写入 Canonical Planet World。
+
+## Home
+
+HomeProfile 第一次开启时初始化一次。
+
+固定：
+
+- Cottage
+- Palette
+- Roof
+- Door
+- Window
+- Signature Plant
+- Nameplate
+
+保存 frozen visual snapshot。
+
+Home Anchor：
+
+~~~text
+NONE
+→ ESTABLISHED
+
+Bad Case
+→ INVALIDATED
+
+Next valid Home Event
+→ ESTABLISHED new version
+~~~
+
+## Gift
+
+~~~text
+Purchase
+→ PENDING
+→ Valid Event
+→ COMPLETED
+~~~
+
+同一时间最多 1 个 Pending Gift。
+
+Bad Case：
+
+~~~text
+COMPLETED → PENDING
+~~~
+
+价格来自 StoreKit。
+
+## Share / Hug
+
+Visibility：
+
+~~~text
+LINK / PRIVATE
+~~~
+
+Hug 去重：
+
+~~~text
+shareId + visitorFingerprint
+~~~
+
+## Explicitly Out of Scope
+
+- AI Pet Chat；
 - Pet Persona；
-- Continuous AI Chat；
-- “Pet is back” 类表达。
-
-## 11. Purchase
-
-```text
-StoreKit
-→ Signed Transaction
-→ Backend Verification
-→ Product / Revocation Check
-→ User Entitlement
-```
-
-客户端 Purchase State 不是最终服务端权益事实。
-
-## 12. Delete Account
-
-```text
-Sign out
-≠
-Delete account
-```
-
-Delete Account 需处理：
-
-- Photo assets；
-- AI assets；
-- User；
-- 关联 DB records。
-
-## 13. V1 → V2
-
-V1：
-
-```text
-Basic Memorial Loop
-```
-
-V2：
-
-```text
-Basic Memorial Loop
-+
-AI Scene / Dynamic Planet Window
-```
+- Resurrection；
+- Public Feed / Comment / Ranking；
+- Task / Level / Currency；
+- Multi-pet frontend；
+- RPG-style Gift System。
