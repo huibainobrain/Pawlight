@@ -52,6 +52,7 @@ model Pet {
   planetLifeState   PlanetLifeState?
   planetEvents      PlanetEvent[]
   giftInstances     GiftInstance[]
+  homeProfile       HomeProfile?
 }
 
 enum PetType {
@@ -215,23 +216,29 @@ enum PlanetEventStatus {
 // "星球来信" (unread) and "星球纪事" (read) are the same object at different
 // read states — one status field, not two separate models.
 model PlanetEvent {
-  id               String            @id @default(cuid())
-  petId            String
-  pet              Pet               @relation(fields: [petId], references: [id], onDelete: Cascade)
-  eventTemplateKey String
-  title            String
-  body             String
-  language         String
-  imageR2Key       String
-  imageR2Url       String
-  status           PlanetEventStatus @default(UNREAD)
+  id                           String            @id @default(cuid())
+  petId                        String
+  pet                          Pet               @relation(fields: [petId], references: [id], onDelete: Cascade)
+  eventTemplateKey             String
+  title                        String
+  body                         String
+  language                     String
+  imageR2Key                   String
+  imageR2Url                   String
+  status                       PlanetEventStatus @default(UNREAD)
   // Snapshot of the resolved facts (location/action/time/atmosphere/...)
   // actually used for this event — avoids a column per fact dimension.
-  factsJson        Json
-  giftInstanceId   String?
-  giftInstance     GiftInstance?     @relation(fields: [giftInstanceId], references: [id])
-  createdAt        DateTime          @default(now())
-  readAt           DateTime?
+  factsJson                    Json
+  giftInstanceId               String?
+  giftInstance                 GiftInstance?     @relation(fields: [giftInstanceId], references: [id])
+  // Non-null only on the event that established (or re-established, after a
+  // Bad Case invalidation) this pet's Home Anchor, carrying the version
+  // number it became. This is the durable history of every anchor this pet
+  // has ever had — HomeProfile itself only caches the CURRENT one for fast
+  // reads; the full lineage lives here, in events that are never deleted.
+  establishedHomeAnchorVersion Int?
+  createdAt                    DateTime          @default(now())
+  readAt                       DateTime?
 
   @@index([petId, createdAt])
   @@index([giftInstanceId])
@@ -261,12 +268,28 @@ model EventTemplate {
   atmosphereKeys       Json
   ambientDetailKeys    Json?
   giftCompatible       Boolean  @default(false)
+  // Whether an event this template produces is suitable to establish (or
+  // re-establish) this pet's Home Anchor. Deliberately NOT the same thing
+  // as "is this template's location Home Base" — not every Home Base event
+  // need make a good world-visual anchor, and this is checked together with
+  // the resolved location's actual scope at generation time (see
+  // PlanetEventGenerationService.pickTemplate), never trusted alone.
+  homeAnchorEligible   Boolean  @default(false)
   weight               Int      @default(1)
   cooldownDays         Int?
   speciesApplicability Json?
   active               Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+}
+
+// HOME_BASE locations read Home Profile (and, once established, the Home
+// Anchor image) at generation time; NEARBY locations only inherit Planet
+// Style. Location is the single source of truth for this — EventTemplate
+// deliberately does not carry a second copy of this distinction.
+enum LocationScope {
+  HOME_BASE
+  NEARBY
 }
 
 // A Location content asset — stable key, bilingual name, and the two
@@ -276,12 +299,17 @@ model EventTemplate {
 // fragment handed to the image-gen provider, which can reasonably diverge in
 // wording from visualDefinition).
 model LocationAsset {
-  id                     String   @id @default(cuid())
-  key                    String   @unique
+  id                     String        @id @default(cuid())
+  key                    String        @unique
   nameZh                 String
   nameEn                 String
   visualDefinition       String
   imageGenPrompt         String
+  // HOME_BASE = generation reads this pet's Home Profile (and current Home
+  // Anchor, once established); NEARBY = inherits Planet Style only. Default
+  // NEARBY so existing rows stay unaffected until a human deliberately
+  // marks one HOME_BASE.
+  scope                  LocationScope @default(NEARBY)
   speciesApplicability   Json?
   // Optional: ActionAsset keys that don't make narrative sense at this
   // location (e.g. a window-sill location excludes a "digging" action).
@@ -291,9 +319,9 @@ model LocationAsset {
   // filter-with-fallback enforcement (a misconfigured exclusion can make a
   // pairing less likely, never blocks generation outright).
   incompatibleActionKeys Json?
-  active                 Boolean  @default(true)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  active                 Boolean       @default(true)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 }
 
 // An Action content asset — same role as LocationAsset for EventTemplate's
@@ -338,6 +366,133 @@ model ContentAsset {
   updatedAt         DateTime         @updatedAt
 
   @@index([kind])
+}
+
+// ---------------------------------------------------------------------------
+// Canonical Planet World / Home Identity. Planet Style is a global, versioned
+// visual ruleset (immutable once a pet binds to a version — a future v2 must
+// never retroactively change v1 pets' worlds). Home Variant Asset is the
+// human-curated catalog of selectable design elements used only to
+// INITIALIZE a Home Profile. Home Profile is the per-pet, long-term-stable
+// result of that initialization: it freezes a resolved visual snapshot so a
+// later edit to the Variant catalog can never change an existing pet's home.
+// ---------------------------------------------------------------------------
+
+// One immutable, versioned Planet Style configuration. Seeded with one P0
+// test version ("pawlight_planet_v1"). `active` only controls eligibility
+// for NEW Home Profile initializations — a pet already bound to a version
+// keeps reading it via the FK regardless of this flag, forever.
+model PlanetStyle {
+  id                       String   @id @default(cuid())
+  key                      String   @unique
+  version                  Int      @unique
+  illustrationLanguage     String
+  realismLevel             String
+  colorSaturationDirection String
+  lighting                 String
+  materialFeel             String
+  worldSafetyRules         String
+  forbiddenWorldStyles     String
+  // The human-synthesized paragraph actually handed to the image-gen
+  // provider — distinct from the structured rule fields above for the same
+  // reason LocationAsset splits visualDefinition from imageGenPrompt.
+  imageGenGuidance         String
+  active                   Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  homeProfiles HomeProfile[]
+}
+
+enum HomeVariantKind {
+  COTTAGE_BLUEPRINT
+  PALETTE
+  ROOF
+  DOOR
+  WINDOW
+  SIGNATURE_PLANT
+}
+
+// Human-curated catalog a Home Profile is initialized FROM — "material to
+// build a world with," never read again after that one initialization. Six
+// kinds share this one table (kind-discriminated, same reasoning as
+// ContentAsset) since avoiding six near-identical tables for simple catalog
+// rows is worth more than per-kind type safety here.
+model HomeVariantAsset {
+  id               String          @id @default(cuid())
+  key              String          @unique
+  kind             HomeVariantKind
+  nameZh           String
+  nameEn           String
+  visualDefinition String
+  imageGenPrompt   String
+  // Only meaningful for kind = PALETTE: a pure prompt string isn't precise
+  // enough for a future non-AI-rendered consumer (e.g. a small UI icon).
+  // Null for every other kind.
+  colorTokens      Json?
+  active           Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([kind])
+}
+
+enum HomeAnchorStatus {
+  NONE // never established yet
+  ESTABLISHED // currently has a valid, current anchor image
+  INVALIDATED // had one, its event was marked Bad Case — needs re-establishing
+}
+
+// Per-pet, long-term-stable result of Home initialization — "what this
+// pet's world was actually resolved to," never recomputed from the Variant
+// catalog after creation. One row per Pet, created once on first enable
+// (PlanetLifeService.enable -> HomeProfileService.initializeIfNeeded) and
+// never re-rolled afterward.
+model HomeProfile {
+  id    String @id @default(cuid())
+  petId String @unique
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  planetStyleId String
+  // No onDelete here (defaults to RESTRICT) — deliberately: a PlanetStyle
+  // row must never be deletable while any pet is still pinned to it, since
+  // that pin is meant to last forever.
+  planetStyle   PlanetStyle @relation(fields: [planetStyleId], references: [id])
+
+  // The Variant keys actually selected at init — kept for traceability /
+  // debugging only. The actual visual content a generation reads is
+  // visualSnapshot below, never a live lookup through these keys, so a
+  // later edit to HomeVariantAsset can never change an existing pet's home.
+  cottageBlueprintKey String
+  paletteKey          String
+  roofKey             String
+  doorKey             String
+  windowKey           String
+  signaturePlantKey   String
+  nameplateText       String
+
+  // Frozen, resolved description of this pet's home (cottage/palette/roof/
+  // door/window/signature plant + nameplate, plus a synthesized summary
+  // prompt) — see home-profile.types.ts for the shape. The fact source every
+  // Home-scoped generation reads from.
+  visualSnapshot Json
+
+  homeAnchorStatus     HomeAnchorStatus @default(NONE)
+  // How many anchors this pet has EVER validly had (0 = none yet). Only
+  // increments when a NEW anchor is established — invalidation does not
+  // decrement it, so it also doubles as "which version are we currently on
+  // or waiting to replace."
+  homeAnchorVersion    Int              @default(0)
+  homeAnchorImageR2Key String?
+  homeAnchorImageR2Url String?
+  // The PlanetEvent that established the CURRENT anchor — null whenever
+  // status is NONE or INVALIDATED. Full historical lineage (including past,
+  // since-invalidated anchors) lives on PlanetEvent.establishedHomeAnchorVersion
+  // instead, since events are never deleted and this field is overwritten.
+  homeAnchorEventId    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum GiftSaleStatus {

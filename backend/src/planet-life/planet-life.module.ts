@@ -6,6 +6,7 @@ import { PlanetLifeService } from './planet-life.service';
 import { PlanetEventGenerationService } from './planet-event-generation.service';
 import { PlanetLifeScheduler } from './planet-life.scheduler';
 import { GiftsService } from './gifts.service';
+import { HomeProfileService } from './home-profile.service';
 import { EVENT_TEXT_GEN_PROVIDER } from './providers/event-text-gen.provider';
 import type { EventTextGenProvider as EventTextGenProviderImpl } from './providers/event-text-gen.provider';
 import { EVENT_IMAGE_GEN_PROVIDER } from './providers/event-image-gen.provider';
@@ -65,6 +66,7 @@ function resolve<T>(
     PlanetEventGenerationService,
     PlanetLifeScheduler,
     GiftsService,
+    HomeProfileService,
     {
       provide: EVENT_TEXT_GEN_PROVIDER,
       useClass: resolve('PLANET_LIFE_TEXT_PROVIDER', TEXT_PROVIDERS),

@@ -1,15 +1,21 @@
 import { PlanetEventGenerationService } from './planet-event-generation.service';
 import { GiftsService } from './gifts.service';
+import { HomeProfileService } from './home-profile.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 function makePrisma() {
-  return {
+  const prisma = {
     planetLifeState: {
       findMany: jest.fn(),
       findUniqueOrThrow: jest.fn(),
       update: jest.fn(),
     },
-    planetEvent: { findFirst: jest.fn(), create: jest.fn() },
+    planetEvent: {
+      findFirst: jest.fn(),
+      // Needs a real id for the Home Anchor write, which references the
+      // just-created event's id inside the same transaction.
+      create: jest.fn().mockResolvedValue({ id: 'created-event-id' }),
+    },
     pet: { findUniqueOrThrow: jest.fn() },
     photo: { findFirst: jest.fn() },
     eventTemplate: { findMany: jest.fn() },
@@ -18,8 +24,25 @@ function makePrisma() {
     locationAsset: { findMany: jest.fn() },
     actionAsset: { findMany: jest.fn() },
     contentAsset: { findUniqueOrThrow: jest.fn() },
-    $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
+    // The Home Anchor write happens inline inside the transaction (see
+    // generateForPet) — tx.homeProfile.update, not through HomeProfileService.
+    homeProfile: { update: jest.fn() },
+    $transaction: jest.fn(),
   };
+  // $transaction now needs to support BOTH the array form used elsewhere in
+  // this file's production code AND the interactive-callback form
+  // generateForPet uses for the Home Anchor write (which needs the newly
+  // created PlanetEvent's own id, not available until create() has run).
+  // Passing `prisma` itself as `tx` keeps every existing
+  // prisma.<model>.<method> assertion working unchanged, since that's the
+  // exact same jest.fn() the callback invokes.
+  prisma.$transaction.mockImplementation((arg: unknown) => {
+    if (typeof arg === 'function') {
+      return (arg as (tx: typeof prisma) => Promise<unknown>)(prisma);
+    }
+    return Promise.all(arg as Promise<unknown>[]);
+  });
+  return prisma;
 }
 
 function asPrismaService(prisma: ReturnType<typeof makePrisma>) {
@@ -66,6 +89,59 @@ function asGiftsService(giftsService: ReturnType<typeof makeGiftsService>) {
   return giftsService as unknown as GiftsService;
 }
 
+// ── Home Profile fixtures ────────────────────────────────────────────────
+// ESTABLISHED is the default (see makeHomeProfileService) so the ~20 tests
+// below that predate Home Anchor and don't care about it keep exercising
+// ordinary, unrestricted selection exactly as before. Tests that DO care
+// override getForPet explicitly.
+const PLANET_STYLE_FIXTURE = {
+  id: 'style-1',
+  key: 'pawlight_planet_v1',
+  imageGenGuidance: 'soft illustrated planet style',
+};
+const HOME_VISUAL_SNAPSHOT_FIXTURE = {
+  cottageBlueprint: {
+    key: 'cottage_warm_wood',
+    nameZh: '暖木小屋',
+    nameEn: 'warm wooden cottage',
+    imageGenPrompt: 'a warm wooden cottage',
+  },
+  nameplateText: 'Mochi',
+  summaryPrompt: 'a cozy warm wooden cottage with a nameplate reading "Mochi"',
+};
+const ESTABLISHED_HOME_PROFILE = {
+  petId: 'pet-1',
+  homeAnchorStatus: 'ESTABLISHED',
+  homeAnchorVersion: 1,
+  homeAnchorImageR2Key: 'planet-life/pet-1/anchor-v1.png',
+  homeAnchorImageR2Url: 'https://r2.example/anchor-v1.png',
+  visualSnapshot: HOME_VISUAL_SNAPSHOT_FIXTURE,
+  planetStyle: PLANET_STYLE_FIXTURE,
+};
+const UNESTABLISHED_HOME_PROFILE = {
+  petId: 'pet-1',
+  homeAnchorStatus: 'NONE',
+  homeAnchorVersion: 0,
+  homeAnchorImageR2Key: null,
+  homeAnchorImageR2Url: null,
+  visualSnapshot: HOME_VISUAL_SNAPSHOT_FIXTURE,
+  planetStyle: PLANET_STYLE_FIXTURE,
+};
+
+function makeHomeProfileService() {
+  return {
+    getForPet: jest.fn().mockResolvedValue(ESTABLISHED_HOME_PROFILE),
+    initializeIfNeeded: jest.fn(),
+    invalidateAnchorIfCurrent: jest.fn(),
+  };
+}
+
+function asHomeProfileService(
+  homeProfileService: ReturnType<typeof makeHomeProfileService>,
+) {
+  return homeProfileService as unknown as HomeProfileService;
+}
+
 // ── Content-asset fixtures ───────────────────────────────────────────────
 // Deliberately mirror the real seed shape (English-slug keys, bilingual
 // names, a model-facing description) rather than reusing raw Chinese text
@@ -76,6 +152,7 @@ const LOCATION = {
   key: 'garden_corner',
   nameZh: '小花园',
   nameEn: 'the garden',
+  scope: 'NEARBY',
   imageGenPrompt: 'a small garden corner',
   speciesApplicability: null,
   incompatibleActionKeys: null,
@@ -85,7 +162,20 @@ const YARD_LOCATION = {
   key: 'yard',
   nameZh: '院子',
   nameEn: 'the yard',
+  scope: 'NEARBY',
   imageGenPrompt: 'a quiet backyard at night',
+  speciesApplicability: null,
+  incompatibleActionKeys: null,
+  active: true,
+};
+// This round's addition: the one HOME_BASE location, used to exercise the
+// Home Anchor lifecycle.
+const HOME_LOCATION = {
+  key: 'home_entrance',
+  nameZh: '小屋门前',
+  nameEn: 'the cottage doorstep',
+  scope: 'HOME_BASE',
+  imageGenPrompt: 'the area just outside the front door',
   speciesApplicability: null,
   incompatibleActionKeys: null,
   active: true,
@@ -155,7 +245,7 @@ const AMBIENT_FLOWERS = {
   visualDescription: 'flowers scattered nearby',
 };
 
-const ALL_LOCATIONS = [LOCATION, YARD_LOCATION];
+const ALL_LOCATIONS = [LOCATION, YARD_LOCATION, HOME_LOCATION];
 const ALL_ACTIONS = [ACTION, PLAYING_ACTION, WALKING_ACTION, STARGAZING_ACTION];
 const ALL_CONTENT_ASSETS = [
   TIME_DAYTIME,
@@ -173,6 +263,25 @@ const TEMPLATE = {
   atmosphereKeys: ['sunny'],
   ambientDetailKeys: ['flowers_grass'],
   giftCompatible: true,
+  homeAnchorEligible: false,
+  weight: 1,
+  cooldownDays: null,
+  speciesApplicability: null,
+  active: true,
+};
+
+// This round's addition: the one homeAnchorEligible template, pointing at
+// the one HOME_BASE location — used to exercise the Home Anchor lifecycle.
+const HOME_TEMPLATE = {
+  id: 'template-home',
+  key: 'home_doorstep_rest',
+  locationKeys: ['home_entrance'],
+  actionKeys: ['resting'],
+  timeKeys: ['daytime'],
+  atmosphereKeys: ['sunny'],
+  ambientDetailKeys: ['flowers_grass'],
+  giftCompatible: false,
+  homeAnchorEligible: true,
   weight: 1,
   cooldownDays: null,
   speciesApplicability: null,
@@ -187,6 +296,7 @@ function makeService(
   imageQuality = makeImageQuality(),
   textQuality = makeTextQuality(),
   giftsService = makeGiftsService(),
+  homeProfileService = makeHomeProfileService(),
 ) {
   const service = new PlanetEventGenerationService(
     asPrismaService(prisma),
@@ -196,6 +306,7 @@ function makeService(
     imageQuality,
     textQuality,
     asGiftsService(giftsService),
+    asHomeProfileService(homeProfileService),
   );
   return {
     service,
@@ -206,6 +317,7 @@ function makeService(
     imageQuality,
     textQuality,
     giftsService,
+    homeProfileService,
   };
 }
 
@@ -231,13 +343,19 @@ function setUpDuePet(prisma: ReturnType<typeof makePrisma>) {
     weeklyWindowStart: null,
   });
 
-  // Faithful-enough fakes of Prisma's `where: { key: { in: [...] } }`
+  // Faithful-enough fakes of Prisma's `where: { key: { in: [...] }, ... }`
   // filtering — real behavior matters here because the service trusts
-  // whatever rows come back as the already-eligible candidate pool.
+  // whatever rows come back as the already-eligible candidate pool. scope
+  // is matched too (not just key) since filterHomeAnchorEligible's lookup
+  // specifically asks for scope: 'HOME_BASE'.
   prisma.locationAsset.findMany.mockImplementation(
-    ({ where }: { where: { key: { in: string[] } } }) =>
+    ({ where }: { where: { key: { in: string[] }; scope?: string } }) =>
       Promise.resolve(
-        ALL_LOCATIONS.filter((l) => where.key.in.includes(l.key)),
+        ALL_LOCATIONS.filter(
+          (l) =>
+            where.key.in.includes(l.key) &&
+            (where.scope === undefined || l.scope === where.scope),
+        ),
       ),
   );
   prisma.actionAsset.findMany.mockImplementation(
@@ -316,6 +434,7 @@ describe('PlanetEventGenerationService.runTick — gift/template compatibility i
     atmosphereKeys: ['sunny'],
     ambientDetailKeys: null,
     giftCompatible: true,
+    homeAnchorEligible: false,
     weight: 1,
     cooldownDays: null,
     speciesApplicability: null,
@@ -491,6 +610,129 @@ describe('PlanetEventGenerationService.runTick — content assets are structured
     await service.runTick();
 
     expect(prisma.planetEvent.create).toHaveBeenCalledTimes(1); // still publishes
+  });
+});
+
+// Home Anchor lifecycle (this round's new layer). ESTABLISHED is the
+// default elsewhere in this file — every test here explicitly overrides
+// getForPet to the specific anchor state it's exercising.
+describe('PlanetEventGenerationService.runTick — Home Anchor lifecycle', () => {
+  it('restricts selection to Home Base + homeAnchorEligible templates while no valid anchor exists, every time, not just usually', async () => {
+    const { service, prisma, homeProfileService } = makeService();
+    setUpDuePet(prisma);
+    homeProfileService.getForPet.mockResolvedValue(UNESTABLISHED_HOME_PROFILE);
+    // Both templates eligible on every other dimension; only HOME_TEMPLATE
+    // qualifies for anchor establishment.
+    prisma.eventTemplate.findMany.mockResolvedValue([TEMPLATE, HOME_TEMPLATE]);
+
+    for (let i = 0; i < 10; i++) {
+      await service.runTick();
+    }
+
+    const keys = prisma.planetEvent.create.mock.calls.map(
+      (call: unknown[]) =>
+        (call[0] as { data: { eventTemplateKey: string } }).data
+          .eventTemplateKey,
+    );
+    expect(keys.every((k: string) => k === 'home_doorstep_rest')).toBe(true);
+  });
+
+  it('defers silently (no publish) when an anchor is needed but no template actually qualifies', async () => {
+    const { service, prisma, homeProfileService } = makeService();
+    setUpDuePet(prisma);
+    homeProfileService.getForPet.mockResolvedValue(UNESTABLISHED_HOME_PROFILE);
+    // garden_rest is NOT homeAnchorEligible, and it's the only template.
+    prisma.eventTemplate.findMany.mockResolvedValue([TEMPLATE]);
+
+    await service.runTick();
+
+    expect(prisma.planetEvent.create).not.toHaveBeenCalled();
+  });
+
+  it('does not establish an anchor when image quality fails, even on an otherwise-qualifying Home event', async () => {
+    const { service, prisma, imageQuality, homeProfileService } = makeService();
+    setUpDuePet(prisma);
+    homeProfileService.getForPet.mockResolvedValue(UNESTABLISHED_HOME_PROFILE);
+    prisma.eventTemplate.findMany.mockResolvedValue([HOME_TEMPLATE]);
+    imageQuality.check.mockResolvedValue({ pass: false, reason: 'test' });
+
+    await service.runTick();
+
+    expect(prisma.planetEvent.create).not.toHaveBeenCalled();
+    expect(prisma.homeProfile.update).not.toHaveBeenCalled();
+  });
+
+  it('establishes Home Anchor V1 on the first successful Home Base publish, tagging the event with the new version', async () => {
+    const { service, prisma, homeProfileService } = makeService();
+    setUpDuePet(prisma);
+    homeProfileService.getForPet.mockResolvedValue(UNESTABLISHED_HOME_PROFILE);
+    prisma.eventTemplate.findMany.mockResolvedValue([HOME_TEMPLATE]);
+
+    await service.runTick();
+
+    const createArg = prisma.planetEvent.create.mock.calls[0][0];
+    expect(createArg.data.establishedHomeAnchorVersion).toBe(1);
+
+    expect(prisma.homeProfile.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { petId: 'pet-1' },
+        data: expect.objectContaining({
+          homeAnchorStatus: 'ESTABLISHED',
+          homeAnchorVersion: 1,
+        }),
+      }),
+    );
+  });
+
+  it('reads the established anchor into image generation for a later Home event, and does not re-establish it', async () => {
+    const { service, prisma, imageGen, homeProfileService } = makeService();
+    setUpDuePet(prisma);
+    homeProfileService.getForPet.mockResolvedValue(ESTABLISHED_HOME_PROFILE);
+    prisma.eventTemplate.findMany.mockResolvedValue([HOME_TEMPLATE]);
+
+    await service.runTick();
+
+    expect(imageGen.generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        home: {
+          visualSnapshot: HOME_VISUAL_SNAPSHOT_FIXTURE,
+          anchorImageUrl: 'https://r2.example/anchor-v1.png',
+          anchorVersion: 1,
+        },
+      }),
+    );
+    expect(prisma.homeProfile.update).not.toHaveBeenCalled();
+    const createArg = prisma.planetEvent.create.mock.calls[0][0];
+    expect(createArg.data.establishedHomeAnchorVersion).toBeNull();
+  });
+
+  it('does not attach Home context to a Nearby event, independent of anchor state', async () => {
+    const { service, prisma, imageGen, homeProfileService } = makeService();
+    setUpDuePet(prisma);
+    homeProfileService.getForPet.mockResolvedValue(ESTABLISHED_HOME_PROFILE);
+    prisma.eventTemplate.findMany.mockResolvedValue([TEMPLATE]); // garden_rest, NEARBY
+
+    await service.runTick();
+
+    expect(imageGen.generate).toHaveBeenCalledWith(
+      expect.objectContaining({ home: undefined }),
+    );
+  });
+
+  // PRD: Home Anchor Image is a visual reference only, never an identity
+  // source — the pet's real photo must always be referenceImageUrl, with
+  // or without a Home event in play.
+  it("always uses the pet's real main photo as referenceImageUrl, never the Home Anchor image", async () => {
+    const { service, prisma, imageGen, homeProfileService } = makeService();
+    setUpDuePet(prisma);
+    homeProfileService.getForPet.mockResolvedValue(ESTABLISHED_HOME_PROFILE);
+    prisma.eventTemplate.findMany.mockResolvedValue([HOME_TEMPLATE]);
+
+    await service.runTick();
+
+    expect(imageGen.generate).toHaveBeenCalledWith(
+      expect.objectContaining({ referenceImageUrl: 'https://r2/main.jpg' }),
+    );
   });
 });
 

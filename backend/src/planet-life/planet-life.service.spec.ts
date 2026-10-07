@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PlanetLifeService } from './planet-life.service';
 import { GiftsService } from './gifts.service';
+import { HomeProfileService } from './home-profile.service';
 import { PlanetEventGenerationService } from './planet-event-generation.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -33,6 +34,12 @@ function makePrisma() {
     locationAsset: { upsert: jest.fn() },
     actionAsset: { upsert: jest.fn() },
     contentAsset: { upsert: jest.fn() },
+    planetStyle: { upsert: jest.fn() },
+    homeVariantAsset: { upsert: jest.fn() },
+    homeProfile: {
+      findUnique: jest.fn(),
+      deleteMany: jest.fn(),
+    },
     $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
   };
 }
@@ -66,19 +73,42 @@ function asGenerationService(
   return generationService as unknown as PlanetEventGenerationService;
 }
 
+function makeHomeProfileService() {
+  return {
+    initializeIfNeeded: jest.fn().mockResolvedValue(undefined),
+    invalidateAnchorIfCurrent: jest.fn().mockResolvedValue(undefined),
+    getForPet: jest.fn(),
+  };
+}
+
+function asHomeProfileService(
+  homeProfileService: ReturnType<typeof makeHomeProfileService>,
+) {
+  return homeProfileService as unknown as HomeProfileService;
+}
+
 function makeService(
   prisma = makePrisma(),
   storage = makeStorage(),
   giftsService = makeGiftsService(),
   generationService = makeGenerationService(),
+  homeProfileService = makeHomeProfileService(),
 ) {
   const service = new PlanetLifeService(
     asPrismaService(prisma),
     storage,
     asGiftsService(giftsService),
     asGenerationService(generationService),
+    asHomeProfileService(homeProfileService),
   );
-  return { service, prisma, storage, giftsService, generationService };
+  return {
+    service,
+    prisma,
+    storage,
+    giftsService,
+    generationService,
+    homeProfileService,
+  };
 }
 
 describe('PlanetLifeService.onModuleInit (reference data seeding)', () => {
@@ -130,13 +160,65 @@ describe('PlanetLifeService.onModuleInit (reference data seeding)', () => {
       ]),
     );
 
-    const templateArg = prisma.eventTemplate.upsert.mock.calls[0][0] as {
-      create: Record<string, unknown>;
-    };
+    const templateArg = prisma.eventTemplate.upsert.mock.calls.find(
+      (call: unknown[]) =>
+        (call[0] as { where: { key: string } }).where.key === 'garden_rest',
+    )?.[0] as { create: Record<string, unknown> };
     expect(templateArg.create).toMatchObject({
       locationKeys: ['garden_corner'],
       actionKeys: ['resting'],
       ambientDetailKeys: ['flowers_grass'],
+    });
+  });
+
+  // This round's new layer: one test PlanetStyle version, one test
+  // HomeVariantAsset per dimension, and the one HOME_BASE Location +
+  // homeAnchorEligible Template needed to exercise the Home Anchor
+  // lifecycle end-to-end.
+  it('seeds a PlanetStyle version, one HomeVariantAsset per dimension, a HOME_BASE Location, and a homeAnchorEligible Template', async () => {
+    const { service, prisma } = makeService();
+    prisma.giftAsset.upsert.mockResolvedValue({ id: 'asset-ball' });
+
+    await service.onModuleInit();
+
+    expect(prisma.planetStyle.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { key: 'pawlight_planet_v1' } }),
+    );
+    const planetStyleArg = prisma.planetStyle.upsert.mock.calls[0][0] as {
+      create: { version: number };
+    };
+    expect(planetStyleArg.create.version).toBe(1);
+
+    const variantKinds = prisma.homeVariantAsset.upsert.mock.calls.map(
+      (call: unknown[]) =>
+        (call[0] as { create: { kind: string } }).create.kind,
+    );
+    expect(new Set(variantKinds)).toEqual(
+      new Set([
+        'COTTAGE_BLUEPRINT',
+        'PALETTE',
+        'ROOF',
+        'DOOR',
+        'WINDOW',
+        'SIGNATURE_PLANT',
+      ]),
+    );
+
+    expect(prisma.locationAsset.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { key: 'home_entrance' },
+        create: expect.objectContaining({ scope: 'HOME_BASE' }),
+      }),
+    );
+
+    const homeTemplateArg = prisma.eventTemplate.upsert.mock.calls.find(
+      (call: unknown[]) =>
+        (call[0] as { where: { key: string } }).where.key ===
+        'home_doorstep_rest',
+    )?.[0] as { create: Record<string, unknown> };
+    expect(homeTemplateArg.create).toMatchObject({
+      locationKeys: ['home_entrance'],
+      homeAnchorEligible: true,
     });
   });
 });
@@ -186,6 +268,7 @@ describe('PlanetLifeService.enable', () => {
     prisma.pet.findUnique.mockResolvedValue({
       id: 'pet-1',
       userId: 'user-1',
+      name: 'Mochi',
       observationVideoUrl: 'https://r2/video.mp4',
     });
     prisma.entitlement.findUnique.mockResolvedValue({
@@ -199,6 +282,29 @@ describe('PlanetLifeService.enable', () => {
     expect(call.create.enabled).toBe(true);
     expect(call.create.nextEligibleAt).toBeInstanceOf(Date);
     expect(call.create.nextEligibleAt.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  // Home Profile init is idempotent and must happen on every successful
+  // enable() call (including a re-enable after pause) — HomeProfileService
+  // itself is what guarantees it never re-rolls on a pet that already has
+  // one; this just confirms PlanetLifeService actually calls it.
+  it("initializes the Home Profile using the pet's real name, before creating/updating PlanetLifeState", async () => {
+    const { service, prisma, homeProfileService } = makeService();
+    prisma.pet.findUnique.mockResolvedValue({
+      id: 'pet-1',
+      userId: 'user-1',
+      name: 'Mochi',
+      observationVideoUrl: 'https://r2/video.mp4',
+    });
+    prisma.entitlement.findUnique.mockResolvedValue({ starLifeEnabled: true });
+    prisma.planetLifeState.upsert.mockResolvedValue({ enabled: true });
+
+    await service.enable('user-1', 'pet-1', true);
+
+    expect(homeProfileService.initializeIfNeeded).toHaveBeenCalledWith(
+      'pet-1',
+      'Mochi',
+    );
   });
 });
 
@@ -269,7 +375,7 @@ describe('PlanetLifeService.markBadCase', () => {
   // Case 9/dev spec Case 8: reverts the carried gift to Pending, no refund logic
   // needed since nothing was "consumed" in the first place.
   it('reverts the carried gift instance to PENDING', async () => {
-    const { service, prisma, giftsService } = makeService();
+    const { service, prisma, giftsService, homeProfileService } = makeService();
     prisma.pet.findUnique.mockResolvedValue({ id: 'pet-1', userId: 'user-1' });
     prisma.planetEvent.findUnique.mockResolvedValue({
       id: 'event-1',
@@ -290,6 +396,12 @@ describe('PlanetLifeService.markBadCase', () => {
     });
     expect(giftsService.revertToPending).toHaveBeenCalledWith(
       'gift-instance-a',
+    );
+    // Checked on every bad-case, gift or not — invalidateAnchorIfCurrent
+    // itself is a no-op unless this event happens to be the current anchor.
+    expect(homeProfileService.invalidateAnchorIfCurrent).toHaveBeenCalledWith(
+      'pet-1',
+      'event-1',
     );
   });
 
@@ -430,6 +542,7 @@ describe('PlanetLifeService.debugReset', () => {
       { imageR2Key: 'planet-life/pet-1/event-a.png' },
       { imageR2Key: 'planet-life/pet-1/event-b.png' },
     ]);
+    prisma.homeProfile.findUnique.mockResolvedValue(null);
 
     await service.debugReset('user-1', 'pet-1');
 
@@ -446,6 +559,28 @@ describe('PlanetLifeService.debugReset', () => {
       where: { petId: 'pet-1' },
     });
     expect(prisma.planetLifeState.deleteMany).toHaveBeenCalledWith({
+      where: { petId: 'pet-1' },
+    });
+  });
+
+  // Added this round: debugReset must also clear HomeProfile (and its R2
+  // anchor image, if any) — otherwise a tester could never re-exercise the
+  // "fresh init" path again after the very first run, only the
+  // already-exists/idempotent one.
+  it('also deletes the Home Anchor R2 image and the HomeProfile row', async () => {
+    const { service, prisma, storage } = makeService();
+    prisma.pet.findUnique.mockResolvedValue({ id: 'pet-1', userId: 'user-1' });
+    prisma.planetEvent.findMany.mockResolvedValue([]);
+    prisma.homeProfile.findUnique.mockResolvedValue({
+      homeAnchorImageR2Key: 'planet-life/pet-1/anchor-v1.png',
+    });
+
+    await service.debugReset('user-1', 'pet-1');
+
+    expect(storage.delete).toHaveBeenCalledWith(
+      'planet-life/pet-1/anchor-v1.png',
+    );
+    expect(prisma.homeProfile.deleteMany).toHaveBeenCalledWith({
       where: { petId: 'pet-1' },
     });
   });

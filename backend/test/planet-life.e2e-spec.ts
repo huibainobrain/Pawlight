@@ -307,6 +307,28 @@ describe('Planet Life + Gifts e2e', () => {
         .set(authed(token))
         .send({ notifyOnNewEvent: true })
         .expect(201);
+
+      // A freshly-enabled pet has no Home Anchor yet, so selection is
+      // restricted to the Home Base + homeAnchorEligible template
+      // (home_doorstep_rest) until one publishes successfully — ball's
+      // eventCompatibility only lists garden_rest, so it can't ride this
+      // first event regardless. Establish the anchor first (its own event,
+      // read so it stops blocking further generation), matching PRD §11's
+      // real initialization order, before exercising the gift path this
+      // test actually cares about.
+      await forceEligibleNow(petId);
+      await generation.runTick();
+      const anchorEvents = await request(httpServer)
+        .get(`/api/v1/pets/${petId}/planet-life/events`)
+        .set(authed(token))
+        .expect(200);
+      await request(httpServer)
+        .post(
+          `/api/v1/pets/${petId}/planet-life/events/${anchorEvents.body[0].id}/read`,
+        )
+        .set(authed(token))
+        .expect(201);
+
       const giftInstance = await createPendingGiftInstance(petId, 'pet3-a');
 
       await forceEligibleNow(petId);
@@ -316,9 +338,14 @@ describe('Planet Life + Gifts e2e', () => {
         .get(`/api/v1/pets/${petId}/planet-life/events`)
         .set(authed(token))
         .expect(200);
-      expect(events.body).toHaveLength(1);
-      const event = events.body[0];
-      expect(event.giftInstanceId).toBe(giftInstance.id);
+      // 2, not 1: the anchor-establishing event from the step above, plus
+      // this one.
+      expect(events.body).toHaveLength(2);
+      const event = events.body.find(
+        (e: { giftInstanceId: string | null }) =>
+          e.giftInstanceId === giftInstance.id,
+      );
+      expect(event).toBeTruthy();
 
       const completedInstance = await prisma.giftInstance.findUniqueOrThrow({
         where: { id: giftInstance.id },
@@ -344,7 +371,7 @@ describe('Planet Life + Gifts e2e', () => {
         .set(authed(token))
         .expect(200);
       expect(giftsRes.body.pending.id).toBe(giftInstance.id);
-    }, 15000);
+    }, 20000);
 
     // Case 10/11: completing an instance allows buying the same gift again,
     // and that second purchase is an independent instance that never
@@ -650,10 +677,29 @@ describe('Planet Life + Gifts e2e', () => {
         .send({ notifyOnNewEvent: true })
         .expect(201);
 
-      // With the star pending, the generation pipeline should bias toward
-      // its own new template on the very first eligible tick — proving the
-      // whole real stack (API, DB, scheduler tick, fake quality checks,
-      // transaction) handles brand-new data with zero code changes.
+      // A freshly-enabled pet has no Home Anchor yet, so the very first
+      // tick is restricted to the Home Base + homeAnchorEligible seed
+      // template (home_doorstep_rest) regardless of this test's new
+      // fixtures — establish it (and mark it read, so it stops blocking
+      // further generation) before exercising the data-driven-extensibility
+      // claim this test actually cares about.
+      await forceEligibleNow(petId);
+      await generation.runTick();
+      const anchorEvents = await request(httpServer)
+        .get(`/api/v1/pets/${petId}/planet-life/events`)
+        .set(authed(token))
+        .expect(200);
+      await request(httpServer)
+        .post(
+          `/api/v1/pets/${petId}/planet-life/events/${anchorEvents.body[0].id}/read`,
+        )
+        .set(authed(token))
+        .expect(201);
+
+      // With the star pending and the anchor already established, the
+      // generation pipeline should now bias toward its own new template —
+      // proving the whole real stack (API, DB, scheduler tick, fake quality
+      // checks, transaction) handles brand-new data with zero code changes.
       await forceEligibleNow(petId);
       await generation.runTick();
 
@@ -661,14 +707,206 @@ describe('Planet Life + Gifts e2e', () => {
         .get(`/api/v1/pets/${petId}/planet-life/events`)
         .set(authed(token))
         .expect(200);
-      expect(events.body).toHaveLength(1);
-      expect(events.body[0].eventTemplateKey).toBe(`star_gazing_${petId}`);
-      expect(events.body[0].giftInstanceId).not.toBeNull();
+      // 2, not 1: the anchor-establishing event from the step above, plus
+      // this one.
+      expect(events.body).toHaveLength(2);
+      const starEvent = events.body.find(
+        (e: { eventTemplateKey: string }) =>
+          e.eventTemplateKey === `star_gazing_${petId}`,
+      );
+      expect(starEvent).toBeTruthy();
+      expect(starEvent.giftInstanceId).not.toBeNull();
 
       const instance = await prisma.giftInstance.findFirstOrThrow({
         where: { giftAssetId: starAsset.id },
       });
       expect(instance.status).toBe('COMPLETED');
-    }, 15000);
+    }, 20000);
+  });
+
+  // ── Flow H: Home Profile initialization (Canonical Planet World round) ──
+  describe('Flow H: Home Profile initialization', () => {
+    it('creates exactly one HomeProfile on first enable, and does not re-roll it on a later re-enable', async () => {
+      const { token } = await debugLogin();
+      const petId = await createPet(token, 'Home Init Pet');
+      await setUpPaidPetWithScene(token, petId);
+
+      await request(httpServer)
+        .post(`/api/v1/pets/${petId}/planet-life/enable`)
+        .set(authed(token))
+        .send({ notifyOnNewEvent: true })
+        .expect(201);
+
+      const first = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+      });
+      expect(first.homeAnchorStatus).toBe('NONE');
+      expect(first.visualSnapshot).toBeTruthy();
+      expect(first.nameplateText).toBe('Home Init Pet');
+
+      // Pause then re-enable (Case 2: retry/re-enable must not re-roll).
+      await request(httpServer)
+        .patch(`/api/v1/pets/${petId}/planet-life/settings`)
+        .set(authed(token))
+        .send({ paused: true })
+        .expect(200);
+      await request(httpServer)
+        .post(`/api/v1/pets/${petId}/planet-life/enable`)
+        .set(authed(token))
+        .send({ notifyOnNewEvent: true })
+        .expect(201);
+
+      const second = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+      });
+      expect(second.id).toBe(first.id);
+      expect(second.cottageBlueprintKey).toBe(first.cottageBlueprintKey);
+      expect(second.paletteKey).toBe(first.paletteKey);
+      expect(second.roofKey).toBe(first.roofKey);
+    });
+
+    // Case 3: the frozen snapshot must survive a later edit to the Variant
+    // catalog this pet's HomeProfile originally selected from — this is the
+    // whole point of freezing a snapshot instead of joining live, so it
+    // needs a REAL mutation through the real DB to mean anything (a mock
+    // would just prove "we store a copy", not "a later catalog edit can't
+    // reach it").
+    it("freezes the visual snapshot at init — a later edit to the HomeVariantAsset catalog never changes an already-initialized pet's home", async () => {
+      const { token } = await debugLogin();
+      const petId = await createPet(token, 'Snapshot Freeze Pet');
+      await setUpPaidPetWithScene(token, petId);
+      await request(httpServer)
+        .post(`/api/v1/pets/${petId}/planet-life/enable`)
+        .set(authed(token))
+        .send({ notifyOnNewEvent: true })
+        .expect(201);
+
+      const profile = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+      });
+      const before = profile.visualSnapshot as {
+        cottageBlueprint: { imageGenPrompt: string };
+      };
+      const originalPrompt = before.cottageBlueprint.imageGenPrompt;
+
+      await prisma.homeVariantAsset.update({
+        where: { key: profile.cottageBlueprintKey },
+        data: { imageGenPrompt: 'a completely different-looking mansion' },
+      });
+
+      const reread = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+      });
+      const after = reread.visualSnapshot as {
+        cottageBlueprint: { imageGenPrompt: string };
+      };
+      expect(after.cottageBlueprint.imageGenPrompt).toBe(originalPrompt);
+    });
+
+    // Case 4: bound once, forever — even though P0 only has one PlanetStyle
+    // version to bind to, this confirms the binding is a real FK read, not
+    // "whichever one happens to be active right now."
+    it('binds the Home Profile to the currently-active PlanetStyle version', async () => {
+      const { token } = await debugLogin();
+      const petId = await createPet(token, 'Planet Style Bind Pet');
+      await setUpPaidPetWithScene(token, petId);
+      await request(httpServer)
+        .post(`/api/v1/pets/${petId}/planet-life/enable`)
+        .set(authed(token))
+        .send({ notifyOnNewEvent: true })
+        .expect(201);
+
+      const profile = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+        include: { planetStyle: true },
+      });
+      expect(profile.planetStyle.key).toBe('pawlight_planet_v1');
+      expect(profile.planetStyle.version).toBe(1);
+    });
+  });
+
+  // ── Flow I: Home Anchor lifecycle — establish, invalidate on Bad Case,
+  // re-establish ─────────────────────────────────────────────────────────
+  describe('Flow I: Home Anchor establishes, invalidates on Bad Case, and re-establishes', () => {
+    it('establishes V1 on the first eligible Home event, invalidates it on Bad Case without touching HomeProfile itself, then re-establishes V2', async () => {
+      const { token } = await debugLogin();
+      const petId = await createPet(token, 'Anchor Lifecycle Pet');
+      await setUpPaidPetWithScene(token, petId);
+      await request(httpServer)
+        .post(`/api/v1/pets/${petId}/planet-life/enable`)
+        .set(authed(token))
+        .send({ notifyOnNewEvent: true })
+        .expect(201);
+
+      // Case 5: no valid anchor yet -> selection is restricted to the one
+      // Home Base + homeAnchorEligible seed template, deterministically.
+      await forceEligibleNow(petId);
+      await generation.runTick();
+
+      let events = await request(httpServer)
+        .get(`/api/v1/pets/${petId}/planet-life/events`)
+        .set(authed(token))
+        .expect(200);
+      expect(events.body).toHaveLength(1);
+      expect(events.body[0].eventTemplateKey).toBe('home_doorstep_rest');
+      const firstEventId = events.body[0].id as string;
+
+      // Case 7: establishes V1.
+      let profile = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+      });
+      expect(profile.homeAnchorStatus).toBe('ESTABLISHED');
+      expect(profile.homeAnchorVersion).toBe(1);
+      expect(profile.homeAnchorEventId).toBe(firstEventId);
+      expect(profile.homeAnchorImageR2Url).toBeTruthy();
+
+      const anchorEventRow = await prisma.planetEvent.findUniqueOrThrow({
+        where: { id: firstEventId },
+      });
+      expect(anchorEventRow.establishedHomeAnchorVersion).toBe(1);
+
+      // Case 10: Bad Case on the anchor event itself invalidates the anchor.
+      await request(httpServer)
+        .post(
+          `/api/v1/pets/${petId}/planet-life/events/${firstEventId}/bad-case`,
+        )
+        .set(authed(token))
+        .expect(201);
+
+      // Case 11: HomeProfile itself survives, untouched — same variant
+      // selection and snapshot, only the anchor pointer/status changed.
+      const cottageBefore = profile.cottageBlueprintKey;
+      profile = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+      });
+      expect(profile.homeAnchorStatus).toBe('INVALIDATED');
+      expect(profile.homeAnchorImageR2Url).toBeNull();
+      expect(profile.homeAnchorEventId).toBeNull();
+      expect(profile.homeAnchorVersion).toBe(1); // not decremented, just not current
+      expect(profile.cottageBlueprintKey).toBe(cottageBefore);
+
+      // Case 12: the next eligible Home event establishes V2 — selection is
+      // restricted to Home Base + homeAnchorEligible again, same as Case 5,
+      // since INVALIDATED is treated the same as NONE for this purpose.
+      await forceEligibleNow(petId);
+      await generation.runTick();
+
+      events = await request(httpServer)
+        .get(`/api/v1/pets/${petId}/planet-life/events`)
+        .set(authed(token))
+        .expect(200);
+      // The Bad Case event is excluded from this list (only UNREAD/READ),
+      // so this is the one new event, not two.
+      expect(events.body).toHaveLength(1);
+      const secondEventId = events.body[0].id as string;
+      expect(secondEventId).not.toBe(firstEventId);
+
+      profile = await prisma.homeProfile.findUniqueOrThrow({
+        where: { petId },
+      });
+      expect(profile.homeAnchorStatus).toBe('ESTABLISHED');
+      expect(profile.homeAnchorVersion).toBe(2);
+      expect(profile.homeAnchorEventId).toBe(secondEventId);
+    }, 20000);
   });
 });

@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { STORAGE_SERVICE } from '../storage/storage.interface';
 import type { StorageService } from '../storage/storage.interface';
 import { GiftsService } from './gifts.service';
+import { HomeProfileService } from './home-profile.service';
 import { EVENT_TEXT_GEN_PROVIDER } from './providers/event-text-gen.provider';
 import type { EventTextGenProvider } from './providers/event-text-gen.provider';
 import type {
@@ -14,6 +15,7 @@ import type {
 import { EVENT_IMAGE_GEN_PROVIDER } from './providers/event-image-gen.provider';
 import type { EventImageGenProvider } from './providers/event-image-gen.provider';
 import type { GeneratedEventImage } from './providers/event-image-gen.provider';
+import type { HomeGenerationContext } from './providers/home-context';
 import { IMAGE_QUALITY_PROVIDER } from './providers/image-quality.provider';
 import type { ImageQualityProvider } from './providers/image-quality.provider';
 import { TEXT_QUALITY_PROVIDER } from './providers/text-quality.provider';
@@ -21,7 +23,6 @@ import type { TextQualityProvider } from './providers/text-quality.provider';
 import {
   NARRATIVE_RULES,
   STABLE_IDENTITY_PLACEHOLDER,
-  WORLD_VISUAL_PLACEHOLDER,
 } from './narrative-rules';
 import {
   GENERATION_MAX_RETRIES,
@@ -53,6 +54,7 @@ export class PlanetEventGenerationService {
     @Inject(IMAGE_QUALITY_PROVIDER) private imageQuality: ImageQualityProvider,
     @Inject(TEXT_QUALITY_PROVIDER) private textQuality: TextQualityProvider,
     private giftsService: GiftsService,
+    private homeProfileService: HomeProfileService,
   ) {}
 
   // Used only by the DEBUG "测试：真实生成一次" trigger (PlanetLifeService.
@@ -129,6 +131,13 @@ export class PlanetEventGenerationService {
     });
     if (!mainPhoto) return; // no reference photo yet — defer silently
 
+    // Every enabled pet has a HomeProfile by construction (PlanetLifeService.
+    // enable() creates one before/alongside PlanetLifeState) — thrown
+    // otherwise and caught by runTick's per-pet try/catch, same as a
+    // deleted-mid-tick Pet row would be.
+    const homeProfile = await this.homeProfileService.getForPet(petId);
+    const anchorEstablished = homeProfile.homeAnchorStatus === 'ESTABLISHED';
+
     // Resolved before template selection so a pending gift can bias which
     // template gets picked (see pickTemplate) — this is what makes PRD §31's
     // "appears within 1-3 valid chronicles" promise hold once there are many
@@ -141,7 +150,16 @@ export class PlanetEventGenerationService {
         })
       : null;
 
-    const template = await this.pickTemplate(pet.type, pendingGiftAsset);
+    // While no valid Home Anchor exists, selection is RESTRICTED (not just
+    // biased) to Home Base + homeAnchorEligible templates — generating any
+    // other event right now would leave the pet stuck unable to ever
+    // establish one. This window is always temporary: it closes the moment
+    // one such event successfully publishes.
+    const template = await this.pickTemplate(
+      pet.type,
+      pendingGiftAsset,
+      !anchorEstablished,
+    );
     if (!template) return; // nothing eligible this tick — defer silently
 
     // A gift only actually rides along when BOTH sides agree: the template
@@ -159,21 +177,45 @@ export class PlanetEventGenerationService {
     const giftAsset = giftRidesAlong ? pendingGiftAsset : null;
     const ridingGiftInstance = giftRidesAlong ? pendingGift : null;
 
-    const facts = await this.resolveFacts(template, giftAsset, pet.type);
+    const location = await this.pickLocation(
+      template,
+      pet.type,
+      !anchorEstablished,
+    );
+    const isHomeEvent = location.scope === 'HOME_BASE';
+    const facts = await this.resolveFacts(
+      template,
+      giftAsset,
+      pet.type,
+      location,
+    );
     const language = pet.user.language ?? 'en';
+
+    const homeContext: HomeGenerationContext | undefined = isHomeEvent
+      ? {
+          visualSnapshot:
+            homeProfile.visualSnapshot as unknown as HomeGenerationContext['visualSnapshot'],
+          anchorImageUrl: anchorEstablished
+            ? (homeProfile.homeAnchorImageR2Url ?? undefined)
+            : undefined,
+          anchorVersion: homeProfile.homeAnchorVersion,
+        }
+      : undefined;
 
     // PRD §49: a quality-check failure gets one automatic retry (regenerate,
     // re-check) before the tick gives up silently for this pet — it must
-    // never publish a failing result and never consume a riding gift either
-    // way.
+    // never publish a failing result and never consume a riding gift
+    // (or establish/touch a Home Anchor) either way.
     const text = await this.generateTextWithRetry(petId, facts, language);
     if (!text) return;
 
     const image = await this.generateImageWithRetry(
       petId,
       mainPhoto.r2Url,
+      homeProfile.planetStyle.imageGenGuidance,
       facts,
       !!giftAsset,
+      homeContext,
     );
     if (!image) return;
 
@@ -193,8 +235,19 @@ export class PlanetEventGenerationService {
       !state.weeklyWindowStart ||
       now.getTime() - state.weeklyWindowStart.getTime() > WEEKLY_WINDOW_MS;
 
-    await this.prisma.$transaction([
-      this.prisma.planetEvent.create({
+    // This publish IS the one that (re-)establishes the Home Anchor only
+    // when it's a Home event AND no valid anchor currently exists — never
+    // on an ordinary Home event once one is already established.
+    const willEstablishAnchor = isHomeEvent && !anchorEstablished;
+    const newAnchorVersion = willEstablishAnchor
+      ? homeProfile.homeAnchorVersion + 1
+      : homeProfile.homeAnchorVersion;
+
+    // An interactive transaction (not the array form used elsewhere in this
+    // file) because the Home Anchor write below needs this event's own id,
+    // which doesn't exist until planetEvent.create() has actually run.
+    await this.prisma.$transaction(async (tx) => {
+      const created = await tx.planetEvent.create({
         data: {
           petId,
           eventTemplateKey: template.key,
@@ -205,23 +258,39 @@ export class PlanetEventGenerationService {
           imageR2Url: url,
           factsJson: facts as unknown as Prisma.InputJsonValue,
           giftInstanceId: ridingGiftInstance?.id,
+          establishedHomeAnchorVersion: willEstablishAnchor
+            ? newAnchorVersion
+            : null,
         },
-      }),
-      ...(ridingGiftInstance
-        ? [
-            this.prisma.giftInstance.update({
-              where: { id: ridingGiftInstance.id },
-              data: { status: 'COMPLETED', completedAt: now },
-            }),
-          ]
-        : []),
-      this.prisma.planetLifeState.update({
+      });
+
+      if (ridingGiftInstance) {
+        await tx.giftInstance.update({
+          where: { id: ridingGiftInstance.id },
+          data: { status: 'COMPLETED', completedAt: now },
+        });
+      }
+
+      await tx.planetLifeState.update({
         where: { petId },
         data: windowExpired
           ? { weeklyEventCount: 1, weeklyWindowStart: now }
           : { weeklyEventCount: { increment: 1 } },
-      }),
-    ]);
+      });
+
+      if (willEstablishAnchor) {
+        await tx.homeProfile.update({
+          where: { petId },
+          data: {
+            homeAnchorStatus: 'ESTABLISHED',
+            homeAnchorVersion: newAnchorVersion,
+            homeAnchorImageR2Key: key,
+            homeAnchorImageR2Url: url,
+            homeAnchorEventId: created.id,
+          },
+        });
+      }
+    });
   }
 
   private async generateTextWithRetry(
@@ -247,17 +316,25 @@ export class PlanetEventGenerationService {
   private async generateImageWithRetry(
     petId: string,
     referenceImageUrl: string,
+    planetStyleDescription: string,
     facts: EventFacts,
     hasGift: boolean,
+    home: HomeGenerationContext | undefined,
   ): Promise<GeneratedEventImage | null> {
     for (let attempt = 1; attempt <= 1 + GENERATION_MAX_RETRIES; attempt++) {
       const image = await this.imageGen.generate({
         referenceImageUrl,
         stableIdentityDescription: STABLE_IDENTITY_PLACEHOLDER,
-        worldVisualDescription: WORLD_VISUAL_PLACEHOLDER,
+        planetStyleDescription,
         facts,
+        home,
       });
-      const check = await this.imageQuality.check({ image, facts, hasGift });
+      const check = await this.imageQuality.check({
+        image,
+        facts,
+        hasGift,
+        home,
+      });
       if (check.pass) return image;
       this.logger.warn(
         `Image quality check failed for pet ${petId} (attempt ${attempt}): ${check.reason ?? 'unspecified'}`,
@@ -273,14 +350,22 @@ export class PlanetEventGenerationService {
   // pending gift entirely, and PRD §31's "appears within 1-3 valid
   // chronicles" promise degrades to luck once templates vary widely in
   // which gifts they accept.
+  //
+  // requireHomeAnchorEligible narrows this further, BEFORE the gift bias:
+  // while true, only templates marked homeAnchorEligible AND verified (by
+  // an actual lookup, not just trusting the flag) to have at least one
+  // HOME_BASE location in their own pool are considered eligible at all —
+  // same "check the real condition, don't trust a coarse flag alone" lesson
+  // already applied to Gift/Template compatibility.
   private async pickTemplate(
     petType: string,
     pendingGiftAsset: GiftAsset | null,
+    requireHomeAnchorEligible: boolean,
   ): Promise<EventTemplate | null> {
     const templates = await this.prisma.eventTemplate.findMany({
       where: { active: true },
     });
-    const eligible: typeof templates = [];
+    let eligible: EventTemplate[] = [];
     for (const t of templates) {
       const species = t.speciesApplicability as string[] | null;
       if (species && !species.includes(petType)) continue;
@@ -299,6 +384,11 @@ export class PlanetEventGenerationService {
     }
     if (eligible.length === 0) return null;
 
+    if (requireHomeAnchorEligible) {
+      eligible = await this.filterHomeAnchorEligible(eligible);
+      if (eligible.length === 0) return null; // defer silently — a content gap, not an error
+    }
+
     if (pendingGiftAsset) {
       const compatibility = pendingGiftAsset.eventCompatibility as string[];
       const giftEligible = eligible.filter(
@@ -309,6 +399,26 @@ export class PlanetEventGenerationService {
       }
     }
     return this.weightedPick(eligible);
+  }
+
+  private async filterHomeAnchorEligible(
+    templates: EventTemplate[],
+  ): Promise<EventTemplate[]> {
+    const flagged = templates.filter((t) => t.homeAnchorEligible);
+    if (flagged.length === 0) return [];
+
+    const result: EventTemplate[] = [];
+    for (const t of flagged) {
+      const homeRows = await this.prisma.locationAsset.findMany({
+        where: {
+          key: { in: t.locationKeys as string[] },
+          active: true,
+          scope: 'HOME_BASE',
+        },
+      });
+      if (homeRows.length > 0) result.push(t);
+    }
+    return result;
   }
 
   private weightedPick(templates: EventTemplate[]): EventTemplate {
@@ -326,13 +436,14 @@ export class PlanetEventGenerationService {
   // sees. Every layer below (species, gift-action, location<->action mutual
   // exclusion) is filter-with-fallback: a misconfigured or overly-narrow
   // asset can make a particular pairing less likely, but can never leave
-  // generation with nothing pickable.
+  // generation with nothing pickable. location is resolved by the caller
+  // (generateForPet) rather than here, since it also decides isHomeEvent.
   private async resolveFacts(
     template: EventTemplate,
     giftAsset: GiftAsset | null,
     petType: string,
+    location: LocationAsset,
   ): Promise<EventFacts> {
-    const location = await this.pickLocation(template, petType);
     const action = await this.pickAction(
       template,
       giftAsset,
@@ -367,24 +478,34 @@ export class PlanetEventGenerationService {
     };
   }
 
+  // requireHomeBase narrows the pool to scope=HOME_BASE FIRST, before
+  // species filtering — pickTemplate already verified (via
+  // filterHomeAnchorEligible) that the chosen template's pool contains at
+  // least one such row whenever this is true, so this filter is guaranteed
+  // non-empty here and never needs its own fallback.
   private async pickLocation(
     template: EventTemplate,
     petType: string,
+    requireHomeBase: boolean,
   ): Promise<LocationAsset> {
     const keys = template.locationKeys as string[];
     const rows = await this.prisma.locationAsset.findMany({
       where: { key: { in: keys }, active: true },
     });
-    const eligible = filterBySpecies(rows, petType);
-    return pickRandom(eligible.length > 0 ? eligible : rows);
+    const scoped = requireHomeBase
+      ? rows.filter((r) => r.scope === 'HOME_BASE')
+      : rows;
+    const eligible = filterBySpecies(scoped, petType);
+    return pickRandom(eligible.length > 0 ? eligible : scoped);
   }
 
-  // Species narrowing (same as pickLocation), then the gift's own
+  // Species narrowing (same idea as pickLocation), then the gift's own
   // actionCompatibility restriction (actionPoolFor, unchanged from before
   // this round), then the chosen location's/action's mutual incompatibility
   // lists — checked from both sides since either asset may be the one
   // declaring the exclusion (a content editor can author it from whichever
-  // row is more natural to think from).
+  // row is more natural to think from). Actions themselves are never
+  // scope-restricted — Home/Nearby is a Location-only property.
   private async pickAction(
     template: EventTemplate,
     giftAsset: GiftAsset | null,

@@ -49,11 +49,12 @@ export const NARRATIVE_RULES = [
   NARRATIVE_LENGTH_GUIDANCE,
 ].join(' ');
 
-// Placeholder until a real stable-identity/world-visual asset pipeline exists
-// (PRD §42). A real EventImageGenProvider will eventually read this from a
-// per-pet "stable generation profile" built from the pet's own reference
-// photos — not invented here.
+// Placeholder until a real stable-identity asset pipeline exists (PRD §42).
+// A real EventImageGenProvider will eventually read this from a per-pet
+// "stable generation profile" built from the pet's own reference photos —
+// not invented here. (The equivalent placeholder for world/style visuals,
+// formerly WORLD_VISUAL_PLACEHOLDER here, is retired — Planet Style is now a
+// real, versioned PlanetStyle DB row; see PlanetEventGenerationService,
+// which reads homeProfile.planetStyle.imageGenGuidance instead.)
 export const STABLE_IDENTITY_PLACEHOLDER =
   'Maintain the same pet identity as the reference photo across all generated images.';
-export const WORLD_VISUAL_PLACEHOLDER =
-  "Soft watercolor illustration style consistent with the pet's existing planet/observation-window artwork.";
